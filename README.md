@@ -505,3 +505,98 @@ MIT -- see [LICENSE](LICENSE) for details.
 <p align="center">
   <sub>Built for organizations that need AI agents they can actually trust.</sub>
 </p>
+
+---
+
+## Clawix for NGO
+
+A complete multi-agent configuration for small-to-mid-size NGOs (10–80 staff, multi-donor, often field-based). All reference files live under `reference/Clawix SKILL and Agent/`.
+
+### What was deployed
+
+#### Phase 1 — Five worker agents
+
+Five specialist agents created via seed script (`scripts/seed-ngo-agents.mjs`), each with `role: worker`, `isOfficial: true`, and `model: claude-sonnet-4-5`:
+
+| Agent | Responsibility | Tools | Reads skills |
+|---|---|---|---|
+| `program-coordinator` | Workplan, partner register, activity tracker, weekly status notes | Read, Write, Edit, Grep, Glob | safeguarding, ngo-comms |
+| `donor-engagement` | Proposals, narrative reports, log-frames, donor research | Read, Write, Edit, Grep, Glob, WebSearch (domain-allowlisted) | donor-proposal, grant-research, impact-report, data-protection |
+| `monitoring-evaluation` | SMART indicators, data-collection forms, period validation, dashboard summaries | Read, Write, Edit, Grep, Glob, Bash (read-only allowlist) | mne, data-protection |
+| `communications` | Newsletters, social posts, op-eds, advocacy briefs | Read, Write, Edit, Grep, Glob | ngo-comms, data-protection |
+| `field-operations` | Logistics lists, risk register, safeguarding incident records (post-triage only) | Read, Write, Edit, Grep, Glob | safeguarding, data-protection |
+
+Agent definitions (YAML frontmatter + system prompt): `reference/Clawix SKILL and Agent/agents/`
+
+#### Phase 2 — NGO Program Assistant (primary/orchestrator agent)
+
+The primary agent is the user-facing orchestrator. It knows all five specialists, when to spawn each, the full workspace layout, and enforces security principles:
+
+- Routes requests to exactly one specialist at a time — no autonomous agent-to-agent chaining
+- Enforces PII boundary (beneficiary data never enters agent memory)
+- Applies safeguarding-first logic (field-ops is documentation-only after human triage)
+- All outbound actions (email, donor submission, social post) are draft-only; a human sends
+- Every agent action appends to `.clawix/audit.log` (append-only)
+
+#### Phase 3 — Workspace seeded
+
+Run via `scripts/setup-ngo.mjs` and `packages/api/prisma/setup-ngo.ts`:
+
+- **28 folders** created at `data/users/<userId>/workspace/` covering the full NGO document structure: `plans/`, `programs/`, `partners/`, `activities/`, `donors/`, `proposals/`, `reports/`, `mne/` (with `raw/`, `processed/`, `quality/`, `indicators/`, `forms/`), `field-ops/`, `incidents/`, `comms/`, `finance/`, `briefs/`, `drafts/`, `status/`, `skills/`
+- **7 skill files** copied from `reference/` into `workspace/skills/`
+- `.clawix/audit.log` initialised (append-only)
+- `README.md` written into the workspace explaining the layout and agent roster
+
+### Reference files
+
+#### Agents (`reference/Clawix SKILL and Agent/agents/`)
+
+Each file is a self-contained Clawix agent definition: YAML frontmatter declares `name`, `allowed-tools`, `working-dir`, `reads-skills`, and `model`; the markdown body is the full system prompt.
+
+| File | Key behaviours |
+|---|---|
+| `program-coordinator.md` | Drafts to `drafts/` only; reports slippage truthfully; drops briefs into `briefs/` for other agents instead of calling them directly |
+| `donor-engagement.md` | Uses donor's own template first; marks missing data as `[FILL: …]` instead of inventing figures; web search restricted to 10 allowlisted donor domains; refuses to submit or inflate |
+| `monitoring-evaluation.md` | SMART-or-nothing indicator template; never edits `mne/raw/` — always writes new files to `mne/processed/`; Bash allowlist: `python`, `jq`, `csvkit`, `head`, `wc`, `ls`, `cat` |
+| `communications.md` | Consent gate on every story (`consent: shareable` in source frontmatter); writes to `comms/drafts/` only; `comms/published/` is human-only |
+| `field-operations.md` | Refuses first-contact safeguarding disclosures; incident body uses pseudonyms with identity mapping kept in `incidents/keys/` (human-only write); mandatory-report flag cannot be removed |
+
+#### Skills (`reference/Clawix SKILL and Agent/skills/`)
+
+Skills are read-only reference packages — encoded best practice the relevant agent reads before drafting. They grant no new tool access.
+
+| Skill | Agent | Content |
+|---|---|---|
+| `donor-proposal/SKILL.md` | donor-engagement | Drafting order (Theory of Change → log-frame → activities → budget → risk → sustainability); indicator alignment table for FCDO, USAID, ECHO, GAC, SDC, BMZ, private foundations; common rejection reasons |
+| `mne/SKILL.md` | monitoring-evaluation | Full SMART indicator YAML template; baseline/midline/endline structure; OECD-DAC evaluation criteria (relevance, coherence, effectiveness, efficiency, impact, sustainability); data-validation rules; anonymization recipe |
+| `safeguarding/SKILL.md` | field-operations, program-coordinator | PSEA principles, child safeguarding, incident triage decision tree, mandatory reporting triggers, record structure with pseudonym convention |
+| `data-protection/SKILL.md` | monitoring-evaluation, donor-engagement, communications, field-operations | GDPR + ICRC/IASC guidance; `pii: true` frontmatter convention; consent capture; anonymization steps (drop → hash → generalize → minimum cell size) |
+| `impact-report/SKILL.md` | donor-engagement | Narrative report structure by donor type; financial reporting touchpoints; beneficiary story consent rules; variance reporting standard |
+| `grant-research/SKILL.md` | donor-engagement | Donor scanning checklist; eligibility filters; deadline tracking format; fit-scoring rubric (1–5) |
+| `ngo-comms/SKILL.md` | communications, program-coordinator | Accessible language standards; do-no-harm storytelling; dignity-preserving imagery; advocacy framing; status-note classification (on-track / at-risk / off-track) |
+
+#### Architecture docs
+
+| File | Purpose |
+|---|---|
+| `reference/Clawix SKILL and Agent/README.md` | Architecture diagram, folder layout rationale, deployment runbook (7 steps), operating rules for staff, explicit list of what the configuration does not do |
+| `reference/Clawix SKILL and Agent/PROPOSAL.md` | Strategic case; 10 non-negotiable security principles; full agent + skill roster table; MCP connectors (KoboToolbox, PowerBI, Google Drive, Mailchimp — all gated); measurable impact targets (90-day); phased rollout (Phase 0–3) |
+
+### Try it now
+
+Open the dashboard and chat with the **NGO Program Assistant**:
+
+```
+"Find donors for a water and sanitation program in West Africa"
+→ spawns donor-engagement, runs allowlisted WebSearch, writes to donor-research/
+
+"Design SMART indicators for a livelihoods program"
+→ spawns monitoring-evaluation, produces mne/indicators/<program>.md
+
+"Draft the monthly newsletter"
+→ spawns communications, reads status/ + mne/processed/, writes to comms/drafts/
+```
+
+### Remaining setup
+
+From the dashboard → **Agents**, assign developer or staff users to their specialist agents. Each user should interact through the NGO Program Assistant (orchestrator); direct specialist access is for power users only.
