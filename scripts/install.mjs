@@ -516,6 +516,39 @@ async function main() {
   runVisible(`docker compose -f "${composeFile}" ${upArgs}`);
   ok('Containers started');
 
+  // Sync Postgres password — the volume retains whatever password was used when
+  // it was first initialised, which may differ from the current .env value if
+  // the user has re-run the installer or changed .env manually. ALTER USER is
+  // idempotent and safe to run on every install/update.
+  if (deployMode === 'production') {
+    step('Syncing Postgres credentials');
+    const pgPass = run("grep -E '^POSTGRES_PASSWORD=' .env | cut -d= -f2-").trim();
+    if (pgPass) {
+      let pgReady = false;
+      const pgStart = Date.now();
+      while (Date.now() - pgStart < 30_000) {
+        try {
+          run('docker exec clawix-postgres pg_isready -U clawix', { stdio: 'ignore' });
+          pgReady = true;
+          break;
+        } catch {
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      }
+      if (pgReady) {
+        try {
+          run(`docker exec clawix-postgres psql -U clawix -d clawix -c "ALTER USER clawix WITH PASSWORD '${pgPass}';"`, { stdio: 'ignore' });
+          run('docker restart clawix-api', { stdio: 'ignore' });
+          ok('Postgres credentials synced — API restarted');
+        } catch {
+          warn('Could not sync Postgres credentials — if API fails to connect, run:\n  docker exec clawix-postgres psql -U clawix -d clawix -c "ALTER USER clawix WITH PASSWORD \'<your POSTGRES_PASSWORD>\';"');
+        }
+      } else {
+        warn('Postgres not ready within 30s — skipping credential sync');
+      }
+    }
+  }
+
   step('Waiting for API /health');
   info('This may take up to 3 minutes on first run (installing deps, migrations, bootstrap).');
   const healthy = await waitForHealth('http://localhost:3001/health', 180);

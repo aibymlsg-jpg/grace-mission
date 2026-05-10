@@ -17,7 +17,7 @@
  *   node scripts/update.mjs --no-build
  */
 
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -113,6 +113,34 @@ async function main() {
   const buildFlag = flags.build ? '--build' : '';
   runVisible(`docker compose -f "${composeFile}" up -d --remove-orphans ${buildFlag}`.trim());
   ok('Containers up');
+
+  if (deployMode === 'production') {
+    step('Syncing Postgres credentials');
+    const env = readFileSync(ENV_FILE, 'utf8');
+    const pgPass = (env.match(/^\s*POSTGRES_PASSWORD=(.+)$/m) ?? [])[1]?.trim();
+    if (pgPass) {
+      let pgReady = false;
+      const pgStart = Date.now();
+      while (Date.now() - pgStart < 30_000) {
+        try {
+          execSync('docker exec clawix-postgres pg_isready -U clawix', { stdio: 'ignore' });
+          pgReady = true;
+          break;
+        } catch {
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      }
+      if (pgReady) {
+        try {
+          execSync(`docker exec clawix-postgres psql -U clawix -d clawix -c "ALTER USER clawix WITH PASSWORD '${pgPass}';"`, { stdio: 'ignore' });
+          execSync('docker restart clawix-api', { stdio: 'ignore' });
+          ok('Postgres credentials synced — API restarted');
+        } catch {
+          warn('Could not sync Postgres credentials');
+        }
+      }
+    }
+  }
 
   step('Waiting for API /health');
   const healthy = await waitForHealth('http://localhost:3001/health', 180);
