@@ -136,8 +136,8 @@ Pluggable tools with approval workflows. Bundle built-in skills, create custom o
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ClawixAI/clawix.git
-cd clawix
+git clone https://github.com/ClawixAI/clawix.git clawixngo
+cd clawixngo
 
 # 2. Run the interactive installer
 pnpm run install:clawix
@@ -220,7 +220,7 @@ If you are using the standalone `setup-clawix.sh` script (which clones the repo 
 
 ```bash
 # First Run
-rm ~/clawix/.env
+rm ~/clawixngo/.env
 /Users/aibizservice/setup-clawix.sh
 ```
 
@@ -240,7 +240,7 @@ The updater reads `CLAWIX_DEPLOY_MODE` from `.env` and picks the right compose f
 
 ```bash
 # Second run onwards — update repo and restart
-cd ~/clawix
+cd ~/clawixngo
 pnpm run update:clawix -- --pull
 ```
 
@@ -386,7 +386,7 @@ Clawix follows a **zero-trust architecture** for agent execution:
 ## Project Structure
 
 ```
-clawix/
+clawixngo/
 ├── packages/
 │   ├── api/          # NestJS API server (auth, engine, channels, skills)
 │   ├── web/          # Next.js dashboard (React 19, Tailwind, shadcn/ui)
@@ -454,8 +454,8 @@ Contributions are welcome! Whether it's bug fixes, new features, documentation, 
 
 ```bash
 # Fork and clone
-git clone https://github.com/YOUR_USERNAME/clawix.git
-cd clawix
+git clone https://github.com/YOUR_USERNAME/clawix.git clawixngo
+cd clawixngo
 
 # Create a feature branch
 git checkout -b feature/your-feature
