@@ -1,13 +1,15 @@
 /references/
+reference/
 .worktrees/
 
 # preferences
 .vscode/
+.idea/
 .claude/
 
 # env
 .env
-.env.prod
+.env.*
 !.env.example
 
 # dependencies
@@ -28,14 +30,19 @@ test-results/
 
 # misc
 *.log
+pnpm-debug.log*
 .DS_Store
+Thumbs.db
 *.tsbuildinfo
+*.swp
+*.swo
+
 # prisma generated client
 packages/api/src/generated/
 
 .superpowers
 docs/superpowers
-data
+data/
 
 # Custom skills (runtime data, per-user)
 skills/custom/

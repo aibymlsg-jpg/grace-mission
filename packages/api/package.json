@@ -14,7 +14,9 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "seed:ngo": "tsx prisma/seed-ngo-agents.ts",
+    "setup:ngo": "tsx prisma/setup-ngo.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

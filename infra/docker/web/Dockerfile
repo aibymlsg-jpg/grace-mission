@@ -6,7 +6,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 FROM node:22-slim AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@10.32.1
 
 WORKDIR /app
 

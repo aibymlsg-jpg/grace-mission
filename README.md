@@ -214,6 +214,18 @@ When it finishes, open `http://localhost:3000` and sign in with the admin creden
 
 > Re-running `install:clawix` with an existing `.env` is safe — it keeps your secrets, skips the prompts, and just rebuilds/restarts. To reconfigure from scratch, delete `.env` and re-run.
 
+### Using setup-clawix.sh (one-step installer)
+
+If you are using the standalone `setup-clawix.sh` script (which clones the repo and runs the installer in one step), a stale `.env` from a previous attempt will cause the installer to skip secret generation. Always remove it first on a fresh install:
+
+```bash
+# First Run
+rm ~/clawix/.env
+/Users/aibizservice/setup-clawix.sh
+```
+
+> `setup-clawix.sh` is a **first-time installer only**. Never re-run it for updates — use the updater below instead.
+
 ### Updates and restarts
 
 ```bash
@@ -223,6 +235,27 @@ pnpm run update:clawix -- --no-build # plain restart, reuse existing images
 ```
 
 The updater reads `CLAWIX_DEPLOY_MODE` from `.env` and picks the right compose file automatically. Prisma migrations and the idempotent bootstrap run inside the container on every start — bootstrap no-ops once the admin exists.
+
+**To update the repo on subsequent runs, use the updater — not `setup-clawix.sh`:**
+
+```bash
+# Second run onwards — update repo and restart
+cd ~/clawix
+pnpm run update:clawix -- --pull
+```
+
+What it does safely:
+
+- `git pull` — fetches latest code
+- Rebuilds Docker images with new code
+- Restarts containers with `--remove-orphans`
+- Waits for the API to be healthy
+
+What it does **not** touch:
+
+- Your `.env` — kept as-is
+- `postgres_data` volume — your database is preserved
+- `redis_data` volume — preserved
 
 ### What happens under the hood
 
