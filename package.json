@@ -39,7 +39,15 @@
       "@prisma/engines",
       "@swc/core",
       "prisma"
-    ]
+    ],
+    "overrides": {
+      "fast-uri": ">=3.1.2",
+      "flatted": ">=3.4.0",
+      "defu": ">=6.1.7",
+      "path-to-regexp": ">=8.4.0",
+      "lodash": ">=4.18.0",
+      "picomatch": ">=4.0.4"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
