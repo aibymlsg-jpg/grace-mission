@@ -144,7 +144,8 @@ export class ContextBuilderService {
     // task and don't need the full skill index, which would waste prompt tokens.)
     if (!isSubAgent) {
       const customDir = workspacePath ? path.join(workspacePath, 'skills') : '';
-      const skillsSummary = await this.skillLoader.buildSkillsSummary(customDir);
+      const allowedDirNames = agentDef.skillIds?.length ? agentDef.skillIds : undefined;
+      const skillsSummary = await this.skillLoader.buildSkillsSummary(customDir, allowedDirNames);
       if (skillsSummary) {
         sections.push(
           '# Skills\n\n' +

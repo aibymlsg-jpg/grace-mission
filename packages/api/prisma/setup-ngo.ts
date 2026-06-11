@@ -101,6 +101,10 @@ skills/         — reference knowledge packages (read-only)
   audit.log     — append-only action log
 \`\`\`
 
+# Available skills
+
+The \`aria-foundation\` skill contains stakeholder audience profiles, communication principles (including language discipline and dignity in storytelling), impact framing (output → outcome → impact), and ethical standards. Any specialist agent can load it when calibrating tone for a specific audience. Remind them to load it when routing work that involves donor communications, external advocacy, or community-facing materials.
+
 # What you handle directly
 
 - Orientation: "What can you do?", "Which agent handles X?", "Explain the workspace layout."

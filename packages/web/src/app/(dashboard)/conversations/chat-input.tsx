@@ -1,7 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bot, Send, Wrench } from 'lucide-react';
+import {
+  BarChart3,
+  Bot,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardList,
+  FileText,
+  Globe,
+  Network,
+  Search,
+  Send,
+  Target,
+  TrendingUp,
+  Users,
+  Wrench,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { authFetch } from '@/lib/auth';
@@ -30,45 +45,157 @@ const builtinCommands: SlashItem[] = [
   { name: '/help', description: 'Show available commands', type: 'command' },
 ];
 
-const suggestions = [
+/* ------------------------------------------------------------------ */
+/*  NGO scenario cards                                                 */
+/* ------------------------------------------------------------------ */
+
+interface NgoScenario {
+  readonly step: string;
+  readonly title: string;
+  readonly subtitle: string;
+  readonly description: string;
+  readonly icons: readonly React.ElementType[];
+  readonly accentBorder: string;
+  readonly accentBg: string;
+  readonly accentText: string;
+  readonly shadow: string;
+  readonly prompt: string;
+  readonly span: 'col-span-1' | 'col-span-2' | 'col-span-3';
+}
+
+// Ordered for the 3-col grid:
+//   Row 1 → [01 Campaign (×2)]  [02 Funding Search (×1)]
+//   Row 2 → [03 Application (×1)]  [05 Cooperation (×2)]
+//   Row 3 → [04 M&E (×3 full)]
+const NGO_SCENARIOS: readonly NgoScenario[] = [
   {
-    title: 'Analyze market trends',
-    description: 'for AI orchestration platforms',
+    step: '01',
+    title: 'Campaign Planning',
+    subtitle: 'mission · objectives · beneficiaries',
+    description:
+      'Define your mission, set SMART objectives, identify target communities, and build a phased activity timeline that keeps the whole team aligned.',
+    icons: [Target, Users, CalendarDays],
+    accentBorder: 'border-l-emerald-500/70',
+    accentBg: 'hover:bg-emerald-500/10',
+    accentText: 'text-emerald-500',
+    shadow: 'hover:shadow-[0_8px_32px_-8px_rgba(16,185,129,0.45)]',
+    prompt:
+      'Help me plan an NGO campaign. Define the mission statement, SMART objectives, target beneficiaries, key activities, and a 12-week delivery timeline.',
+    span: 'col-span-2',
   },
   {
-    title: 'Review pull request',
-    description: 'with security-focused analysis',
+    step: '02',
+    title: 'Funding Search',
+    subtitle: 'donors · eligibility · deadlines',
+    description:
+      'Scan donor landscapes, score fit against eligibility criteria, and surface upcoming application windows before they close.',
+    icons: [Search, Globe],
+    accentBorder: 'border-l-sky-500/70',
+    accentBg: 'hover:bg-sky-500/10',
+    accentText: 'text-sky-500',
+    shadow: 'hover:shadow-[0_8px_32px_-8px_rgba(56,189,248,0.45)]',
+    prompt:
+      'Research funding opportunities for our NGO programme. Identify matching donors (USAID, FCDO, private foundations), their priorities, eligibility requirements, and next deadlines.',
+    span: 'col-span-1',
   },
   {
-    title: 'Create a deployment plan',
-    description: 'for Docker Compose setup',
+    step: '03',
+    title: 'Funding Application',
+    subtitle: 'proposal · log-frame · budget',
+    description:
+      'Draft proposals with theory of change, log-frames, budget narratives, and risk matrices tailored to each donor template.',
+    icons: [FileText, CheckCircle2],
+    accentBorder: 'border-l-amber-500/70',
+    accentBg: 'hover:bg-amber-500/10',
+    accentText: 'text-amber-500',
+    shadow: 'hover:shadow-[0_8px_32px_-8px_rgba(245,158,11,0.45)]',
+    prompt:
+      'Help me write a funding proposal. I need a theory of change, logical framework with indicators, detailed budget narrative, and a risk matrix for submission.',
+    span: 'col-span-1',
   },
   {
-    title: 'Explain container isolation',
-    description: 'in multi-agent systems',
+    step: '05',
+    title: 'NGO Cooperation',
+    subtitle: 'partnerships · MoU · joint delivery',
+    description:
+      'Frame shared objectives, structure collaboration or referral agreements, and coordinate joint reporting with peer organisations.',
+    icons: [Network, Users],
+    accentBorder: 'border-l-rose-500/70',
+    accentBg: 'hover:bg-rose-500/10',
+    accentText: 'text-rose-500',
+    shadow: 'hover:shadow-[0_8px_32px_-8px_rgba(244,63,94,0.45)]',
+    prompt:
+      'Draft a cooperation proposal for another NGO. Outline shared objectives, a collaboration model, resource-sharing arrangement, and a joint reporting structure.',
+    span: 'col-span-2',
+  },
+  {
+    step: '04',
+    title: 'M&E and Impact',
+    subtitle: 'indicators · data collection · evaluation',
+    description:
+      'Design indicator frameworks, data-collection instruments, baseline studies, and endline evaluations aligned to OECD-DAC criteria — the evidence backbone of every programme.',
+    icons: [BarChart3, TrendingUp, ClipboardList],
+    accentBorder: 'border-l-violet-500/70',
+    accentBg: 'hover:bg-violet-500/10',
+    accentText: 'text-violet-500',
+    shadow: 'hover:shadow-[0_8px_32px_-8px_rgba(139,92,246,0.45)]',
+    prompt:
+      'Design a monitoring and evaluation framework. Create SMART indicators, data collection instruments, a baseline methodology, and an impact assessment approach aligned to OECD-DAC criteria.',
+    span: 'col-span-3',
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  SuggestionCard                                                     */
-/* ------------------------------------------------------------------ */
-
-function SuggestionCard({
-  title,
-  description,
+function NgoScenarioCard({
+  scenario,
   onClick,
 }: {
-  title: string;
-  description: string;
+  scenario: NgoScenario;
   onClick: () => void;
 }) {
+  const isFull = scenario.span === 'col-span-3';
+
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="flex cursor-pointer flex-col items-start justify-center rounded-lg border border-border p-4 text-left transition-colors hover:bg-muted/50"
+      className={cn(
+        'group cursor-pointer rounded-lg border border-l-[3px] bg-muted/40 p-4 text-left',
+        'transition-all duration-200 hover:-translate-y-0.5',
+        scenario.accentBorder,
+        scenario.accentBg,
+        scenario.shadow,
+        scenario.span,
+        isFull ? 'flex flex-row items-center gap-6' : 'flex flex-col gap-3',
+      )}
     >
-      <span className="text-sm font-semibold">{title}</span>
-      <span className="text-sm text-muted-foreground">{description}</span>
+      {/* Icon cluster */}
+      <div className={cn('flex shrink-0 items-center gap-2', isFull && 'flex-col')}>
+        {scenario.icons.map((Icon, i) => (
+          <Icon
+            key={i}
+            className={cn(
+              'transition-transform duration-200 group-hover:scale-110',
+              i === 0
+                ? cn('size-6', scenario.accentText)
+                : 'size-4 text-muted-foreground/50',
+            )}
+          />
+        ))}
+      </div>
+
+      {/* Text block */}
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex items-baseline gap-2">
+          <span className={cn('font-mono text-[10px] font-semibold', scenario.accentText)}>
+            {scenario.step}
+          </span>
+          <span className="text-sm font-semibold leading-tight">{scenario.title}</span>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+          {scenario.subtitle}
+        </span>
+        <p className="line-clamp-2 text-xs text-muted-foreground">{scenario.description}</p>
+      </div>
     </button>
   );
 }
@@ -79,19 +206,20 @@ function SuggestionCard({
 
 export function EmptyState({ onSelectSuggestion }: { onSelectSuggestion: (text: string) => void }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-8">
-      <div className="flex size-12 items-center justify-center rounded-full border border-foreground/20 bg-muted">
-        <Bot className="size-6" />
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 px-4 py-6">
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex size-12 items-center justify-center rounded-full border border-foreground/20 bg-muted">
+          <Bot className="size-6" />
+        </div>
+        <p className="text-sm text-muted-foreground">What would you like to work on today?</p>
       </div>
-      <div className="grid w-full max-w-[768px] grid-cols-2 gap-2">
-        {suggestions.map((s) => (
-          <SuggestionCard
-            key={s.title}
-            title={s.title}
-            description={s.description}
-            onClick={() => {
-              onSelectSuggestion(`${s.title} ${s.description}`);
-            }}
+
+      <div className="grid w-full max-w-[768px] grid-cols-3 gap-2.5">
+        {NGO_SCENARIOS.map((s) => (
+          <NgoScenarioCard
+            key={s.step}
+            scenario={s}
+            onClick={() => onSelectSuggestion(s.prompt)}
           />
         ))}
       </div>

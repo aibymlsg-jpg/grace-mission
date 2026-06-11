@@ -12,6 +12,7 @@ import {
   Plus,
   Square,
   Wrench,
+  BookOpen,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -80,6 +81,94 @@ interface ProviderInfo {
 interface PaginatedAgents {
   data: AgentDefinition[];
   meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+// ------------------------------------------------------------------ //
+//  Skill types + helpers                                              //
+// ------------------------------------------------------------------ //
+
+interface SkillEntry {
+  name: string;
+  description: string;
+  path: string;
+  source: 'builtin' | 'custom';
+}
+
+function skillDirName(skillPath: string): string {
+  const parts = skillPath.split('/').filter(Boolean);
+  return parts[parts.length - 2] ?? '';
+}
+
+// ------------------------------------------------------------------ //
+//  Skills hook                                                        //
+// ------------------------------------------------------------------ //
+
+function useSkills() {
+  const [skills, setSkills] = useState<SkillEntry[]>([]);
+
+  useEffect(() => {
+    void authFetch<{ data: SkillEntry[] }>('/api/v1/skills')
+      .then((res) => {
+        setSkills(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {});
+  }, []);
+
+  return skills;
+}
+
+// ------------------------------------------------------------------ //
+//  Skill picker                                                       //
+// ------------------------------------------------------------------ //
+
+function SkillPicker({
+  skills,
+  selected,
+  onChange,
+}: {
+  skills: SkillEntry[];
+  selected: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  if (skills.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground">No skills available.</p>
+    );
+  }
+
+  return (
+    <div className="max-h-44 overflow-y-auto rounded-md border divide-y">
+      {skills.map((skill) => {
+        const dirName = skillDirName(skill.path);
+        const checked = selected.includes(dirName);
+        return (
+          <label
+            key={skill.path}
+            className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-muted/50"
+          >
+            <input
+              type="checkbox"
+              className="mt-0.5 shrink-0"
+              checked={checked}
+              onChange={() => {
+                onChange(
+                  checked ? selected.filter((d) => d !== dirName) : [...selected, dirName],
+                );
+              }}
+            />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <BookOpen className="size-3 shrink-0 text-muted-foreground" />
+                <span className="text-sm font-medium">{skill.name}</span>
+                <span className="text-xs text-muted-foreground">({skill.source})</span>
+              </div>
+              <p className="line-clamp-1 text-xs text-muted-foreground">{skill.description}</p>
+            </div>
+          </label>
+        );
+      })}
+    </div>
+  );
 }
 
 // ------------------------------------------------------------------ //
@@ -188,12 +277,14 @@ function CreateAgentDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   saving: boolean;
-  onSubmit: (form: FormData) => void;
+  onSubmit: (form: FormData, skillIds: string[]) => void;
   title?: string;
   description?: string;
 }) {
   const providers = useProviders();
+  const skills = useSkills();
   const [streamingEnabled, setStreamingEnabled] = useState(false);
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -207,7 +298,7 @@ function CreateAgentDialog({
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
             fd.set('streamingEnabled', String(streamingEnabled));
-            onSubmit(fd);
+            onSubmit(fd, selectedSkillIds);
           }}
           className="flex flex-col gap-4"
         >
@@ -267,6 +358,14 @@ function CreateAgentDialog({
             />
           </div>
 
+          <div className="flex flex-col gap-2">
+            <Label>Skills</Label>
+            <p className="text-xs text-muted-foreground">
+              Select which skills this agent can use. Leave empty to allow all skills.
+            </p>
+            <SkillPicker skills={skills} selected={selectedSkillIds} onChange={setSelectedSkillIds} />
+          </div>
+
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
               <Label htmlFor="create-streamingEnabled" className="text-base">
@@ -318,10 +417,12 @@ function EditAgentDialog({
   agent: AgentDefinition | null;
   onOpenChange: (open: boolean) => void;
   saving: boolean;
-  onSubmit: (id: string, form: FormData) => void;
+  onSubmit: (id: string, form: FormData, skillIds: string[]) => void;
 }) {
   const providers = useProviders();
+  const skills = useSkills();
   const [streamingEnabled, setStreamingEnabled] = useState(agent?.streamingEnabled ?? false);
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>(agent?.skillIds ?? []);
 
   if (!agent) return null;
 
@@ -337,7 +438,7 @@ function EditAgentDialog({
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
             fd.set('streamingEnabled', String(streamingEnabled));
-            onSubmit(agent.id, fd);
+            onSubmit(agent.id, fd, selectedSkillIds);
           }}
           className="flex flex-col gap-4"
         >
@@ -407,6 +508,14 @@ function EditAgentDialog({
               defaultValue={agent.maxTokensPerRun ?? 100000}
               min={1000}
             />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Skills</Label>
+            <p className="text-xs text-muted-foreground">
+              Select which skills this agent can use. Leave empty to allow all skills.
+            </p>
+            <SkillPicker skills={skills} selected={selectedSkillIds} onChange={setSelectedSkillIds} />
           </div>
 
           <div className="flex items-center justify-between rounded-lg border p-4">
@@ -1232,7 +1341,7 @@ export default function UserAgentsPage() {
     void fetchAgents();
   }, [fetchAgents]);
 
-  async function handleCreateOfficial(form: FormData) {
+  async function handleCreateOfficial(form: FormData, skillIds: string[]) {
     setSaving(true);
     setError('');
     try {
@@ -1249,6 +1358,7 @@ export default function UserAgentsPage() {
           apiBaseUrl: form.get('apiBaseUrl') || undefined,
           maxTokensPerRun: Number(form.get('maxTokensPerRun')) || 100000,
           streamingEnabled: form.get('streamingEnabled') === 'true',
+          skillIds,
           isOfficial: true,
         }),
       });
@@ -1262,7 +1372,7 @@ export default function UserAgentsPage() {
     }
   }
 
-  async function handleCreateSub(form: FormData) {
+  async function handleCreateSub(form: FormData, skillIds: string[]) {
     setSaving(true);
     setError('');
     try {
@@ -1279,6 +1389,7 @@ export default function UserAgentsPage() {
           apiBaseUrl: form.get('apiBaseUrl') || undefined,
           maxTokensPerRun: Number(form.get('maxTokensPerRun')) || 100000,
           streamingEnabled: form.get('streamingEnabled') === 'true',
+          skillIds,
           isOfficial: false,
         }),
       });
@@ -1292,7 +1403,7 @@ export default function UserAgentsPage() {
     }
   }
 
-  async function handleUpdate(id: string, form: FormData) {
+  async function handleUpdate(id: string, form: FormData, skillIds: string[]) {
     setSaving(true);
     setError('');
     try {
@@ -1308,6 +1419,7 @@ export default function UserAgentsPage() {
           apiBaseUrl: form.get('apiBaseUrl') || undefined,
           maxTokensPerRun: Number(form.get('maxTokensPerRun')) || 100000,
           streamingEnabled: form.get('streamingEnabled') === 'true',
+          skillIds,
         }),
       });
       setEditAgent(null);

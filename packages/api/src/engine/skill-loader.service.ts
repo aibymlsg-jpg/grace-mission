@@ -110,8 +110,16 @@ export class SkillLoaderService {
     ];
   }
 
-  async buildSkillsSummary(customDir: string): Promise<string> {
-    const skills = await this.listSkills(customDir);
+  async buildSkillsSummary(customDir: string, allowedDirNames?: readonly string[]): Promise<string> {
+    const allSkills = await this.listSkills(customDir);
+    const skills =
+      allowedDirNames && allowedDirNames.length > 0
+        ? allSkills.filter((s) => {
+            const parts = s.path.split('/').filter(Boolean);
+            const dirName = parts[parts.length - 2] ?? '';
+            return allowedDirNames.includes(dirName);
+          })
+        : allSkills;
     if (skills.length === 0) return '';
     const lines = ['<skills>'];
     for (const skill of skills) {

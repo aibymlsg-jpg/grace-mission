@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth-provider';
 import {
+  BarChart3,
   BookOpen,
   Bot,
   ChevronRight,
@@ -12,14 +13,18 @@ import {
   Coins,
   CreditCard,
   FolderOpen,
+  Heart,
+  MapPin,
   MonitorPlay,
   LogOut,
   MessageSquare,
   Moon,
+  Newspaper,
   Radio,
   ScrollText,
   Settings2,
   Sun,
+  Target,
   User,
   Users,
   Wrench,
@@ -80,11 +85,31 @@ const platformItems = [
   },
 ];
 
-const governanceItems = [
+interface NavItem {
+  readonly title: string;
+  readonly href: string;
+  readonly icon: typeof BookOpen;
+  readonly adminOnly?: boolean;
+}
+
+const ngoItems: readonly NavItem[] = [
+  { title: 'Programs', href: '/ngo/programs', icon: Target },
+  { title: 'Donors', href: '/ngo/donors', icon: Heart },
+  { title: 'M&E', href: '/ngo/mne', icon: BarChart3 },
+  { title: 'Communications', href: '/ngo/comms', icon: Newspaper },
+  { title: 'Field Ops', href: '/ngo/field-ops', icon: MapPin },
+];
+
+const governanceItems: readonly NavItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: BookOpen },
   { title: 'Token Usage', href: '/governance/tokens', icon: Coins },
   { title: 'Audit Logs', href: '/governance/audit', icon: ScrollText },
 ];
+
+// 2px left stripe on hover/active — matches the lift-and-stripe vocabulary used
+// across Memory, Groups, and Skills cards.
+const navButtonClass =
+  'transition-[transform,background-color,box-shadow] duration-150 hover:translate-x-0.5 hover:shadow-[inset_2px_0_0_0_hsl(var(--sidebar-primary)/0.6)] data-[active=true]:shadow-[inset_2px_0_0_0_hsl(var(--sidebar-primary))]';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -122,7 +147,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="group-data-[collapsible=icon]:hidden">
+      <SidebarHeader className="border-b border-sidebar-border/40 group-data-[collapsible=icon]:hidden">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
@@ -139,11 +164,18 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            Workspace
+          </SidebarGroupLabel>
           <SidebarMenu>
             {platformItems.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={isActive(item.href)} tooltip={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive(item.href)}
+                  tooltip={item.title}
+                  className={navButtonClass}
+                >
                   <Link href={item.href}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -155,11 +187,18 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Governance</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            NGO Relevant
+          </SidebarGroupLabel>
           <SidebarMenu>
-            {governanceItems.map((item) => (
+            {ngoItems.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={isActive(item.href)} tooltip={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive(item.href)}
+                  tooltip={item.title}
+                  className={navButtonClass}
+                >
                   <Link href={item.href}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -167,6 +206,31 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            Governance
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {governanceItems
+              .filter((item) => !item.adminOnly || user?.role === 'admin')
+              .map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.title}
+                    className={navButtonClass}
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             <Collapsible
               defaultOpen={pathname.startsWith('/settings')}
               className="group/collapsible"
@@ -187,6 +251,7 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       isActive={pathname.startsWith('/settings')}
                       tooltip="Settings"
+                      className={navButtonClass}
                     >
                       <Settings2 />
                       <span>Settings</span>
@@ -202,7 +267,11 @@ export function AppSidebar() {
                         { title: 'Providers', href: '/settings/providers', icon: Bot },
                       ].map((item) => (
                         <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild isActive={isActive(item.href)}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isActive(item.href)}
+                            className="transition-all duration-150 hover:translate-x-0.5"
+                          >
                             <Link href={item.href}>
                               <item.icon />
                               <span>{item.title}</span>

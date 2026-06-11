@@ -20,7 +20,7 @@ export const createAgentDefinitionSchema = z.object({
   provider: z.string().min(1),
   model: z.string().min(1),
   apiBaseUrl: z.string().url().nullable().optional(),
-  skillIds: z.array(z.string().cuid()).default([]),
+  skillIds: z.array(z.string().min(1)).default([]),
   maxTokensPerRun: z.number().int().positive().default(100000),
   containerConfig: containerConfigSchema.default({
     image: 'node:20-slim',

@@ -11,6 +11,8 @@ export interface ContextAgentDef {
   readonly name: string;
   readonly description: string | null;
   readonly systemPrompt: string;
+  /** dirNames of skills this agent may use. Empty array = all skills allowed. */
+  readonly skillIds?: readonly string[];
 }
 
 /** Parameters for building enriched messages. */
