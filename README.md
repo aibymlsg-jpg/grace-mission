@@ -1,522 +1,227 @@
 <p align="center">
-  <h1 align="center">Clawix</h1>
+  <h1 align="center">Clawix for NGOs</h1>
   <p align="center">
-    <strong>Self-hosted multi-agent AI orchestration platform</strong>
+    <strong>Your organisation's own team of AI assistants.</strong>
     <br />
-    Run AI agent swarms in isolated containers. Full governance. Zero vendor lock-in.
-  </p>
-  <p align="center">
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License"></a>
-    <a href="https://github.com/ClawixAI/clawix/stargazers"><img src="https://img.shields.io/github/stars/ClawixAI/clawix?style=flat-square" alt="Stars"></a>
-    <a href="https://github.com/ClawixAI/clawix/issues"><img src="https://img.shields.io/github/issues/ClawixAI/clawix?style=flat-square" alt="Issues"></a>
-    <a href="https://github.com/ClawixAI/clawix/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome"></a>
-    <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square" alt="Node.js"></a>
-    <a href="package.json"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square" alt="TypeScript"></a>
+    They help you draft proposals, reports, newsletters and plans — while keeping your data private and always leaving the final decision to a person.
   </p>
 </p>
 
 ---
 
-## Why Clawix?
-
-Most AI agent frameworks are either **toys** (single-process, no isolation, no audit trail) or **walled gardens** (cloud-only, per-seat pricing, your data on someone else's servers).
-
-Clawix sits in between: **production-grade orchestration you own entirely.**
-
-- **Every agent runs in its own Docker container** -- no agent can read another's files, exhaust your host's memory, or escape its sandbox.
-- **Plug in any LLM** -- Claude and GPT-4 today, with Azure, DeepSeek, Gemini, and OpenRouter coming soon. Any OpenAI-compatible endpoint (Ollama, vLLM, etc.) works now via the custom provider.
-- **Built for teams** -- RBAC, token budgets, audit logs, and scoped memory mean you can hand agents to your whole org without losing sleep.
-- **Reach users where they are** -- Telegram, WhatsApp, Slack, and a built-in web dashboard. One agent, many channels.
-
-> Think of it as "Kubernetes for AI agents" -- container isolation, resource limits, health checks, and warm pools, but purpose-built for LLM workloads.
+> **Who this guide is for**
+>
+> This page is written for the people who **use** Clawix every day — programme staff, fundraisers, M&E officers, communications teams and field coordinators. **You do not need to be technical.** If you can send a message in a chat app, you can use Clawix.
+>
+> If you are the person who *installs or maintains* Clawix on a server, skip to [**For administrators**](#for-administrators-technical-setup) at the bottom.
 
 ---
 
-## Features
+## What is Clawix?
 
-<table>
-<tr>
-<td width="50%">
+Clawix gives your NGO a small **team of AI assistants** that work the way your real team does. Instead of one generic chatbot, you get a coordinator at the "front desk" and five specialists behind it — each trained for a specific part of NGO work.
 
-### Container-Isolated Agents
+You talk to them in plain language, the same way you'd brief a colleague. They do the heavy lifting — research, first drafts, structuring data — and hand the result back to **you** to review, finish and send.
 
-Every agent gets its own sandboxed Docker container with CPU/memory limits, read-only mounts, and no root access. Cross-agent interference is architecturally impossible.
+Three promises sit underneath everything Clawix does:
 
-### Warm Container Pool
-
-Primary agents stay warm in pre-provisioned containers. Cold-start latency drops from **1-3 seconds to ~50ms**.
-
-### Swarm Orchestration
-
-Break complex tasks into sub-agent DAGs. The coordinator delegates, aggregates results, and handles failures -- all within isolated containers.
-
-</td>
-<td width="50%">
-
-### Multi-Provider AI
-
-Anthropic and OpenAI out of the box, with Azure, DeepSeek, Gemini, and OpenRouter planned. Any OpenAI-compatible endpoint already works via the custom provider. Add new providers with a single config entry.
-
-### Scoped Memory System
-
-Persistent memory at three levels: private (per-user), group (team), and org-wide. Agents build context over time without re-prompting.
-
-### Skills Framework
-
-Pluggable tools with approval workflows. Bundle built-in skills, create custom ones at runtime, or use the built-in skill-creator agent to generate new skills from natural language.
-
-</td>
-</tr>
-</table>
-
-### And also...
-
-- **Governance & Compliance** -- Token budgets per user/group, immutable audit logs, structured logging (Pino), Prometheus metrics
-- **Multi-Channel Delivery** -- reach users across messaging platforms and web (see table below)
-- **Per-User Workspaces** -- Persistent directories that survive container teardown, with quota enforcement
-- **Encrypted Secrets** -- Provider API keys stored with AES-256-GCM; encryption key never leaves your server
-- **RBAC** -- Role-based access control across all management APIs
+- 🧑‍⚖️ **A human is always in charge.** Clawix only ever produces *drafts*. It never sends an email, posts to social media, or submits anything to a donor on its own. A person always presses "send".
+- 🔒 **Your data stays yours.** Clawix runs on your organisation's own server. Beneficiary names and personal details are deliberately kept out of its memory.
+- ✅ **It won't make things up.** If a figure or fact is missing, the assistants mark it clearly (e.g. `[FILL: 2024 beneficiary count]`) rather than inventing a number.
 
 ---
 
-## Architecture
+## Meet your AI team
 
-```
-                        ┌──────────────────────────────────────────┐
-                        │            User Interfaces               │
-                        │   Telegram  WhatsApp  Slack  Web UI      │
-                        └──────────────────┬───────────────────────┘
-                                           │
-                        ┌──────────────────▼───────────────────────┐
-                        │             API Gateway                  │
-                        │   NestJS + Fastify  │  JWT  │  Rate Limit│
-                        └──────────────────┬───────────────────────┘
-                                           │
-              ┌────────────────────────────▼────────────────────────────┐
-              │                     Core Engine                         │
-              │                                                         │
-              │  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐   │
-              │  │  Reasoning  │  │    Tool      │  │    Swarm      │   │
-              │  │   Loops     │  │  Execution   │  │ Coordinator   │   │
-              │  └─────────────┘  └──────────────┘  └───────────────┘   │
-              │                                                         │
-              │  Providers: Claude │ GPT │ OpenAI-compatible │ Custom   │
-              └────────────────────────────┬────────────────────-───────┘
-                                           │
-              ┌────────────────────────────▼────────────────────────────┐
-              │                  Container Pool                         │
-              │  ┌──────────┐  ┌──────────────┐  ┌─────────────────┐    │
-              │  │  Warm    │  │  Ephemeral   │  │  Resource       │    │
-              │  │  Primary │  │  Sub-Agents  │  │  Limits         │    │
-              │  └──────────┘  └──────────────┘  └─────────────────┘    │
-              └────────────────────────────┬───────────────────────────-┘
-                                           │
-              ┌────────────────────────────▼────────────────────────────┐
-              │                    Data Layer                           │
-              │        PostgreSQL  │  Redis  │  User Workspaces         │
-              └─────────────────────────────────────────────────────────┘
-```
+At the front desk is the **NGO Programme Assistant**. This is who you talk to. You describe what you need in everyday words, and it quietly hands the job to the right specialist — one at a time — then brings the result back to you. You rarely need to talk to the specialists directly.
+
+| The specialist | Think of them as… | Ask them for… |
+| --- | --- | --- |
+| **Programme Coordinator** | Your planning and tracking officer | Workplans, partner lists, activity trackers, weekly status notes |
+| **Donor Engagement** | Your fundraising and grants officer | Proposals, donor reports, log-frames, and research into who might fund you |
+| **Monitoring & Evaluation** | Your data and results officer | SMART indicators, data-collection forms, checking data quality, dashboard summaries |
+| **Communications** | Your storytelling and outreach officer | Newsletters, social media posts, op-eds, advocacy briefs |
+| **Field Operations** | Your logistics and safety officer | Logistics lists, risk registers, and writing up incident records *after* a person has handled the situation |
+
+Each specialist has been given a set of **best-practice guides** ("skills") to read before it drafts — for example, how donors like FCDO, USAID and ECHO expect proposals to be structured, or the data-protection rules for handling sensitive information. So you're not just getting generic text; you're getting drafts that follow the standards your sector expects.
 
 ---
 
-## Quick Start
+## Getting started in 4 steps
 
-### Prerequisites
+### 1. Open Clawix
 
-- [Git](https://git-scm.com/)
-- [Node.js 20+](https://nodejs.org/)
-- [pnpm 9+](https://pnpm.io/installation) (`npm install -g pnpm`)
-- [Docker](https://docs.docker.com/get-docker/) (for agent containers, PostgreSQL, and Redis)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (user-friendly platform for container management)
-- [Docker Compose](https://docs.docker.com/compose/install/) (included in Docker Desktop)
+Your administrator will give you one of these:
 
-> **Self-hosting in production?** Skip ahead to [Production Deployment](#production-deployment-first-run) — the installer handles `.env` generation, image builds, and bootstrap for you. The steps below are for local development.
+- **A web address** (for example `https://clawix.your-ngo.org`) — open it in any browser, just like a normal website.
+- **A Telegram bot** — open Telegram, search for the bot name they gave you, and start a chat.
 
-### 1. Clone & Install
+### 2. Sign in
+
+Use the email and password your administrator set up for you. (On Telegram, your account is linked for you — just start chatting.)
+
+### 3. Say hello to the Programme Assistant
+
+In the web dashboard, open **Conversations** and choose the **NGO Programme Assistant**. On Telegram, just send a message. A simple "Hi, what can you help me with?" is a fine way to start.
+
+### 4. Ask in plain English
+
+Describe what you need the way you'd ask a colleague. You don't need special commands or keywords. For example:
+
+> *"Find donors for a water and sanitation programme in West Africa."*
+> → The assistant researches funders and saves a shortlist for you to review.
+
+> *"Design SMART indicators for a livelihoods programme."*
+> → You get a ready-to-edit set of indicators following M&E best practice.
+
+> *"Draft this month's newsletter using our recent activity updates."*
+> → A first draft of the newsletter, written in accessible, dignity-preserving language.
+
+> *"Write a workplan for the next quarter for our girls' education project."*
+> → A structured quarterly plan you can refine with your team.
+
+---
+
+## Where your work is saved
+
+Everything the assistants produce is saved as **drafts** in a tidy set of folders set up for your organisation — for example `proposals/`, `reports/`, `mne/`, `comms/drafts/`, `field-ops/` and so on. You'll find the draft waiting there (and in the conversation) so you can open it, edit it, and finish it your way.
+
+Nothing in those "drafts" folders has been sent anywhere. Sending — to a donor, a mailing list, or social media — is always a deliberate step **you** take.
+
+---
+
+## The ground rules that keep you safe
+
+These rules are built into Clawix. Knowing them helps you trust what it gives you:
+
+1. **Drafts only — a human always sends.** Emails, donor submissions, and social posts are prepared for you, never sent automatically.
+2. **Beneficiary privacy is protected.** Personal details of the people you serve are kept out of the assistants' memory. When incidents are written up, real names are replaced with pseudonyms; the key linking them is kept separate and is people-only.
+3. **Safeguarding comes first.** Field Operations will **not** handle a safeguarding disclosure or make first-contact decisions. A trained person deals with the situation; the assistant only helps *document* it afterwards, and mandatory-reporting flags can't be quietly removed.
+4. **No invented facts or figures.** Missing data is flagged for you to fill in, not guessed.
+5. **One specialist at a time.** The Programme Assistant routes each request to a single specialist — there's no uncontrolled chain of agents acting on their own.
+6. **Everything is logged.** Each action is recorded in a tamper-evident activity log, so there's always a clear trail of what was done.
+
+---
+
+## What Clawix will *not* do
+
+So there are no surprises, Clawix deliberately **does not**:
+
+- Send emails, submit proposals, or publish posts on its own.
+- Store or remember beneficiaries' personal information.
+- Make safeguarding or protection *decisions* — that's always a person's job.
+- Invent statistics, quotes, or results to fill a gap.
+- Act on a story without consent — beneficiary stories are only used when the source is marked as shareable.
+
+---
+
+## Tips for getting great results
+
+- **Be specific.** "Draft a 2-page concept note for a $50,000 girls' education project in rural Kenya" beats "write a proposal".
+- **Point to context.** Mention the programme, the donor, or the time period so the assistant uses the right material.
+- **Review every draft.** Treat it as a strong first draft from a capable colleague — your judgement and local knowledge make it final.
+- **Fill in the `[FILL: …]` marks.** These are deliberate prompts where only you have the real number or detail.
+- **Ask follow-ups.** "Make it shorter", "use a more formal tone", or "add a risk section" all work in the same conversation.
+
+---
+
+## Getting help
+
+- **Something looks wrong, or you're stuck?** Contact whoever set Clawix up for your organisation (your administrator or IT focal point).
+- **Want a new kind of assistant or skill?** Those can be added — pass the request to your administrator.
+
+---
+---
+
+## For administrators (technical setup)
+
+> The section above is for everyday users. The rest of this document is for the person installing or maintaining Clawix on a server.
+
+Clawix is a **self-hosted multi-agent AI orchestration platform**: every agent runs in its own isolated Docker container, with full audit logging, role-based access, token budgets, and encrypted secrets. It's a pnpm monorepo (`packages/api` — NestJS + Fastify; `packages/web` — Next.js dashboard; `packages/shared`).
+
+**Full guides:**
+- **Server / cloud deployment (DigitalOcean, domains, SSL):** see [`DO_deploy.md`](DO_deploy.md)
+- **Codebase architecture & developer commands:** see [`CLAUDE.md`](CLAUDE.md) and [`docs/`](docs/)
+
+### Install (first run)
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/ClawixAI/clawix.git clawixngo
+# Clone, then run the interactive installer — it generates .env
+# (secrets, DB password), builds the images, and starts the stack.
+git clone https://github.com/aibyml-ngo/clawix-ngo.git clawixngo
 cd clawixngo
-
-# 2. Run the interactive installer
 pnpm run install:clawix
 ```
 
-<details>
-<summary>Manual setup (click to expand)</summary>
+There is also a one-step bootstrapper that clones *and* installs: `./setup-clawix.sh` (interactive) or `./setup-clawix.sh --auto --provider anthropic --api-key sk-ant-xxx` (unattended). Use it for **first-time installs only** — never for updates.
+
+### Update / restart
 
 ```bash
-pnpm install
-cp .env.example .env
-pnpm --filter @clawix/shared run build
-docker build -t clawix-agent:latest -f infra/docker/agent/Dockerfile .
-docker compose -f docker-compose.dev.yml up -d
-```
-
-</details>
-
-### 2. Configure
-
-Edit `.env` with your API keys:
-
-```bash
-# Required: encryption key for provider secrets (AES-256-GCM)
-PROVIDER_ENCRYPTION_KEY=$(openssl rand -hex 32)
-
-# AI providers (used by db:seed; also env fallback at runtime)
-ANTHROPIC_API_KEY=sk-ant-xxx        # Claude
-OPENAI_API_KEY=sk-xxx               # GPT (optional)
-
-# Channels (optional -- used by db:seed to populate channel config)
-TELEGRAM_BOT_TOKEN=123456789:ABCdef...   # Telegram (from @BotFather)
-
-# Database (defaults work with docker-compose)
-DATABASE_URL="postgresql://clawix:clawix_dev@localhost:5433/clawix"
-REDIS_URL="redis://localhost:6379"
-```
-
-### 3. Run
-
-```bash
-pnpm run dev    # API on :3001, Dashboard on :3000
-```
-
-That's it. Open `http://localhost:3000` or message your Telegram bot.
-
----
-
-## Production Deployment (First Run)
-
-Two helper scripts wrap the full production flow:
-
-| Command                   | What it does                                                                |
-| ------------------------- | --------------------------------------------------------------------------- |
-| `pnpm run install:clawix` | Interactive first-time setup: generates `.env`, builds images, starts stack |
-| `pnpm run update:clawix`  | Non-interactive rebuild + restart (use after `git pull` or config changes)  |
-
-### First run
-
-```bash
-pnpm run install:clawix
-```
-
-The installer will:
-
-1. Check prerequisites (Node 20+, pnpm, Docker, Docker Compose)
-2. Ask for deployment mode (production / development), provider (OpenAI or Zai-Coding) + API key, admin email/password (production only), and optional Telegram bot token
-3. Generate `.env` with cryptographically random `JWT_SECRET`, `PROVIDER_ENCRYPTION_KEY`, `POSTGRES_PASSWORD` (file permissions set to `600`)
-4. Build `clawix-agent:latest` (agent image used for isolated per-task containers)
-5. Run `docker compose … up -d --build`
-6. Wait for `http://localhost:3001/health` to go green (migrations + bootstrap run inside the API container on first start)
-
-When it finishes, open `http://localhost:3000` and sign in with the admin credentials you entered.
-
-> Re-running `install:clawix` with an existing `.env` is safe — it keeps your secrets, skips the prompts, and just rebuilds/restarts. To reconfigure from scratch, delete `.env` and re-run.
-
-### Using setup-clawix.sh (one-step installer)
-
-If you are using the standalone `setup-clawix.sh` script (which clones the repo and runs the installer in one step), a stale `.env` from a previous attempt will cause the installer to skip secret generation. Always remove it first on a fresh install:
-
-```bash
-# First Run
-rm ~/clawixngo/.env
-/Users/aibizservice/setup-clawix.sh
-```
-
-> `setup-clawix.sh` is a **first-time installer only**. Never re-run it for updates — use the updater below instead.
-
-### Updates and restarts
-
-```bash
-pnpm run update:clawix              # rebuild + restart (default)
+pnpm run update:clawix              # rebuild + restart
 pnpm run update:clawix -- --pull    # git pull --ff-only, then rebuild + restart
 pnpm run update:clawix -- --no-build # plain restart, reuse existing images
 ```
 
-The updater reads `CLAWIX_DEPLOY_MODE` from `.env` and picks the right compose file automatically. Prisma migrations and the idempotent bootstrap run inside the container on every start — bootstrap no-ops once the admin exists.
+Your `.env`, the `postgres_data` volume, and `redis_data` are preserved across updates.
 
-**To update the repo on subsequent runs, use the updater — not `setup-clawix.sh`:**
+### Uninstall
 
 ```bash
-# Second run onwards — update repo and restart
-cd ~/clawixngo
-pnpm run update:clawix -- --pull
+pnpm run uninstall:clawix            # remove containers/images/volumes, keep host data
+pnpm run uninstall:clawix -- --full  # also remove .env, ./data/, ./skills/custom/
 ```
 
-What it does safely:
+### Seed the NGO configuration
 
-- `git pull` — fetches latest code
-- Rebuilds Docker images with new code
-- Restarts containers with `--remove-orphans`
-- Waits for the API to be healthy
-
-What it does **not** touch:
-
-- Your `.env` — kept as-is
-- `postgres_data` volume — your database is preserved
-- `redis_data` volume — preserved
-
-### What happens under the hood
-
-- `infra/docker/api/entrypoint.sh` runs `prisma migrate deploy`, then `node dist/bootstrap.js`.
-- `bootstrap.ts` only writes when the admin doesn't already exist and only uses `upsert` / guarded `create` — never deletes data.
-- The production compose file **fails fast** at `docker compose up` time if any of `POSTGRES_PASSWORD`, `JWT_SECRET`, `CORS_ALLOWED_ORIGINS`, or `PROVIDER_ENCRYPTION_KEY` are missing.
-- Generate the encryption key manually (if not using the installer) with `openssl rand -hex 32`.
-
-### Manual equivalent (no installer)
+The NGO team (five specialists + Programme Assistant) and the workspace folder structure are created by:
 
 ```bash
-cp .env.example .env
-# edit .env — set POSTGRES_PASSWORD, JWT_SECRET, CORS_ALLOWED_ORIGINS,
-# PROVIDER_ENCRYPTION_KEY, DEFAULT_PROVIDER, <PROVIDER>_API_KEY,
-# INITIAL_ADMIN_EMAIL, INITIAL_ADMIN_PASSWORD, INITIAL_ADMIN_NAME
+node scripts/seed-ngo-agents.mjs    # create the five NGO specialist agents
+node scripts/setup-ngo.mjs          # seed the 28-folder workspace + skill files
+```
 
+All NGO reference material (agent definitions, skill packages, architecture notes) lives under `reference/Clawix SKILL and Agent/`.
+
+### Local development
+
+```bash
+pnpm install
+cp .env.example .env                 # set PROVIDER_ENCRYPTION_KEY, provider key, etc.
+pnpm --filter @clawix/shared run build
 docker build -t clawix-agent:latest -f infra/docker/agent/Dockerfile .
-docker compose -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.prod.yml logs api | grep '\[bootstrap\]'
+pnpm run docker:dev                  # Postgres (5433) + Redis
+pnpm run db:migrate && pnpm run db:seed
+pnpm run dev                         # API on :3001, dashboard on :3000
 ```
 
-## Uninstallation
+### Supported AI providers
 
-Remove Clawix completely with:
+| Provider | Status |
+| --- | --- |
+| Anthropic (Claude) | Available |
+| OpenAI (GPT) | Available |
+| Z.AI Coding (GLM) | Available |
+| Any OpenAI-compatible endpoint (Ollama, vLLM, …) | Available |
+| Azure, DeepSeek, Gemini, Kimi, OpenRouter | Planned |
 
-```bash
-pnpm run uninstall:clawix               # preserve host data
-pnpm run uninstall:clawix -- --full     # complete removal
-```
+### Channels
 
-### Flags
-
-| Flag            | Description                                                             |
-| --------------- | ----------------------------------------------------------------------- |
-| `--full` / `-f` | Remove Docker resources AND host data (.env, ./data/, ./skills/custom/) |
-| `--yes` / `-y`  | Skip confirmation prompt                                                |
-
-### What gets removed
-
-**Docker cleanup (default):**
-
-- Containers from both dev and prod environments
-- Images built by compose + `clawix-agent:latest`
-- Named volumes (`postgres_data`, `redis_data`, etc.)
-- Orphan containers
-
-**Host data (with `--full`):**
-
-- `.env` — configuration and secrets
-- `./data/` — runtime data, user workspaces
-- `./skills/custom/` — user-created skills
-
-### Fresh reinstall
-
-```bash
-# Full cleanup
-pnpm run uninstall:clawix -- --full -y
-
-# Reinstall from scratch
-pnpm run install:clawix
-```
-
-> Without `--full`, host data is preserved. The installer detects existing `.env` and skips configuration prompts, reusing your previous settings.
+| Channel | Status |
+| --- | --- |
+| Web dashboard | Available |
+| Telegram | Available |
+| WhatsApp, Slack | Planned |
 
 ---
 
-## Multi-Provider Support
+## NGO configuration reference
 
-Built-in providers plus extensible registry -- add new ones with a single `ProviderSpec` entry:
+A complete multi-agent setup for small-to-mid-size NGOs (10–80 staff, multi-donor, often field-based). All reference files live under `reference/Clawix SKILL and Agent/`.
 
-| Provider        | Detection                                  | Use Case              | Status    |
-| --------------- | ------------------------------------------ | --------------------- | --------- |
-| **Anthropic**   | model starts with `claude-`                | Primary (best tools)  | Available |
-| **OpenAI**      | model starts with `gpt-`/`o1-`/`o3-`/`o4-` | General purpose       | Available |
-| **Z.AI Coding** | model starts with `glm-`                   | GLM models            | Available |
-| **Azure**       | config key `azure_openai`                  | Enterprise compliance | Planned   |
-| **DeepSeek**    | model starts with `deepseek-`              | Cost-effective        | Planned   |
-| **Gemini**      | model starts with `gemini-`                | Google ecosystem      | Planned   |
-| **Kimi**        | model starts with `moonshot-`              | Long-context tasks    | Planned   |
-| **OpenRouter**  | API key starts with `sk-or-`               | Provider gateway      | Planned   |
-| **Custom**      | any OpenAI-compatible endpoint             | Ollama, vLLM, etc.    | Available |
+### The five specialist agents
 
-## Channels
-
-| Channel           | Integration         | Use Case                      | Status    |
-| ----------------- | ------------------- | ----------------------------- | --------- |
-| **Telegram**      | grammY              | Personal & team chat          | Available |
-| **WhatsApp**      | Business API        | Customer-facing agents        | Planned   |
-| **Slack**         | Bolt SDK            | Workspace collaboration       | Planned   |
-| **Web Dashboard** | Next.js + WebSocket | Admin console & conversations | Available |
-
----
-
-## Security Model
-
-Clawix follows a **zero-trust architecture** for agent execution:
-
-| Threat                         | Mitigation                                                     |
-| ------------------------------ | -------------------------------------------------------------- |
-| Cross-user data access         | Workspaces only mounted into owner's container                 |
-| Sub-agent privilege escalation | Sub-agents get read-only curated context, never full workspace |
-| Memory poisoning               | Agent context regenerated from DB each run                     |
-| Disk exhaustion                | Per-user quota enforcement (default 500 MB)                    |
-| Path traversal                 | All paths validated to stay under `data/org/`                  |
-| Secret leakage                 | API keys encrypted at rest (AES-256-GCM)                       |
-| Untrusted code execution       | All agent code runs inside sandboxed containers, never on host |
-
----
-
-## Tech Stack
-
-| Layer      | Technology                                                |
-| ---------- | --------------------------------------------------------- |
-| API        | NestJS 11 + Fastify                                       |
-| Frontend   | Next.js 15 + Tailwind CSS + shadcn/ui                     |
-| AI         | Multi-provider (Anthropic, OpenAI, any OpenAI-compatible) |
-| Database   | Prisma ORM + PostgreSQL 16                                |
-| Cache      | Redis 7 (ioredis)                                         |
-| Auth       | NextAuth (JWT + OAuth2)                                   |
-| Containers | Docker CLI with resource limits                           |
-| Logging    | Pino (structured JSON)                                    |
-| Metrics    | Prometheus (prom-client)                                  |
-| Testing    | Vitest + Playwright                                       |
-| Monorepo   | pnpm workspaces                                           |
-
----
-
-## Project Structure
-
-```
-clawixngo/
-├── packages/
-│   ├── api/          # NestJS API server (auth, engine, channels, skills)
-│   ├── web/          # Next.js dashboard (React 19, Tailwind, shadcn/ui)
-│   ├── shared/       # Shared types, schemas, utilities, logger
-│   └── worker/       # Background job processor
-├── skills/
-│   └── builtin/      # Bundled skills (web_search, file_ops, etc.)
-├── infra/
-│   └── docker/       # Agent container Dockerfile
-├── prisma/           # Database schema + migrations
-├── docs/             # Architecture & implementation docs
-└── scripts/          # Dev/ops scripts
-```
-
----
-
-## Commands
-
-```bash
-pnpm run dev              # Start API + dashboard (hot-reload)
-pnpm run build            # Build all packages
-pnpm run test             # Run all tests
-pnpm run test:coverage    # Tests with coverage report
-pnpm run lint             # ESLint + type check
-pnpm run format           # Prettier format
-
-# Production deployment
-pnpm run install:clawix   # Interactive first-time setup (generates .env, builds, starts)
-pnpm run update:clawix    # Rebuild + restart after git pull or config changes
-
-# Infrastructure
-pnpm run docker:dev       # Start Postgres, Redis, pgAdmin
-pnpm run docker:down      # Stop local infra
-
-# Database
-pnpm run db:migrate       # Run Prisma migrations
-pnpm run db:seed          # Seed initial data
-pnpm run db:studio        # Open Prisma Studio (GUI)
-```
-
----
-
-## Roadmap
-
-- [x] Container-isolated agent execution
-- [x] Multi-provider AI support (Claude, GPT, OpenAI-compatible endpoints)
-- [ ] First-class Azure, DeepSeek, Gemini, Kimi, OpenRouter providers
-- [x] Warm container pool (~50ms cold start)
-- [x] Swarm orchestration with DAG dependencies
-- [x] Telegram channel integration
-- [x] Scoped memory system
-- [x] Skills framework with built-in skill creator
-- [ ] WhatsApp Business API integration
-- [ ] Slack integration
-- [x] Web dashboard (conversations, agents, skills, settings)
-- [ ] Skill marketplace UI
-- [ ] Advanced token analytics & optimization
-- [ ] Multi-region deployment support
-
----
-
-## Contributing
-
-Contributions are welcome! Whether it's bug fixes, new features, documentation, or feedback -- we'd love your help.
-
-```bash
-# Fork and clone
-git clone https://github.com/YOUR_USERNAME/clawix.git clawixngo
-cd clawixngo
-
-# Create a feature branch
-git checkout -b feature/your-feature
-
-# Make changes, then test and lint
-pnpm run test
-pnpm run lint
-
-# Commit with conventional commits
-git commit -m "feat: add amazing feature"
-
-# Push and open a PR
-git push origin feature/your-feature
-```
-
-**Guidelines:**
-
-- TypeScript strict mode -- no `any`
-- Write tests for new features (Vitest)
-- Follow conventional commits (`feat:`, `fix:`, `refactor:`, etc.)
-- Keep files under 400 LOC
-- Never commit secrets or API keys
-
----
-
-## Security
-
-If you discover a security vulnerability, please report it responsibly via [GitHub Security Advisories](https://github.com/clawix/clawix/security/advisories) instead of using the public issue tracker.
-
----
-
-## Acknowledgments
-
-Clawix builds on ideas from:
-
-- [nanoClaw](https://github.com/qwibitai/nanoclaw) -- Container-isolated agent execution
-- [nanobot](https://github.com/HKUDS/nanobot) -- Multi-provider AI design patterns
-
----
-
-## License
-
-MIT -- see [LICENSE](LICENSE) for details.
-
----
-
-<p align="center">
-  <sub>Built for organizations that need AI agents they can actually trust.</sub>
-</p>
-
----
-
-## Clawix for NGO
-
-A complete multi-agent configuration for small-to-mid-size NGOs (10–80 staff, multi-donor, often field-based). All reference files live under `reference/Clawix SKILL and Agent/`.
-
-### What was deployed
-
-#### Phase 1 — Five worker agents
-
-Five specialist agents created via seed script (`scripts/seed-ngo-agents.mjs`), each with `role: worker`, `isOfficial: true`, and `model: claude-sonnet-4-5`:
+Created via `scripts/seed-ngo-agents.mjs` — each with `role: worker`, `isOfficial: true`, `model: claude-sonnet-4-5`:
 
 | Agent | Responsibility | Tools | Reads skills |
 |---|---|---|---|
@@ -526,77 +231,74 @@ Five specialist agents created via seed script (`scripts/seed-ngo-agents.mjs`), 
 | `communications` | Newsletters, social posts, op-eds, advocacy briefs | Read, Write, Edit, Grep, Glob | ngo-comms, data-protection |
 | `field-operations` | Logistics lists, risk register, safeguarding incident records (post-triage only) | Read, Write, Edit, Grep, Glob | safeguarding, data-protection |
 
-Agent definitions (YAML frontmatter + system prompt): `reference/Clawix SKILL and Agent/agents/`
+### The NGO Programme Assistant (orchestrator)
 
-#### Phase 2 — NGO Program Assistant (primary/orchestrator agent)
-
-The primary agent is the user-facing orchestrator. It knows all five specialists, when to spawn each, the full workspace layout, and enforces security principles:
+The user-facing agent. It knows all five specialists, when to spawn each, the full workspace layout, and enforces the security principles:
 
 - Routes requests to exactly one specialist at a time — no autonomous agent-to-agent chaining
-- Enforces PII boundary (beneficiary data never enters agent memory)
-- Applies safeguarding-first logic (field-ops is documentation-only after human triage)
+- Enforces the PII boundary (beneficiary data never enters agent memory)
+- Applies safeguarding-first logic (field-ops is documentation-only, after human triage)
 - All outbound actions (email, donor submission, social post) are draft-only; a human sends
 - Every agent action appends to `.clawix/audit.log` (append-only)
 
-#### Phase 3 — Workspace seeded
+### Workspace layout
 
-Run via `scripts/setup-ngo.mjs` and `packages/api/prisma/setup-ngo.ts`:
+Seeded via `scripts/setup-ngo.mjs` and `packages/api/prisma/setup-ngo.ts`:
 
-- **28 folders** created at `data/users/<userId>/workspace/` covering the full NGO document structure: `plans/`, `programs/`, `partners/`, `activities/`, `donors/`, `proposals/`, `reports/`, `mne/` (with `raw/`, `processed/`, `quality/`, `indicators/`, `forms/`), `field-ops/`, `incidents/`, `comms/`, `finance/`, `briefs/`, `drafts/`, `status/`, `skills/`
+- **28 folders** at `data/users/<userId>/workspace/`: `plans/`, `programs/`, `partners/`, `activities/`, `donors/`, `proposals/`, `reports/`, `mne/` (`raw/`, `processed/`, `quality/`, `indicators/`, `forms/`), `field-ops/`, `incidents/`, `comms/`, `finance/`, `briefs/`, `drafts/`, `status/`, `skills/`
 - **7 skill files** copied from `reference/` into `workspace/skills/`
 - `.clawix/audit.log` initialised (append-only)
-- `README.md` written into the workspace explaining the layout and agent roster
+- A workspace `README.md` explaining the layout and agent roster
 
-### Reference files
+### Skill packages
 
-#### Agents (`reference/Clawix SKILL and Agent/agents/`)
-
-Each file is a self-contained Clawix agent definition: YAML frontmatter declares `name`, `allowed-tools`, `working-dir`, `reads-skills`, and `model`; the markdown body is the full system prompt.
-
-| File | Key behaviours |
-|---|---|
-| `program-coordinator.md` | Drafts to `drafts/` only; reports slippage truthfully; drops briefs into `briefs/` for other agents instead of calling them directly |
-| `donor-engagement.md` | Uses donor's own template first; marks missing data as `[FILL: …]` instead of inventing figures; web search restricted to 10 allowlisted donor domains; refuses to submit or inflate |
-| `monitoring-evaluation.md` | SMART-or-nothing indicator template; never edits `mne/raw/` — always writes new files to `mne/processed/`; Bash allowlist: `python`, `jq`, `csvkit`, `head`, `wc`, `ls`, `cat` |
-| `communications.md` | Consent gate on every story (`consent: shareable` in source frontmatter); writes to `comms/drafts/` only; `comms/published/` is human-only |
-| `field-operations.md` | Refuses first-contact safeguarding disclosures; incident body uses pseudonyms with identity mapping kept in `incidents/keys/` (human-only write); mandatory-report flag cannot be removed |
-
-#### Skills (`reference/Clawix SKILL and Agent/skills/`)
-
-Skills are read-only reference packages — encoded best practice the relevant agent reads before drafting. They grant no new tool access.
+Read-only reference packages — encoded best practice the relevant agent reads before drafting. They grant no new tool access.
 
 | Skill | Agent | Content |
 |---|---|---|
-| `donor-proposal/SKILL.md` | donor-engagement | Drafting order (Theory of Change → log-frame → activities → budget → risk → sustainability); indicator alignment table for FCDO, USAID, ECHO, GAC, SDC, BMZ, private foundations; common rejection reasons |
-| `mne/SKILL.md` | monitoring-evaluation | Full SMART indicator YAML template; baseline/midline/endline structure; OECD-DAC evaluation criteria (relevance, coherence, effectiveness, efficiency, impact, sustainability); data-validation rules; anonymization recipe |
+| `donor-proposal/SKILL.md` | donor-engagement | Drafting order (Theory of Change → log-frame → activities → budget → risk → sustainability); indicator alignment for FCDO, USAID, ECHO, GAC, SDC, BMZ, private foundations; common rejection reasons |
+| `mne/SKILL.md` | monitoring-evaluation | SMART indicator YAML template; baseline/midline/endline structure; OECD-DAC evaluation criteria; data-validation rules; anonymization recipe |
 | `safeguarding/SKILL.md` | field-operations, program-coordinator | PSEA principles, child safeguarding, incident triage decision tree, mandatory reporting triggers, record structure with pseudonym convention |
-| `data-protection/SKILL.md` | monitoring-evaluation, donor-engagement, communications, field-operations | GDPR + ICRC/IASC guidance; `pii: true` frontmatter convention; consent capture; anonymization steps (drop → hash → generalize → minimum cell size) |
+| `data-protection/SKILL.md` | monitoring-evaluation, donor-engagement, communications, field-operations | GDPR + ICRC/IASC guidance; `pii: true` convention; consent capture; anonymization steps |
 | `impact-report/SKILL.md` | donor-engagement | Narrative report structure by donor type; financial reporting touchpoints; beneficiary story consent rules; variance reporting standard |
-| `grant-research/SKILL.md` | donor-engagement | Donor scanning checklist; eligibility filters; deadline tracking format; fit-scoring rubric (1–5) |
-| `ngo-comms/SKILL.md` | communications, program-coordinator | Accessible language standards; do-no-harm storytelling; dignity-preserving imagery; advocacy framing; status-note classification (on-track / at-risk / off-track) |
+| `grant-research/SKILL.md` | donor-engagement | Donor scanning checklist; eligibility filters; deadline tracking; fit-scoring rubric (1–5) |
+| `ngo-comms/SKILL.md` | communications, program-coordinator | Accessible language standards; do-no-harm storytelling; dignity-preserving imagery; advocacy framing; status-note classification |
 
-#### Architecture docs
+### Architecture docs
 
 | File | Purpose |
 |---|---|
-| `reference/Clawix SKILL and Agent/README.md` | Architecture diagram, folder layout rationale, deployment runbook (7 steps), operating rules for staff, explicit list of what the configuration does not do |
-| `reference/Clawix SKILL and Agent/PROPOSAL.md` | Strategic case; 10 non-negotiable security principles; full agent + skill roster table; MCP connectors (KoboToolbox, PowerBI, Google Drive, Mailchimp — all gated); measurable impact targets (90-day); phased rollout (Phase 0–3) |
+| `reference/Clawix SKILL and Agent/README.md` | Architecture diagram, folder layout rationale, deployment runbook, operating rules for staff, what the configuration does not do |
+| `reference/Clawix SKILL and Agent/PROPOSAL.md` | Strategic case; 10 non-negotiable security principles; full agent + skill roster; MCP connectors (KoboToolbox, PowerBI, Google Drive, Mailchimp — all gated); 90-day impact targets; phased rollout |
 
-### Try it now
+---
 
-Open the dashboard and chat with the **NGO Program Assistant**:
+## Security model
 
-```
-"Find donors for a water and sanitation program in West Africa"
-→ spawns donor-engagement, runs allowlisted WebSearch, writes to donor-research/
+Clawix follows a **zero-trust architecture** for agent execution:
 
-"Design SMART indicators for a livelihoods program"
-→ spawns monitoring-evaluation, produces mne/indicators/<program>.md
+| Threat | Mitigation |
+| --- | --- |
+| Cross-user data access | Workspaces only mounted into the owner's container |
+| Sub-agent privilege escalation | Sub-agents get read-only curated context, never the full workspace |
+| Memory poisoning | Agent context regenerated from the database each run |
+| Disk exhaustion | Per-user quota enforcement (default 500 MB) |
+| Path traversal | All paths validated to stay under `data/org/` |
+| Secret leakage | API keys encrypted at rest (AES-256-GCM) |
+| Untrusted code execution | All agent code runs inside sandboxed containers, never on the host |
 
-"Draft the monthly newsletter"
-→ spawns communications, reads status/ + mne/processed/, writes to comms/drafts/
-```
+---
 
-### Remaining setup
+## Acknowledgments
 
-From the dashboard → **Agents**, assign developer or staff users to their specialist agents. Each user should interact through the NGO Program Assistant (orchestrator); direct specialist access is for power users only.
+Clawix builds on ideas from [nanoClaw](https://github.com/qwibitai/nanoclaw) (container-isolated agent execution) and [nanobot](https://github.com/HKUDS/nanobot) (multi-provider AI design patterns).
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  <sub>Built for organisations that need AI agents they can actually trust.</sub>
+</p>
