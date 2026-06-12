@@ -71,6 +71,17 @@ export default function SkillsPage() {
         </p>
       </div>
 
+      <div className="rounded-lg border bg-muted/30 p-4">
+        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          How the skill validate &amp; fix loop works
+        </p>
+        <img
+          src="/images/clawix_skill_validate_and_fix_loop.svg"
+          alt="How the Clawix agent validates and fixes a skill in place"
+          className="mx-auto w-full max-w-2xl"
+        />
+      </div>
+
       {error && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
