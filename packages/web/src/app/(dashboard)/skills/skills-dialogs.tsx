@@ -324,6 +324,12 @@ export function CreateDialog({
     }
   }, [open]);
 
+  // Keep the frontmatter name: line in sync with the name field so validation never fails.
+  useEffect(() => {
+    if (!content.trim()) return;
+    setContent((prev) => prev.replace(/^(name:\s*).*$/m, `name: ${name}`));
+  }, [name]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const loadSample = (label: string) => {
     const sample = SKILL_SAMPLES.find((s) => s.label === label);
     if (!sample) return;
