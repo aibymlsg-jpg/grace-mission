@@ -295,7 +295,12 @@ Clawix builds on ideas from [nanoClaw](https://github.com/qwibitai/nanoclaw) (co
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+This project is **dual-licensed**:
+
+- **Core Clawix platform** — [MIT License](LICENSE). Free to use, modify, and distribute, including commercially.
+- **NGO-specific components** — [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). Noncommercial use only — but the PolyForm Noncommercial terms expressly permit charities, educational institutions, public research/health/safety bodies, environmental organizations, and governments, so **NGOs and nonprofits may use them freely.**
+
+See the [NOTICE](NOTICE) file for the exact list of paths covered by each license. The NGO directories (`reference/Clawix SKILL and Agent/`, `skills/ARIA/`, `skills/builtin/aria-foundation/`) also carry their own local `LICENSE` files.
 
 ---
 
