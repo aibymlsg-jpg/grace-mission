@@ -10,6 +10,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    workspace: 'Workspace',
+  },
+  'zh-TW': {
+    workspace: '工作區',
+  },
+} satisfies Messages<{
+  workspace: string;
+}>;
 
 interface WorkspaceBreadcrumbsProps {
   readonly currentPath: string;
@@ -26,6 +38,7 @@ function buildSegments(currentPath: string): readonly { name: string; path: stri
 }
 
 export function WorkspaceBreadcrumbs({ currentPath, onNavigate }: WorkspaceBreadcrumbsProps) {
+  const t = useT(messages);
   const segments = buildSegments(currentPath);
 
   return (
@@ -35,7 +48,7 @@ export function WorkspaceBreadcrumbs({ currentPath, onNavigate }: WorkspaceBread
           {segments.length === 0 ? (
             <BreadcrumbPage className="flex items-center gap-1.5">
               <Home className="size-3.5" />
-              Workspace
+              {t.workspace}
             </BreadcrumbPage>
           ) : (
             <BreadcrumbLink
@@ -45,7 +58,7 @@ export function WorkspaceBreadcrumbs({ currentPath, onNavigate }: WorkspaceBread
               }}
             >
               <Home className="size-3.5" />
-              Workspace
+              {t.workspace}
             </BreadcrumbLink>
           )}
         </BreadcrumbItem>

@@ -32,7 +32,112 @@ import {
 } from '@/components/ui/alert-dialog';
 import { authFetch } from '@/lib/auth';
 import { SuccessDialog } from '@/components/ui/success-dialog';
+import { useT, type Messages } from '@/lib/i18n';
 import { CreatePolicyDialog, EditPolicyDialog } from './policies-dialogs';
+
+// ------------------------------------------------------------------ //
+//  i18n                                                               //
+// ------------------------------------------------------------------ //
+
+const messages = {
+  en: {
+    unlimited: 'Unlimited',
+    createPolicy: 'Create Policy',
+    emptyState: 'No policies configured. Click "Create Policy" to get started.',
+    columns: {
+      policy: 'Policy',
+      tokenBudget: 'Token Budget',
+      agents: 'Agents',
+      providers: 'Providers',
+      active: 'Active',
+    },
+    noneProviders: 'None',
+    actions: {
+      edit: 'Edit',
+      delete: 'Delete',
+    },
+    deleteDialog: {
+      title: 'Delete Policy',
+      description: (name: string) =>
+        `Are you sure you want to delete ${name}? Users assigned to this policy must be reassigned first.`,
+      cancel: 'Cancel',
+      confirm: 'Delete',
+    },
+    successTitle: 'Policy Created',
+    createdMessage: (name: string) => `${name} has been created.`,
+    defaultPolicyName: 'Policy',
+    errors: {
+      load: 'Failed to load policies',
+      create: 'Failed to create policy',
+      update: 'Failed to update policy',
+      delete: 'Failed to delete policy',
+    },
+  },
+  'zh-TW': {
+    unlimited: '無限制',
+    createPolicy: '建立政策',
+    emptyState: '尚未設定任何政策。點選「建立政策」開始使用。',
+    columns: {
+      policy: '政策',
+      tokenBudget: 'Token 預算',
+      agents: '代理',
+      providers: '供應商',
+      active: '啟用中',
+    },
+    noneProviders: '無',
+    actions: {
+      edit: '編輯',
+      delete: '刪除',
+    },
+    deleteDialog: {
+      title: '刪除政策',
+      description: (name: string) =>
+        `確定要刪除 ${name} 嗎？必須先重新指派使用此政策的使用者。`,
+      cancel: '取消',
+      confirm: '刪除',
+    },
+    successTitle: '政策已建立',
+    createdMessage: (name: string) => `${name} 已建立。`,
+    defaultPolicyName: '政策',
+    errors: {
+      load: '無法載入政策',
+      create: '無法建立政策',
+      update: '無法更新政策',
+      delete: '無法刪除政策',
+    },
+  },
+} satisfies Messages<{
+  unlimited: string;
+  createPolicy: string;
+  emptyState: string;
+  columns: {
+    policy: string;
+    tokenBudget: string;
+    agents: string;
+    providers: string;
+    active: string;
+  };
+  noneProviders: string;
+  actions: {
+    edit: string;
+    delete: string;
+  };
+  deleteDialog: {
+    title: string;
+    description: (name: string) => string;
+    cancel: string;
+    confirm: string;
+  };
+  successTitle: string;
+  createdMessage: (name: string) => string;
+  defaultPolicyName: string;
+  errors: {
+    load: string;
+    create: string;
+    update: string;
+    delete: string;
+  };
+}>;
 
 // ------------------------------------------------------------------ //
 //  Types (exported for use in dialogs)                                //
@@ -71,8 +176,8 @@ interface ApiProvider {
 //  Helpers                                                            //
 // ------------------------------------------------------------------ //
 
-function formatBudget(cents: number | null): string {
-  if (cents === null) return 'Unlimited';
+function formatBudget(cents: number | null, unlimitedLabel: string): string {
+  if (cents === null) return unlimitedLabel;
   return `$${(cents / 100).toFixed(2)}/mo`;
 }
 
@@ -81,6 +186,7 @@ function formatBudget(cents: number | null): string {
 // ------------------------------------------------------------------ //
 
 export function PoliciesTab() {
+  const t = useT(messages);
   const [policies, setPolicies] = useState<ApiPolicy[]>([]);
   const [providerNames, setProviderNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -107,7 +213,7 @@ export function PoliciesTab() {
       }
       setProviderNames(nameMap);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load policies');
+      setError(err instanceof Error ? err.message : t.errors.load);
     } finally {
       setLoading(false);
     }
@@ -127,9 +233,11 @@ export function PoliciesTab() {
       });
       setCreateOpen(false);
       await fetchData();
-      setSuccessMessage(`${(data as { name?: string }).name ?? 'Policy'} has been created.`);
+      setSuccessMessage(
+        t.createdMessage((data as { name?: string }).name ?? t.defaultPolicyName),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create policy');
+      setError(err instanceof Error ? err.message : t.errors.create);
     } finally {
       setSaving(false);
     }
@@ -145,7 +253,7 @@ export function PoliciesTab() {
       });
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update policy');
+      setError(err instanceof Error ? err.message : t.errors.update);
     } finally {
       setSaving(false);
     }
@@ -162,7 +270,7 @@ export function PoliciesTab() {
       setEditPolicy(null);
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update policy');
+      setError(err instanceof Error ? err.message : t.errors.update);
     } finally {
       setSaving(false);
     }
@@ -176,7 +284,7 @@ export function PoliciesTab() {
       setDeletePolicy(null);
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete policy');
+      setError(err instanceof Error ? err.message : t.errors.delete);
     } finally {
       setSaving(false);
     }
@@ -192,7 +300,7 @@ export function PoliciesTab() {
           }}
         >
           <Plus className="mr-1 size-4" />
-          Create Policy
+          {t.createPolicy}
         </Button>
       </div>
 
@@ -208,18 +316,18 @@ export function PoliciesTab() {
         </div>
       ) : policies.length === 0 ? (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm p-8 text-center text-sm text-muted-foreground">
-          No policies configured. Click &quot;Create Policy&quot; to get started.
+          {t.emptyState}
         </div>
       ) : (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Policy</TableHead>
-                <TableHead>Token Budget</TableHead>
-                <TableHead>Agents</TableHead>
-                <TableHead>Providers</TableHead>
-                <TableHead>Active</TableHead>
+                <TableHead>{t.columns.policy}</TableHead>
+                <TableHead>{t.columns.tokenBudget}</TableHead>
+                <TableHead>{t.columns.agents}</TableHead>
+                <TableHead>{t.columns.providers}</TableHead>
+                <TableHead>{t.columns.active}</TableHead>
                 <TableHead className="w-[50px]" />
               </TableRow>
             </TableHeader>
@@ -237,7 +345,7 @@ export function PoliciesTab() {
                   </TableCell>
                   <TableCell>
                     <code className="rounded bg-muted px-2 py-1 text-xs">
-                      {formatBudget(p.maxTokenBudget)}
+                      {formatBudget(p.maxTokenBudget, t.unlimited)}
                     </code>
                   </TableCell>
                   <TableCell className="text-sm">{p.maxAgents}</TableCell>
@@ -254,7 +362,7 @@ export function PoliciesTab() {
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-xs text-muted-foreground">None</span>
+                          <span className="text-xs text-muted-foreground">{t.noneProviders}</span>
                         );
                       })()}
                     </div>
@@ -281,7 +389,7 @@ export function PoliciesTab() {
                             setEditPolicy(p);
                           }}
                         >
-                          Edit
+                          {t.actions.edit}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -290,7 +398,7 @@ export function PoliciesTab() {
                             setDeletePolicy(p);
                           }}
                         >
-                          Delete
+                          {t.actions.delete}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -329,14 +437,13 @@ export function PoliciesTab() {
         {deletePolicy && (
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Policy</AlertDialogTitle>
+              <AlertDialogTitle>{t.deleteDialog.title}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete <strong>{deletePolicy.name}</strong>? Users assigned
-                to this policy must be reassigned first.
+                {t.deleteDialog.description(deletePolicy.name)}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t.deleteDialog.cancel}</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => {
@@ -345,7 +452,7 @@ export function PoliciesTab() {
                 disabled={saving}
               >
                 {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-                Delete
+                {t.deleteDialog.confirm}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -357,7 +464,7 @@ export function PoliciesTab() {
         onOpenChange={(open) => {
           if (!open) setSuccessMessage('');
         }}
-        title="Policy Created"
+        title={t.successTitle}
         description={successMessage}
       />
     </>

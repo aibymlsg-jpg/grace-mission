@@ -6,6 +6,57 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getAccessToken } from '@/lib/auth';
 import { formatFileSize } from '@/lib/format';
+import { useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    exceedsLimit: (limit: string) => `File exceeds ${limit} limit`,
+    notAuthenticated: 'Not authenticated',
+    alreadyExists: 'File already exists',
+    uploadFailedStatus: (status: number) => `Upload failed (${status})`,
+    networkError: 'Network error',
+    uploadCancelled: 'Upload cancelled',
+    dropFilesHere: 'Drop files here,',
+    browseFiles: 'browse files',
+    or: ', or',
+    uploadFolder: 'upload folder',
+    maxFileSize: (limit: string) => `Max file size: ${limit}`,
+    done: 'Done',
+    uploadFailed: 'Upload failed',
+    close: 'Close',
+  },
+  'zh-TW': {
+    exceedsLimit: (limit: string) => `檔案超過 ${limit} 上限`,
+    notAuthenticated: '尚未驗證身分',
+    alreadyExists: '檔案已存在',
+    uploadFailedStatus: (status: number) => `上傳失敗（${status}）`,
+    networkError: '網路錯誤',
+    uploadCancelled: '已取消上傳',
+    dropFilesHere: '將檔案拖放至此、',
+    browseFiles: '瀏覽檔案',
+    or: '，或',
+    uploadFolder: '上傳資料夾',
+    maxFileSize: (limit: string) => `檔案大小上限：${limit}`,
+    done: '完成',
+    uploadFailed: '上傳失敗',
+    close: '關閉',
+  },
+} satisfies Messages<{
+  exceedsLimit: (limit: string) => string;
+  notAuthenticated: string;
+  alreadyExists: string;
+  uploadFailedStatus: (status: number) => string;
+  networkError: string;
+  uploadCancelled: string;
+  dropFilesHere: string;
+  browseFiles: string;
+  or: string;
+  uploadFolder: string;
+  maxFileSize: (limit: string) => string;
+  done: string;
+  uploadFailed: string;
+  close: string;
+}>;
 
 const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
 
@@ -71,6 +122,7 @@ interface UploadItem {
 }
 
 export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZoneProps) {
+  const t = useT(messages);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,7 +137,7 @@ export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZon
       if (file.size > MAX_FILE_SIZE) {
         updateUpload(index, {
           status: 'error',
-          error: `File exceeds ${formatFileSize(MAX_FILE_SIZE)} limit`,
+          error: t.exceedsLimit(formatFileSize(MAX_FILE_SIZE)),
         });
         return;
       }
@@ -94,7 +146,7 @@ export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZon
 
       const token = await getAccessToken();
       if (!token) {
-        updateUpload(index, { status: 'error', error: 'Not authenticated' });
+        updateUpload(index, { status: 'error', error: t.notAuthenticated });
         return;
       }
 
@@ -123,23 +175,23 @@ export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZon
             updateUpload(index, { status: 'done', progress: 100 });
             onUploadComplete();
           } else if (xhr.status === 409) {
-            updateUpload(index, { status: 'error', error: 'File already exists' });
+            updateUpload(index, { status: 'error', error: t.alreadyExists });
           } else {
             updateUpload(index, {
               status: 'error',
-              error: `Upload failed (${xhr.status})`,
+              error: t.uploadFailedStatus(xhr.status),
             });
           }
           resolve();
         });
 
         xhr.addEventListener('error', () => {
-          updateUpload(index, { status: 'error', error: 'Network error' });
+          updateUpload(index, { status: 'error', error: t.networkError });
           resolve();
         });
 
         xhr.addEventListener('abort', () => {
-          updateUpload(index, { status: 'error', error: 'Upload cancelled' });
+          updateUpload(index, { status: 'error', error: t.uploadCancelled });
           resolve();
         });
 
@@ -148,7 +200,7 @@ export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZon
         xhr.send(formData);
       });
     },
-    [currentPath, onUploadComplete, updateUpload],
+    [currentPath, onUploadComplete, updateUpload, t],
   );
 
   const addFiles = useCallback(
@@ -283,26 +335,24 @@ export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZon
           <FolderUp className="h-8 w-8" />
         </div>
         <p className="text-sm">
-          Drop files here,{' '}
+          {t.dropFilesHere}{' '}
           <button
             type="button"
             onClick={handleBrowseClick}
             className="cursor-pointer font-medium text-amber-500 underline-offset-4 hover:underline focus:outline-none"
           >
-            browse files
+            {t.browseFiles}
           </button>
-          , or{' '}
+          {t.or}{' '}
           <button
             type="button"
             onClick={handleFolderBrowseClick}
             className="cursor-pointer font-medium text-amber-500 underline-offset-4 hover:underline focus:outline-none"
           >
-            upload folder
+            {t.uploadFolder}
           </button>
         </p>
-        <p className="text-xs text-muted-foreground">
-          Max file size: {formatFileSize(MAX_FILE_SIZE)}
-        </p>
+        <p className="text-xs text-muted-foreground">{t.maxFileSize(formatFileSize(MAX_FILE_SIZE))}</p>
       </div>
 
       {/* Hidden file input */}
@@ -349,12 +399,12 @@ export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZon
               )}
 
               {item.status === 'done' && (
-                <span className="text-xs font-medium text-green-500">Done</span>
+                <span className="text-xs font-medium text-green-500">{t.done}</span>
               )}
 
               {item.status === 'error' && (
                 <span className="text-xs font-medium text-destructive">
-                  {item.error ?? 'Upload failed'}
+                  {item.error ?? t.uploadFailed}
                 </span>
               )}
             </li>
@@ -366,7 +416,7 @@ export function UploadZone({ currentPath, onUploadComplete, onClose }: UploadZon
       <div className="flex justify-end">
         <Button variant="ghost" size="sm" onClick={onClose}>
           <X className="mr-1 h-4 w-4" />
-          Close
+          {t.close}
         </Button>
       </div>
     </div>

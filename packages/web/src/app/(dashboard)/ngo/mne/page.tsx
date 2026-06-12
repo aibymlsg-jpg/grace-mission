@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { DirectoryListing, FileEntry } from '@clawix/shared';
 import { authFetch } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { useT, type Messages } from '@/lib/i18n';
 import { FolderColumns, type FolderDef } from '../folder-columns';
 
 const FOLDERS: readonly FolderDef[] = [
@@ -15,7 +16,35 @@ const FOLDERS: readonly FolderDef[] = [
   { path: '/mne/quality', label: 'quality' },
 ];
 
+const messages = {
+  en: {
+    title: 'Monitoring & Evaluation',
+    subtitle: 'indicators · data · forms',
+    startConversation: 'Start conversation',
+    descBefore:
+      'SMART indicators, data-collection forms, period validation and dashboard summaries. Managed by the ',
+    descAgent: 'M&E',
+    descAfter: ' agent.',
+  },
+  'zh-TW': {
+    title: '監測與評估',
+    subtitle: '指標 · 資料 · 表單',
+    startConversation: '開始對話',
+    descBefore: 'SMART 指標、資料蒐集表單、期間驗證與儀表板摘要。由',
+    descAgent: '監測與評估',
+    descAfter: '代理管理。',
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  startConversation: string;
+  descBefore: string;
+  descAgent: string;
+  descAfter: string;
+}>;
+
 export default function MnePage() {
+  const t = useT(messages);
   const [columns, setColumns] = useState<Record<string, readonly FileEntry[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -48,21 +77,22 @@ export default function MnePage() {
       <header className="flex flex-col gap-1 border-b border-border/60 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">Monitoring &amp; Evaluation</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-              indicators · data · forms
+              {t.subtitle}
             </span>
           </div>
           <Button variant="outline" size="sm" asChild>
             <Link href="/conversations">
               <MessageSquare className="mr-2 size-4" />
-              Start conversation
+              {t.startConversation}
             </Link>
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          SMART indicators, data-collection forms, period validation and dashboard summaries. Managed
-          by the <span className="font-medium text-foreground">M&amp;E</span> agent.
+          {t.descBefore}
+          <span className="font-medium text-foreground">{t.descAgent}</span>
+          {t.descAfter}
         </p>
       </header>
 

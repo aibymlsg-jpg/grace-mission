@@ -8,6 +8,7 @@ import mermaid from 'mermaid';
 import { authFetch } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/format';
+import { useT, type Messages } from '@/lib/i18n';
 import { Badge } from '@/components/ui/badge';
 import type { DirectoryListing, FileContent } from '@clawix/shared';
 import {
@@ -32,15 +33,218 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+const messages = {
+  en: {
+    validation: {
+      required: 'Name is required',
+      tooLong: 'Name must be 255 characters or fewer',
+      slashes: 'Name cannot contain slashes',
+    },
+    create: {
+      titleFile: 'Create New File',
+      titleFolder: 'Create New Folder',
+      descFile: 'Enter a name for the new file.',
+      descFolder: 'Enter a name for the new folder.',
+      nameLabel: 'Name',
+      placeholderFile: 'e.g. index.ts',
+      placeholderFolder: 'e.g. src',
+      cancel: 'Cancel',
+      creating: 'Creating...',
+      create: 'Create',
+    },
+    del: {
+      title: (name: string) => `Delete “${name}”?`,
+      itemCount: (n: number) =>
+        `This folder contains ${n} ${n === 1 ? 'item' : 'items'}. This action cannot be undone.`,
+      folderContents: 'This folder and all its contents will be deleted. This action cannot be undone.',
+      fileWarning: 'This action cannot be undone.',
+      cancel: 'Cancel',
+      deleting: 'Deleting...',
+      delete: 'Delete',
+    },
+    move: {
+      title: (name: string) => `Move “${name}”`,
+      desc: 'Select a destination folder.',
+      collapse: 'Collapse',
+      expand: 'Expand',
+      current: '(current)',
+      loadError: 'Failed to load directories.',
+      workspaceRoot: 'Workspace (root)',
+      cancel: 'Cancel',
+      moving: 'Moving...',
+      move: 'Move',
+    },
+    discard: {
+      title: 'Unsaved Changes',
+      descPrefix: 'You have unsaved changes to ',
+      descSuffix: '. Discard them?',
+      cancel: 'Cancel',
+      discard: 'Discard',
+    },
+    conflict: {
+      title: 'File Changed',
+      descSuffix:
+        ' was modified since you started editing. This may have been caused by an agent or another process.',
+      cancel: 'Cancel',
+      reload: 'Reload File',
+      overwrite: 'Overwrite',
+    },
+    mermaid: {
+      renderError: 'Failed to render diagram',
+      errorTitle: 'Mermaid Error',
+    },
+    fullPreview: {
+      title: (name: string) => `Preview: ${name}`,
+      srDesc: (name: string, type: string, size: string) =>
+        `Full preview of ${name} (${type}, ${size})`,
+      editFile: 'Edit file',
+      tooLarge: 'File is too large to preview (> 1 MB)',
+      binaryFile: 'Binary file — preview not available',
+    },
+  },
+  'zh-TW': {
+    validation: {
+      required: '名稱為必填',
+      tooLong: '名稱不得超過 255 個字元',
+      slashes: '名稱不可包含斜線',
+    },
+    create: {
+      titleFile: '新增檔案',
+      titleFolder: '新增資料夾',
+      descFile: '請輸入新檔案的名稱。',
+      descFolder: '請輸入新資料夾的名稱。',
+      nameLabel: '名稱',
+      placeholderFile: '例如 index.ts',
+      placeholderFolder: '例如 src',
+      cancel: '取消',
+      creating: '建立中...',
+      create: '建立',
+    },
+    del: {
+      title: (name: string) => `刪除「${name}」？`,
+      itemCount: (n: number) => `此資料夾包含 ${n} 個項目。此操作無法復原。`,
+      folderContents: '此資料夾及其所有內容將被刪除。此操作無法復原。',
+      fileWarning: '此操作無法復原。',
+      cancel: '取消',
+      deleting: '刪除中...',
+      delete: '刪除',
+    },
+    move: {
+      title: (name: string) => `移動「${name}」`,
+      desc: '請選擇目標資料夾。',
+      collapse: '收合',
+      expand: '展開',
+      current: '（目前）',
+      loadError: '無法載入資料夾。',
+      workspaceRoot: '工作區（根目錄）',
+      cancel: '取消',
+      moving: '移動中...',
+      move: '移動',
+    },
+    discard: {
+      title: '未儲存的變更',
+      descPrefix: '您對 ',
+      descSuffix: ' 有未儲存的變更。要捨棄嗎？',
+      cancel: '取消',
+      discard: '捨棄',
+    },
+    conflict: {
+      title: '檔案已變更',
+      descSuffix: ' 自您開始編輯後已被修改。這可能是由代理或其他程序所造成。',
+      cancel: '取消',
+      reload: '重新載入檔案',
+      overwrite: '覆寫',
+    },
+    mermaid: {
+      renderError: '無法繪製圖表',
+      errorTitle: 'Mermaid 錯誤',
+    },
+    fullPreview: {
+      title: (name: string) => `預覽：${name}`,
+      srDesc: (name: string, type: string, size: string) =>
+        `${name} 的完整預覽（${type}，${size}）`,
+      editFile: '編輯檔案',
+      tooLarge: '檔案過大無法預覽（> 1 MB）',
+      binaryFile: '二進位檔案 — 無法預覽',
+    },
+  },
+} satisfies Messages<{
+  validation: {
+    required: string;
+    tooLong: string;
+    slashes: string;
+  };
+  create: {
+    titleFile: string;
+    titleFolder: string;
+    descFile: string;
+    descFolder: string;
+    nameLabel: string;
+    placeholderFile: string;
+    placeholderFolder: string;
+    cancel: string;
+    creating: string;
+    create: string;
+  };
+  del: {
+    title: (name: string) => string;
+    itemCount: (n: number) => string;
+    folderContents: string;
+    fileWarning: string;
+    cancel: string;
+    deleting: string;
+    delete: string;
+  };
+  move: {
+    title: (name: string) => string;
+    desc: string;
+    collapse: string;
+    expand: string;
+    current: string;
+    loadError: string;
+    workspaceRoot: string;
+    cancel: string;
+    moving: string;
+    move: string;
+  };
+  discard: {
+    title: string;
+    descPrefix: string;
+    descSuffix: string;
+    cancel: string;
+    discard: string;
+  };
+  conflict: {
+    title: string;
+    descSuffix: string;
+    cancel: string;
+    reload: string;
+    overwrite: string;
+  };
+  mermaid: {
+    renderError: string;
+    errorTitle: string;
+  };
+  fullPreview: {
+    title: (name: string) => string;
+    srDesc: (name: string, type: string, size: string) => string;
+    editFile: string;
+    tooLarge: string;
+    binaryFile: string;
+  };
+}>;
+
 // --- Validation ---
 
 const INVALID_NAME_PATTERN = /[/\\]/;
 const MAX_NAME_LENGTH = 255;
 
-function validateName(name: string): string | null {
-  if (name.length === 0) return 'Name is required';
-  if (name.length > MAX_NAME_LENGTH) return 'Name must be 255 characters or fewer';
-  if (INVALID_NAME_PATTERN.test(name)) return 'Name cannot contain slashes';
+type NameError = 'required' | 'tooLong' | 'slashes';
+
+function validateName(name: string): NameError | null {
+  if (name.length === 0) return 'required';
+  if (name.length > MAX_NAME_LENGTH) return 'tooLong';
+  if (INVALID_NAME_PATTERN.test(name)) return 'slashes';
   return null;
 }
 
@@ -61,6 +265,7 @@ export function CreateDialog({
   onConfirm,
   isLoading,
 }: CreateDialogProps) {
+  const t = useT(messages);
   const [name, setName] = useState('');
   const error = name.length > 0 ? validateName(name) : null;
   const isFile = type === 'file';
@@ -84,16 +289,16 @@ export function CreateDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New {isFile ? 'File' : 'Folder'}</DialogTitle>
+          <DialogTitle>{isFile ? t.create.titleFile : t.create.titleFolder}</DialogTitle>
           <DialogDescription>
-            Enter a name for the new {isFile ? 'file' : 'folder'}.
+            {isFile ? t.create.descFile : t.create.descFolder}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="entry-name">Name</Label>
+          <Label htmlFor="entry-name">{t.create.nameLabel}</Label>
           <Input
             id="entry-name"
-            placeholder={isFile ? 'e.g. index.ts' : 'e.g. src'}
+            placeholder={isFile ? t.create.placeholderFile : t.create.placeholderFolder}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -103,7 +308,7 @@ export function CreateDialog({
             }}
             autoFocus
           />
-          {error && <p className="text-xs text-destructive">{error}</p>}
+          {error && <p className="text-xs text-destructive">{t.validation[error]}</p>}
         </div>
         <DialogFooter>
           <Button
@@ -112,10 +317,10 @@ export function CreateDialog({
               handleOpenChange(false);
             }}
           >
-            Cancel
+            {t.create.cancel}
           </Button>
           <Button onClick={handleConfirm} disabled={!name || !!error || isLoading}>
-            {isLoading ? 'Creating...' : 'Create'}
+            {isLoading ? t.create.creating : t.create.create}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -144,27 +349,28 @@ export function DeleteDialog({
   onConfirm,
   isLoading,
 }: DeleteDialogProps) {
+  const t = useT(messages);
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete &ldquo;{name}&rdquo;?</AlertDialogTitle>
+          <AlertDialogTitle>{t.del.title(name)}</AlertDialogTitle>
           <AlertDialogDescription>
             {isDirectory
               ? childCount !== undefined
-                ? `This folder contains ${childCount} ${childCount === 1 ? 'item' : 'items'}. This action cannot be undone.`
-                : 'This folder and all its contents will be deleted. This action cannot be undone.'
-              : 'This action cannot be undone.'}
+                ? t.del.itemCount(childCount)
+                : t.del.folderContents
+              : t.del.fileWarning}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t.del.cancel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isLoading ? 'Deleting...' : 'Delete'}
+            {isLoading ? t.del.deleting : t.del.delete}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -227,6 +433,7 @@ export function MoveDialog({
   onConfirm,
   isLoading,
 }: MoveDialogProps) {
+  const t = useT(messages);
   const [roots, setRoots] = useState<DirNode[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -243,9 +450,9 @@ export function MoveDialog({
         setRoots(dirs);
       })
       .catch(() => {
-        setFetchError('Failed to load directories.');
+        setFetchError(t.move.loadError);
       });
-  }, [open]);
+  }, [open, t]);
 
   const handleToggle = useCallback(async (node: DirNode) => {
     const nextExpanded = !node.expanded;
@@ -303,7 +510,7 @@ export function MoveDialog({
         >
           <button
             type="button"
-            aria-label={node.expanded ? 'Collapse' : 'Expand'}
+            aria-label={node.expanded ? t.move.collapse : t.move.expand}
             className={cn(
               'flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded transition-transform',
               !hasChildren && 'invisible',
@@ -319,7 +526,9 @@ export function MoveDialog({
           </button>
           <Folder className="h-4 w-4 shrink-0 text-amber-500" />
           <span className="truncate">{node.name}</span>
-          {isCurrentDir && <span className="ml-auto text-xs text-muted-foreground">(current)</span>}
+          {isCurrentDir && (
+            <span className="ml-auto text-xs text-muted-foreground">{t.move.current}</span>
+          )}
         </div>
         {node.expanded && node.children !== null && (
           <div>{node.children.map((child) => renderNode(child, depth + 1))}</div>
@@ -334,8 +543,8 @@ export function MoveDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Move &ldquo;{name}&rdquo;</DialogTitle>
-          <DialogDescription>Select a destination folder.</DialogDescription>
+          <DialogTitle>{t.move.title(name)}</DialogTitle>
+          <DialogDescription>{t.move.desc}</DialogDescription>
         </DialogHeader>
 
         <div className="max-h-72 overflow-y-auto rounded border border-border bg-background p-1">
@@ -353,9 +562,9 @@ export function MoveDialog({
           >
             <span className="h-4 w-4 shrink-0" />
             <Folder className="h-4 w-4 shrink-0 text-amber-500" />
-            <span className="truncate font-medium">Workspace (root)</span>
+            <span className="truncate font-medium">{t.move.workspaceRoot}</span>
             {rootIsCurrentDir && (
-              <span className="ml-auto text-xs text-muted-foreground">(current)</span>
+              <span className="ml-auto text-xs text-muted-foreground">{t.move.current}</span>
             )}
           </div>
 
@@ -371,10 +580,10 @@ export function MoveDialog({
               handleOpenChange(false);
             }}
           >
-            Cancel
+            {t.move.cancel}
           </Button>
           <Button onClick={handleConfirm} disabled={selected === null || isLoading}>
-            {isLoading ? 'Moving...' : 'Move'}
+            {isLoading ? t.move.moving : t.move.move}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -392,22 +601,25 @@ interface DiscardDialogProps {
 }
 
 export function DiscardDialog({ filename, open, onOpenChange, onDiscard }: DiscardDialogProps) {
+  const t = useT(messages);
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogTitle>{t.discard.title}</AlertDialogTitle>
           <AlertDialogDescription>
-            You have unsaved changes to <strong>{filename}</strong>. Discard them?
+            {t.discard.descPrefix}
+            <strong>{filename}</strong>
+            {t.discard.descSuffix}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t.discard.cancel}</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={onDiscard}
           >
-            Discard
+            {t.discard.discard}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -432,29 +644,30 @@ export function ConflictDialog({
   onOverwrite,
   onReload,
 }: ConflictDialogProps) {
+  const t = useT(messages);
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <AlertTriangle className="size-5 text-amber-500" />
-            File Changed
+            {t.conflict.title}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <strong>{filename}</strong> was modified since you started editing. This may have been
-            caused by an agent or another process.
+            <strong>{filename}</strong>
+            {t.conflict.descSuffix}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t.conflict.cancel}</AlertDialogCancel>
           <Button variant="outline" onClick={onReload}>
-            Reload File
+            {t.conflict.reload}
           </Button>
           <AlertDialogAction
             className="bg-amber-600 text-white hover:bg-amber-700"
             onClick={onOverwrite}
           >
-            Overwrite
+            {t.conflict.overwrite}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -465,6 +678,7 @@ export function ConflictDialog({
 /* ---------- MermaidBlock ---------- */
 
 function MermaidBlock({ code }: { code: string }) {
+  const t = useT(messages);
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -490,7 +704,7 @@ function MermaidBlock({ code }: { code: string }) {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to render diagram');
+          setError(err instanceof Error ? err.message : t.mermaid.renderError);
           setSvg(null);
         }
       });
@@ -498,12 +712,12 @@ function MermaidBlock({ code }: { code: string }) {
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [code, t]);
 
   if (error) {
     return (
       <div className="rounded border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-        <p className="font-medium">Mermaid Error</p>
+        <p className="font-medium">{t.mermaid.errorTitle}</p>
         <pre className="mt-1 text-xs">{error}</pre>
       </div>
     );
@@ -532,6 +746,7 @@ interface FullPreviewDialogProps {
 }
 
 export function FullPreviewDialog({ file, open, onOpenChange, onEdit }: FullPreviewDialogProps) {
+  const t = useT(messages);
   if (!file) return null;
 
   const isMarkdown = file.type === 'markdown';
@@ -540,9 +755,9 @@ export function FullPreviewDialog({ file, open, onOpenChange, onEdit }: FullPrev
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden p-0">
-        <DialogTitle className="sr-only">Preview: {file.name}</DialogTitle>
+        <DialogTitle className="sr-only">{t.fullPreview.title(file.name)}</DialogTitle>
         <DialogDescription className="sr-only">
-          Full preview of {file.name} ({file.type}, {formatFileSize(file.size)})
+          {t.fullPreview.srDesc(file.name, file.type, formatFileSize(file.size))}
         </DialogDescription>
         {/* Header */}
         <div className="flex items-center gap-2 border-b px-6 py-4">
@@ -565,7 +780,7 @@ export function FullPreviewDialog({ file, open, onOpenChange, onEdit }: FullPrev
                   onOpenChange(false);
                   onEdit();
                 }}
-                title="Edit file"
+                title={t.fullPreview.editFile}
               >
                 <Pencil className="size-4" />
               </Button>
@@ -586,9 +801,7 @@ export function FullPreviewDialog({ file, open, onOpenChange, onEdit }: FullPrev
           {file.content === null ? (
             <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
               <p className="text-sm text-muted-foreground">
-                {file.truncated
-                  ? 'File is too large to preview (> 1 MB)'
-                  : 'Binary file — preview not available'}
+                {file.truncated ? t.fullPreview.tooLarge : t.fullPreview.binaryFile}
               </p>
             </div>
           ) : isMarkdown ? (

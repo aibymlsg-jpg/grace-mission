@@ -39,7 +39,115 @@ import {
 } from '@/components/ui/alert-dialog';
 import { authFetch } from '@/lib/auth';
 import { SuccessDialog } from '@/components/ui/success-dialog';
+import { useT, type Messages } from '@/lib/i18n';
 import { CreateChannelDialog, EditChannelDialog } from './channels-dialogs';
+
+// ------------------------------------------------------------------ //
+//  i18n                                                               //
+// ------------------------------------------------------------------ //
+
+const messages = {
+  en: {
+    addChannel: 'Add Channel',
+    emptyState: 'No channels configured. Click "Add Channel" to get started.',
+    columns: {
+      channel: 'Channel',
+      type: 'Type',
+      status: 'Status',
+      enabled: 'Enabled',
+    },
+    status: {
+      connected: 'connected',
+      disconnected: 'disconnected',
+      disabled: 'disabled',
+    },
+    actions: {
+      configure: 'Configure',
+      remove: 'Remove',
+    },
+    deleteDialog: {
+      title: 'Remove Channel',
+      description: (name: string) =>
+        `Are you sure you want to remove ${name}? This will disconnect the channel and remove its configuration.`,
+      cancel: 'Cancel',
+      confirm: 'Remove',
+    },
+    successTitle: 'Channel Added',
+    addedMessage: (name: string) => `${name} has been added.`,
+    errors: {
+      load: 'Failed to load channels',
+      create: 'Failed to create channel',
+      update: 'Failed to update channel',
+      delete: 'Failed to delete channel',
+    },
+  },
+  'zh-TW': {
+    addChannel: '新增頻道',
+    emptyState: '尚未設定任何頻道。點選「新增頻道」開始使用。',
+    columns: {
+      channel: '頻道',
+      type: '類型',
+      status: '狀態',
+      enabled: '已啟用',
+    },
+    status: {
+      connected: '已連線',
+      disconnected: '已斷線',
+      disabled: '已停用',
+    },
+    actions: {
+      configure: '設定',
+      remove: '移除',
+    },
+    deleteDialog: {
+      title: '移除頻道',
+      description: (name: string) =>
+        `確定要移除 ${name} 嗎？這將中斷此頻道的連線並移除其設定。`,
+      cancel: '取消',
+      confirm: '移除',
+    },
+    successTitle: '頻道已新增',
+    addedMessage: (name: string) => `${name} 已新增。`,
+    errors: {
+      load: '無法載入頻道',
+      create: '無法建立頻道',
+      update: '無法更新頻道',
+      delete: '無法刪除頻道',
+    },
+  },
+} satisfies Messages<{
+  addChannel: string;
+  emptyState: string;
+  columns: {
+    channel: string;
+    type: string;
+    status: string;
+    enabled: string;
+  };
+  status: {
+    connected: string;
+    disconnected: string;
+    disabled: string;
+  };
+  actions: {
+    configure: string;
+    remove: string;
+  };
+  deleteDialog: {
+    title: string;
+    description: (name: string) => string;
+    cancel: string;
+    confirm: string;
+  };
+  successTitle: string;
+  addedMessage: (name: string) => string;
+  errors: {
+    load: string;
+    create: string;
+    update: string;
+    delete: string;
+  };
+}>;
 
 // ------------------------------------------------------------------ //
 //  Types (exported for use in dialogs)                                //
@@ -106,6 +214,7 @@ function buildConfig(
 // ------------------------------------------------------------------ //
 
 export function ChannelsTab() {
+  const t = useT(messages);
   const [channels, setChannels] = useState<ApiChannel[]>([]);
   const [connectedIds, setConnectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -128,7 +237,7 @@ export function ChannelsTab() {
       setChannels(Array.isArray(res.data) ? res.data : []);
       setConnectedIds(new Set(status.connectedIds ?? []));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load channels');
+      setError(err instanceof Error ? err.message : t.errors.load);
     } finally {
       setLoading(false);
     }
@@ -153,9 +262,9 @@ export function ChannelsTab() {
       });
       setCreateOpen(false);
       await fetchChannels();
-      setSuccessMessage(`${form.get('name')} has been added.`);
+      setSuccessMessage(t.addedMessage(String(form.get('name') ?? '')));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create channel');
+      setError(err instanceof Error ? err.message : t.errors.create);
     } finally {
       setSaving(false);
     }
@@ -171,7 +280,7 @@ export function ChannelsTab() {
       });
       await fetchChannels();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update channel');
+      setError(err instanceof Error ? err.message : t.errors.update);
     } finally {
       setSaving(false);
     }
@@ -193,7 +302,7 @@ export function ChannelsTab() {
       setEditChannel(null);
       await fetchChannels();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update channel');
+      setError(err instanceof Error ? err.message : t.errors.update);
     } finally {
       setSaving(false);
     }
@@ -207,7 +316,7 @@ export function ChannelsTab() {
       setDeleteChannel(null);
       await fetchChannels();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete channel');
+      setError(err instanceof Error ? err.message : t.errors.delete);
     } finally {
       setSaving(false);
     }
@@ -223,7 +332,7 @@ export function ChannelsTab() {
           }}
         >
           <Plus className="mr-1 size-4" />
-          Add Channel
+          {t.addChannel}
         </Button>
       </div>
 
@@ -239,17 +348,17 @@ export function ChannelsTab() {
         </div>
       ) : channels.length === 0 ? (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm p-8 text-center text-sm text-muted-foreground">
-          No channels configured. Click &quot;Add Channel&quot; to get started.
+          {t.emptyState}
         </div>
       ) : (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Channel</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Enabled</TableHead>
+                <TableHead>{t.columns.channel}</TableHead>
+                <TableHead>{t.columns.type}</TableHead>
+                <TableHead>{t.columns.status}</TableHead>
+                <TableHead>{t.columns.enabled}</TableHead>
                 <TableHead className="w-[50px]" />
               </TableRow>
             </TableHeader>
@@ -274,13 +383,13 @@ export function ChannelsTab() {
                           variant="secondary"
                           className="bg-green-500/15 text-green-600 border-green-500/30"
                         >
-                          connected
+                          {t.status.connected}
                         </Badge>
                       ) : (
-                        <Badge variant="destructive">disconnected</Badge>
+                        <Badge variant="destructive">{t.status.disconnected}</Badge>
                       )
                     ) : (
-                      <Badge variant="outline">disabled</Badge>
+                      <Badge variant="outline">{t.status.disabled}</Badge>
                     )}
                   </TableCell>
                   <TableCell>
@@ -305,7 +414,7 @@ export function ChannelsTab() {
                             setEditChannel(channel);
                           }}
                         >
-                          Configure
+                          {t.actions.configure}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-destructive"
@@ -313,7 +422,7 @@ export function ChannelsTab() {
                             setDeleteChannel(channel);
                           }}
                         >
-                          Remove
+                          {t.actions.remove}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -350,14 +459,13 @@ export function ChannelsTab() {
         {deleteChannel && (
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Remove Channel</AlertDialogTitle>
+              <AlertDialogTitle>{t.deleteDialog.title}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove <strong>{deleteChannel.name}</strong>? This will
-                disconnect the channel and remove its configuration.
+                {t.deleteDialog.description(deleteChannel.name)}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t.deleteDialog.cancel}</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => {
@@ -366,7 +474,7 @@ export function ChannelsTab() {
                 disabled={saving}
               >
                 {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-                Remove
+                {t.deleteDialog.confirm}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -378,7 +486,7 @@ export function ChannelsTab() {
         onOpenChange={(open) => {
           if (!open) setSuccessMessage('');
         }}
-        title="Channel Added"
+        title={t.successTitle}
         description={successMessage}
       />
     </>

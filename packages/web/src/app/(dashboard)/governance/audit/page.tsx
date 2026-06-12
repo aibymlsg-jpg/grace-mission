@@ -16,6 +16,63 @@ import {
 import { authFetch } from '@/lib/auth';
 import { useAnimeOnMount, staggerFadeUp, STAGGER } from '@/lib/anime';
 import { useAuth } from '@/components/auth-provider';
+import { useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    title: 'Audit Logs',
+    description: 'Immutable record of all actions and events in your workspace.',
+    yourActionsOnly: ' Showing your actions only.',
+    searchPlaceholder: 'Search logs...',
+    allActions: 'All Actions',
+    allResources: 'All Resources',
+    totalEntries: (n: number) => `${n.toLocaleString()} total entries`,
+    empty: 'No audit log entries found.',
+    colTimestamp: 'Timestamp',
+    colUser: 'User',
+    colAction: 'Action',
+    colResource: 'Resource',
+    colDetails: 'Details',
+    pageOf: (page: number, total: number) => `Page ${page} of ${total}`,
+    previous: 'Previous',
+    next: 'Next',
+  },
+  'zh-TW': {
+    title: '稽核日誌',
+    description: '工作區內所有動作與事件的不可變更紀錄。',
+    yourActionsOnly: ' 僅顯示您的動作。',
+    searchPlaceholder: '搜尋日誌...',
+    allActions: '所有動作',
+    allResources: '所有資源',
+    totalEntries: (n: number) => `共 ${n.toLocaleString()} 筆`,
+    empty: '找不到稽核日誌紀錄。',
+    colTimestamp: '時間',
+    colUser: '操作者',
+    colAction: '動作',
+    colResource: '資源',
+    colDetails: '詳細資料',
+    pageOf: (page: number, total: number) => `第 ${page} 頁，共 ${total} 頁`,
+    previous: '上一頁',
+    next: '下一頁',
+  },
+} satisfies Messages<{
+  title: string;
+  description: string;
+  yourActionsOnly: string;
+  searchPlaceholder: string;
+  allActions: string;
+  allResources: string;
+  totalEntries: (n: number) => string;
+  empty: string;
+  colTimestamp: string;
+  colUser: string;
+  colAction: string;
+  colResource: string;
+  colDetails: string;
+  pageOf: (page: number, total: number) => string;
+  previous: string;
+  next: string;
+}>;
 
 interface AuditLogEntry {
   id: string;
@@ -75,6 +132,7 @@ function formatDetails(details: Record<string, unknown>): string {
 
 export default function AuditLogsPage() {
   const { user } = useAuth();
+  const t = useT(messages);
   const isAdmin = user?.role === 'admin';
 
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
@@ -159,10 +217,10 @@ export default function AuditLogsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Audit Logs</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t.title}</h1>
         <p className="text-sm text-muted-foreground">
-          Immutable record of all actions and events in your workspace.
-          {!isAdmin && ' Showing your actions only.'}
+          {t.description}
+          {!isAdmin && t.yourActionsOnly}
         </p>
       </div>
 
@@ -171,7 +229,7 @@ export default function AuditLogsPage() {
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search logs..."
+            placeholder={t.searchPlaceholder}
             className="pl-9"
             value={searchQuery}
             onChange={(e) => {
@@ -187,7 +245,7 @@ export default function AuditLogsPage() {
             setPage(1);
           }}
         >
-          <option value="">All Actions</option>
+          <option value="">{t.allActions}</option>
           {knownActions.map((a) => (
             <option key={a} value={a}>
               {a}
@@ -202,14 +260,14 @@ export default function AuditLogsPage() {
             setPage(1);
           }}
         >
-          <option value="">All Resources</option>
+          <option value="">{t.allResources}</option>
           {knownResources.map((r) => (
             <option key={r} value={r}>
               {r}
             </option>
           ))}
         </select>
-        <span className="text-sm text-muted-foreground">{total} total entries</span>
+        <span className="text-sm text-muted-foreground">{t.totalEntries(total)}</span>
       </div>
 
       {/* Logs table */}
@@ -219,18 +277,18 @@ export default function AuditLogsPage() {
         </div>
       ) : filteredLogs.length === 0 ? (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm p-8 text-center text-sm text-muted-foreground">
-          No audit log entries found.
+          {t.empty}
         </div>
       ) : (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[160px]">Timestamp</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Resource</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead className="w-[160px]">{t.colTimestamp}</TableHead>
+                <TableHead>{t.colUser}</TableHead>
+                <TableHead>{t.colAction}</TableHead>
+                <TableHead>{t.colResource}</TableHead>
+                <TableHead>{t.colDetails}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody data-animate="audit-rows">
@@ -275,9 +333,7 @@ export default function AuditLogsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
-          </span>
+          <span className="text-sm text-muted-foreground">{t.pageOf(page, totalPages)}</span>
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -288,7 +344,7 @@ export default function AuditLogsPage() {
               }}
             >
               <ChevronLeft className="mr-1 size-4" />
-              Previous
+              {t.previous}
             </Button>
             <Button
               variant="outline"
@@ -298,7 +354,7 @@ export default function AuditLogsPage() {
                 setPage((p) => p + 1);
               }}
             >
-              Next
+              {t.next}
               <ChevronRight className="ml-1 size-4" />
             </Button>
           </div>

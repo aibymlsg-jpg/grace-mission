@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { DirectoryListing, FileEntry } from '@clawix/shared';
 import { authFetch } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { useT, type Messages } from '@/lib/i18n';
 import { FolderColumns, type FolderDef } from '../folder-columns';
 
 const FOLDERS: readonly FolderDef[] = [
@@ -15,7 +16,34 @@ const FOLDERS: readonly FolderDef[] = [
   { path: '/donor-research', label: 'research' },
 ];
 
+const messages = {
+  en: {
+    title: 'Donor Engagement',
+    subtitle: 'proposals · reports · research',
+    startConversation: 'Start conversation',
+    descBefore: 'Proposals, narrative reports, log-frames and donor research. Managed by the ',
+    descAgent: 'Donor Engagement',
+    descAfter: ' agent.',
+  },
+  'zh-TW': {
+    title: '捐助者互動',
+    subtitle: '提案 · 報告 · 研究',
+    startConversation: '開始對話',
+    descBefore: '提案、敘述性報告、邏輯框架與捐助者研究。由',
+    descAgent: '捐助者互動',
+    descAfter: '代理管理。',
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  startConversation: string;
+  descBefore: string;
+  descAgent: string;
+  descAfter: string;
+}>;
+
 export default function DonorsPage() {
+  const t = useT(messages);
   const [columns, setColumns] = useState<Record<string, readonly FileEntry[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -48,21 +76,22 @@ export default function DonorsPage() {
       <header className="flex flex-col gap-1 border-b border-border/60 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">Donor Engagement</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-              proposals · reports · research
+              {t.subtitle}
             </span>
           </div>
           <Button variant="outline" size="sm" asChild>
             <Link href="/conversations">
               <MessageSquare className="mr-2 size-4" />
-              Start conversation
+              {t.startConversation}
             </Link>
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Proposals, narrative reports, log-frames and donor research. Managed by the{' '}
-          <span className="font-medium text-foreground">Donor Engagement</span> agent.
+          {t.descBefore}
+          <span className="font-medium text-foreground">{t.descAgent}</span>
+          {t.descAfter}
         </p>
       </header>
 

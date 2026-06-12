@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { DirectoryListing, FileEntry } from '@clawix/shared';
 import { authFetch } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { useT, type Messages } from '@/lib/i18n';
 import { FolderColumns, type FolderDef } from '../folder-columns';
 
 const FOLDERS: readonly FolderDef[] = [
@@ -13,7 +14,35 @@ const FOLDERS: readonly FolderDef[] = [
   { path: '/incidents', label: 'incidents' },
 ];
 
+const messages = {
+  en: {
+    title: 'Field Operations',
+    subtitle: 'logistics · risk · safeguarding',
+    startConversation: 'Start conversation',
+    descBefore: 'Logistics lists, risk register and safeguarding incident records. Managed by the ',
+    descAgent: 'Field Operations',
+    descAfter:
+      ' agent. Incident documentation is post-triage only — a human triages first.',
+  },
+  'zh-TW': {
+    title: '現場運作',
+    subtitle: '後勤 · 風險 · 防護',
+    startConversation: '開始對話',
+    descBefore: '後勤清單、風險登記與防護事件記錄。由',
+    descAgent: '現場運作',
+    descAfter: '代理管理。事件記錄僅限分流後建立 — 須由人員先行分流。',
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  startConversation: string;
+  descBefore: string;
+  descAgent: string;
+  descAfter: string;
+}>;
+
 export default function FieldOpsPage() {
+  const t = useT(messages);
   const [columns, setColumns] = useState<Record<string, readonly FileEntry[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,22 +75,22 @@ export default function FieldOpsPage() {
       <header className="flex flex-col gap-1 border-b border-border/60 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">Field Operations</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-              logistics · risk · safeguarding
+              {t.subtitle}
             </span>
           </div>
           <Button variant="outline" size="sm" asChild>
             <Link href="/conversations">
               <MessageSquare className="mr-2 size-4" />
-              Start conversation
+              {t.startConversation}
             </Link>
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Logistics lists, risk register and safeguarding incident records. Managed by the{' '}
-          <span className="font-medium text-foreground">Field Operations</span> agent.
-          Incident documentation is post-triage only — a human triages first.
+          {t.descBefore}
+          <span className="font-medium text-foreground">{t.descAgent}</span>
+          {t.descAfter}
         </p>
       </header>
 

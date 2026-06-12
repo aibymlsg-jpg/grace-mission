@@ -56,6 +56,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { authFetch } from '@/lib/auth';
 import { useAnimeOnMount, staggerFadeUp, STAGGER } from '@/lib/anime';
+import { useT, type Messages } from '@/lib/i18n';
 import { GroupsTab } from '../groups-tab';
 
 // ------------------------------------------------------------------ //
@@ -108,81 +109,62 @@ function roleVariant(role: string) {
 // ------------------------------------------------------------------ //
 
 interface Permission {
-  name: string;
+  key: string;
   admin: boolean;
   developer: boolean;
   viewer: boolean;
 }
 
 interface PermissionGroup {
-  category: string;
+  categoryKey: string;
   permissions: Permission[];
-}
-
-function PermissionIcon({ allowed }: { allowed: boolean }) {
-  return allowed ? (
-    <Check className="mx-auto size-4 text-green-500" aria-label="Allowed" />
-  ) : (
-    <Minus className="mx-auto size-4 text-muted-foreground/40" aria-label="Not allowed" />
-  );
 }
 
 const permissionMatrix: PermissionGroup[] = [
   {
-    category: 'Agents',
+    categoryKey: 'agents',
     permissions: [
-      { name: 'View agent definitions', admin: true, developer: true, viewer: true },
-      { name: 'Create / edit agent', admin: true, developer: true, viewer: false },
-      { name: 'Delete agent', admin: true, developer: false, viewer: false },
-      { name: 'Run agent', admin: true, developer: true, viewer: false },
+      { key: 'viewAgentDefs', admin: true, developer: true, viewer: true },
+      { key: 'createEditAgent', admin: true, developer: true, viewer: false },
+      { key: 'deleteAgent', admin: true, developer: false, viewer: false },
+      { key: 'runAgent', admin: true, developer: true, viewer: false },
     ],
   },
   {
-    category: 'Skills',
+    categoryKey: 'skills',
     permissions: [
-      { name: 'Browse marketplace', admin: true, developer: true, viewer: true },
-      { name: 'Submit skill', admin: false, developer: true, viewer: false },
-      { name: 'Approve / reject skill', admin: true, developer: false, viewer: false },
+      { key: 'browseMarketplace', admin: true, developer: true, viewer: true },
+      { key: 'submitSkill', admin: false, developer: true, viewer: false },
+      { key: 'approveSkill', admin: true, developer: false, viewer: false },
     ],
   },
   {
-    category: 'Governance',
+    categoryKey: 'governance',
     permissions: [
-      { name: 'View token usage (org-wide)', admin: true, developer: false, viewer: true },
-      { name: 'View token usage (own)', admin: true, developer: true, viewer: false },
-      { name: 'Set budget alerts', admin: true, developer: false, viewer: false },
-      { name: 'View audit logs', admin: true, developer: true, viewer: true },
-      { name: 'Export audit logs', admin: true, developer: false, viewer: false },
+      { key: 'viewTokenOrg', admin: true, developer: false, viewer: true },
+      { key: 'viewTokenOwn', admin: true, developer: true, viewer: false },
+      { key: 'setBudgetAlerts', admin: true, developer: false, viewer: false },
+      { key: 'viewAuditLogs', admin: true, developer: true, viewer: true },
+      { key: 'exportAuditLogs', admin: true, developer: false, viewer: false },
     ],
   },
   {
-    category: 'Administration',
+    categoryKey: 'administration',
     permissions: [
-      { name: 'Manage users', admin: true, developer: false, viewer: false },
-      { name: 'Assign roles', admin: true, developer: false, viewer: false },
-      { name: 'Manage policies', admin: true, developer: false, viewer: false },
-      { name: 'Configure providers', admin: true, developer: false, viewer: false },
-      { name: 'Org settings', admin: true, developer: false, viewer: false },
-      { name: 'Manage groups', admin: true, developer: true, viewer: false },
+      { key: 'manageUsers', admin: true, developer: false, viewer: false },
+      { key: 'assignRoles', admin: true, developer: false, viewer: false },
+      { key: 'managePolicies', admin: true, developer: false, viewer: false },
+      { key: 'configureProviders', admin: true, developer: false, viewer: false },
+      { key: 'orgSettings', admin: true, developer: false, viewer: false },
+      { key: 'manageGroups', admin: true, developer: true, viewer: false },
     ],
   },
 ];
 
-const roleDescriptions: Record<string, { icon: typeof ShieldCheck; description: string }> = {
-  admin: {
-    icon: ShieldCheck,
-    description:
-      'Full platform control: org settings, user management, RBAC, agent lifecycle, channel config, skill approval, providers, system health.',
-  },
-  developer: {
-    icon: Shield,
-    description:
-      'Build & operate: create agents, write skills, run agents, schedule tasks, monitor usage, manage channels, SDK integration.',
-  },
-  viewer: {
-    icon: Eye,
-    description: 'Read-only: dashboards, audit logs, token reports.',
-  },
+const roleIcons: Record<string, typeof ShieldCheck> = {
+  admin: ShieldCheck,
+  developer: Shield,
+  viewer: Eye,
 };
 
 // ------------------------------------------------------------------ //
@@ -211,7 +193,351 @@ function serializeSorts(sorts: SortEntry[]): string {
   return sorts.map((s) => `${s.key}:${s.dir}`).join(',');
 }
 
+// ------------------------------------------------------------------ //
+//  i18n dictionary (co-located)                                       //
+// ------------------------------------------------------------------ //
+
+const messages = {
+  en: {
+    title: 'User Management',
+    subtitle: 'Manage users, roles, and groups.',
+    tabs: {
+      users: 'Users',
+      roles: 'Roles',
+      groups: 'Groups',
+    },
+    createUser: 'Create User',
+    table: {
+      name: 'Name',
+      email: 'Email',
+      role: 'Role',
+      policy: 'Policy',
+      status: 'Status',
+      empty: 'No users found.',
+      active: 'active',
+      inactive: 'inactive',
+    },
+    rowActions: {
+      edit: 'Edit',
+      remove: 'Remove',
+    },
+    roleLabels: {
+      admin: 'Admin',
+      developer: 'Developer',
+      viewer: 'Viewer',
+    },
+    roleDescriptions: {
+      admin:
+        'Full platform control: org settings, user management, RBAC, agent lifecycle, channel config, skill approval, providers, system health.',
+      developer:
+        'Build & operate: create agents, write skills, run agents, schedule tasks, monitor usage, manage channels, SDK integration.',
+      viewer: 'Read-only: dashboards, audit logs, token reports.',
+    },
+    userCount: (n: number) => `${n} user${n !== 1 ? 's' : ''}`,
+    matrix: {
+      heading: 'Permission Matrix',
+      permission: 'Permission',
+      admin: 'Admin',
+      developer: 'Developer',
+      viewer: 'Viewer',
+      footnote: "Roles are system-defined. Contact your administrator to change a user's role.",
+      allowed: 'Allowed',
+      notAllowed: 'Not allowed',
+    },
+    categories: {
+      agents: 'Agents',
+      skills: 'Skills',
+      governance: 'Governance',
+      administration: 'Administration',
+    },
+    permissions: {
+      viewAgentDefs: 'View agent definitions',
+      createEditAgent: 'Create / edit agent',
+      deleteAgent: 'Delete agent',
+      runAgent: 'Run agent',
+      browseMarketplace: 'Browse marketplace',
+      submitSkill: 'Submit skill',
+      approveSkill: 'Approve / reject skill',
+      viewTokenOrg: 'View token usage (org-wide)',
+      viewTokenOwn: 'View token usage (own)',
+      setBudgetAlerts: 'Set budget alerts',
+      viewAuditLogs: 'View audit logs',
+      exportAuditLogs: 'Export audit logs',
+      manageUsers: 'Manage users',
+      assignRoles: 'Assign roles',
+      managePolicies: 'Manage policies',
+      configureProviders: 'Configure providers',
+      orgSettings: 'Org settings',
+      manageGroups: 'Manage groups',
+    },
+    createDialog: {
+      title: 'Create User',
+      description: 'Add a new user to the platform.',
+      name: 'Name',
+      email: 'Email',
+      password: 'Password',
+      role: 'Role',
+      policy: 'Policy',
+      cancel: 'Cancel',
+      submit: 'Create',
+    },
+    assignStep: {
+      heading: 'User Created',
+      added: (name: string) => `${name} has been added to the platform.`,
+      assignAgent: 'Assign Primary Agent',
+      selectAgent: 'Select an agent...',
+      help: 'Assign a primary agent so this user can start conversations.',
+      skip: 'Skip',
+      assign: 'Assign',
+    },
+    doneStep: {
+      heading: 'All Set!',
+      createdViewer: (name: string) => `${name} has been created with read-only access.`,
+      createdAgent: (name: string) => `${name} has been created and assigned a primary agent.`,
+      done: 'Done',
+    },
+    editDialog: {
+      title: 'Edit User',
+      description: (name: string) => `Update ${name}'s profile.`,
+      name: 'Name',
+      role: 'Role',
+      policy: 'Policy',
+      status: 'Status',
+      active: 'Active',
+      inactive: 'Inactive',
+      primaryAgent: 'Primary Agent',
+      noAgent: 'No agent assigned',
+      viewerHelp: 'Viewers cannot run agents.',
+      agentHelp: 'The primary agent allows this user to start conversations.',
+      cancel: 'Cancel',
+      save: 'Save',
+    },
+    deleteDialog: {
+      title: 'Remove User',
+      confirm: (name: string, email: string) =>
+        `Are you sure you want to remove ${name} (${email})? This action cannot be undone.`,
+      cancel: 'Cancel',
+      remove: 'Remove',
+    },
+    errors: {
+      load: 'Failed to load data',
+      create: 'Failed to create user',
+      update: 'Failed to update user',
+      delete: 'Failed to delete user',
+    },
+  },
+  'zh-TW': {
+    title: '使用者管理',
+    subtitle: '管理使用者、角色與群組。',
+    tabs: {
+      users: '使用者',
+      roles: '角色',
+      groups: '群組',
+    },
+    createUser: '建立使用者',
+    table: {
+      name: '名稱',
+      email: '電子郵件',
+      role: '角色',
+      policy: '政策',
+      status: '狀態',
+      empty: '找不到使用者。',
+      active: '啟用中',
+      inactive: '未啟用',
+    },
+    rowActions: {
+      edit: '編輯',
+      remove: '移除',
+    },
+    roleLabels: {
+      admin: '管理員',
+      developer: '開發者',
+      viewer: '檢視者',
+    },
+    roleDescriptions: {
+      admin:
+        '完整平台控制權：組織設定、使用者管理、RBAC、代理生命週期、頻道設定、技能審核、供應商、系統健康狀態。',
+      developer:
+        '建置與營運：建立代理、撰寫技能、執行代理、排程任務、監控用量、管理頻道、SDK 整合。',
+      viewer: '唯讀：儀表板、稽核日誌、Token 報表。',
+    },
+    userCount: (n: number) => `${n} 位使用者`,
+    matrix: {
+      heading: '權限矩陣',
+      permission: '權限',
+      admin: '管理員',
+      developer: '開發者',
+      viewer: '檢視者',
+      footnote: '角色由系統定義。如需變更使用者的角色，請聯絡您的管理員。',
+      allowed: '允許',
+      notAllowed: '不允許',
+    },
+    categories: {
+      agents: '代理',
+      skills: '技能',
+      governance: '治理',
+      administration: '管理',
+    },
+    permissions: {
+      viewAgentDefs: '檢視代理定義',
+      createEditAgent: '建立／編輯代理',
+      deleteAgent: '刪除代理',
+      runAgent: '執行代理',
+      browseMarketplace: '瀏覽市集',
+      submitSkill: '提交技能',
+      approveSkill: '核准／拒絕技能',
+      viewTokenOrg: '檢視 Token 用量（全組織）',
+      viewTokenOwn: '檢視 Token 用量（個人）',
+      setBudgetAlerts: '設定預算提醒',
+      viewAuditLogs: '檢視稽核日誌',
+      exportAuditLogs: '匯出稽核日誌',
+      manageUsers: '管理使用者',
+      assignRoles: '指派角色',
+      managePolicies: '管理政策',
+      configureProviders: '設定供應商',
+      orgSettings: '組織設定',
+      manageGroups: '管理群組',
+    },
+    createDialog: {
+      title: '建立使用者',
+      description: '新增使用者至平台。',
+      name: '名稱',
+      email: '電子郵件',
+      password: '密碼',
+      role: '角色',
+      policy: '政策',
+      cancel: '取消',
+      submit: '建立',
+    },
+    assignStep: {
+      heading: '使用者已建立',
+      added: (name: string) => `${name} 已新增至平台。`,
+      assignAgent: '指派主要代理',
+      selectAgent: '選擇代理…',
+      help: '指派主要代理，讓此使用者可以開始對話。',
+      skip: '略過',
+      assign: '指派',
+    },
+    doneStep: {
+      heading: '全部完成！',
+      createdViewer: (name: string) => `${name} 已建立，並具有唯讀存取權限。`,
+      createdAgent: (name: string) => `${name} 已建立，並已指派主要代理。`,
+      done: '完成',
+    },
+    editDialog: {
+      title: '編輯使用者',
+      description: (name: string) => `更新 ${name} 的個人資料。`,
+      name: '名稱',
+      role: '角色',
+      policy: '政策',
+      status: '狀態',
+      active: '啟用中',
+      inactive: '未啟用',
+      primaryAgent: '主要代理',
+      noAgent: '未指派代理',
+      viewerHelp: '檢視者無法執行代理。',
+      agentHelp: '主要代理可讓此使用者開始對話。',
+      cancel: '取消',
+      save: '儲存',
+    },
+    deleteDialog: {
+      title: '移除使用者',
+      confirm: (name: string, email: string) =>
+        `確定要移除 ${name}（${email}）嗎？此操作無法復原。`,
+      cancel: '取消',
+      remove: '移除',
+    },
+    errors: {
+      load: '載入資料失敗',
+      create: '建立使用者失敗',
+      update: '更新使用者失敗',
+      delete: '刪除使用者失敗',
+    },
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  tabs: { users: string; roles: string; groups: string };
+  createUser: string;
+  table: {
+    name: string;
+    email: string;
+    role: string;
+    policy: string;
+    status: string;
+    empty: string;
+    active: string;
+    inactive: string;
+  };
+  rowActions: { edit: string; remove: string };
+  roleLabels: { admin: string; developer: string; viewer: string };
+  roleDescriptions: { admin: string; developer: string; viewer: string };
+  userCount: (n: number) => string;
+  matrix: {
+    heading: string;
+    permission: string;
+    admin: string;
+    developer: string;
+    viewer: string;
+    footnote: string;
+    allowed: string;
+    notAllowed: string;
+  };
+  categories: { agents: string; skills: string; governance: string; administration: string };
+  permissions: Record<string, string>;
+  createDialog: {
+    title: string;
+    description: string;
+    name: string;
+    email: string;
+    password: string;
+    role: string;
+    policy: string;
+    cancel: string;
+    submit: string;
+  };
+  assignStep: {
+    heading: string;
+    added: (name: string) => string;
+    assignAgent: string;
+    selectAgent: string;
+    help: string;
+    skip: string;
+    assign: string;
+  };
+  doneStep: {
+    heading: string;
+    createdViewer: (name: string) => string;
+    createdAgent: (name: string) => string;
+    done: string;
+  };
+  editDialog: {
+    title: string;
+    description: (name: string) => string;
+    name: string;
+    role: string;
+    policy: string;
+    status: string;
+    active: string;
+    inactive: string;
+    primaryAgent: string;
+    noAgent: string;
+    viewerHelp: string;
+    agentHelp: string;
+    cancel: string;
+    save: string;
+  };
+  deleteDialog: {
+    title: string;
+    confirm: (name: string, email: string) => string;
+    cancel: string;
+    remove: string;
+  };
+  errors: { load: string; create: string; update: string; delete: string };
+}>;
+
 export default function UsersPage() {
+  const t = useT(messages);
   const searchParams = useSearchParams();
   const router = useRouter();
   const [tab, setTab] = useState('users');
@@ -266,11 +592,11 @@ export default function UsersPage() {
       }
       setUserAgentMap(map);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
+      setError(err instanceof Error ? err.message : t.errors.load);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchData();
@@ -318,7 +644,7 @@ export default function UsersPage() {
       }
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create user');
+      setError(err instanceof Error ? err.message : t.errors.create);
     } finally {
       setSaving(false);
     }
@@ -386,7 +712,7 @@ export default function UsersPage() {
       setEditUserAgentId('');
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update user');
+      setError(err instanceof Error ? err.message : t.errors.update);
     } finally {
       setSaving(false);
     }
@@ -400,7 +726,7 @@ export default function UsersPage() {
       setDeleteUser(null);
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete user');
+      setError(err instanceof Error ? err.message : t.errors.delete);
     } finally {
       setSaving(false);
     }
@@ -479,8 +805,8 @@ export default function UsersPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
-        <p className="text-sm text-muted-foreground">Manage users, roles, and groups.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t.title}</h1>
+        <p className="text-sm text-muted-foreground">{t.subtitle}</p>
       </div>
 
       {error && (
@@ -498,13 +824,13 @@ export default function UsersPage() {
         <div className="flex items-center justify-between">
           <TabsList className="h-10 rounded-full p-1">
             <TabsTrigger value="users" className="rounded-full px-4">
-              Users
+              {t.tabs.users}
             </TabsTrigger>
             <TabsTrigger value="roles" className="rounded-full px-4">
-              Roles
+              {t.tabs.roles}
             </TabsTrigger>
             <TabsTrigger value="groups" className="rounded-full px-4">
-              Groups
+              {t.tabs.groups}
             </TabsTrigger>
           </TabsList>
           {tab === 'users' && (
@@ -515,7 +841,7 @@ export default function UsersPage() {
               }}
             >
               <Plus className="mr-1 size-4" />
-              Create User
+              {t.createUser}
             </Button>
           )}
         </div>
@@ -528,7 +854,7 @@ export default function UsersPage() {
             </div>
           ) : users.length === 0 ? (
             <div className="rounded-md border bg-background/30 backdrop-blur-sm p-8 text-center text-sm text-muted-foreground">
-              No users found.
+              {t.table.empty}
             </div>
           ) : (
             <div className="rounded-md border bg-background/30 backdrop-blur-sm">
@@ -541,7 +867,7 @@ export default function UsersPage() {
                         toggleSort('name');
                       }}
                     >
-                      Name {getSortIcon('name')}
+                      {t.table.name} {getSortIcon('name')}
                     </TableHead>
                     <TableHead
                       className="cursor-pointer select-none"
@@ -549,7 +875,7 @@ export default function UsersPage() {
                         toggleSort('email');
                       }}
                     >
-                      Email {getSortIcon('email')}
+                      {t.table.email} {getSortIcon('email')}
                     </TableHead>
                     <TableHead
                       className="cursor-pointer select-none"
@@ -557,7 +883,7 @@ export default function UsersPage() {
                         toggleSort('role');
                       }}
                     >
-                      Role {getSortIcon('role')}
+                      {t.table.role} {getSortIcon('role')}
                     </TableHead>
                     <TableHead
                       className="cursor-pointer select-none"
@@ -565,7 +891,7 @@ export default function UsersPage() {
                         toggleSort('plan');
                       }}
                     >
-                      Policy {getSortIcon('plan')}
+                      {t.table.policy} {getSortIcon('plan')}
                     </TableHead>
                     <TableHead
                       className="cursor-pointer select-none"
@@ -573,7 +899,7 @@ export default function UsersPage() {
                         toggleSort('status');
                       }}
                     >
-                      Status {getSortIcon('status')}
+                      {t.table.status} {getSortIcon('status')}
                     </TableHead>
                     <TableHead className="w-[50px]" />
                   </TableRow>
@@ -584,7 +910,9 @@ export default function UsersPage() {
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell className="text-muted-foreground">{user.email}</TableCell>
                       <TableCell>
-                        <Badge variant={roleVariant(user.role)}>{user.role}</Badge>
+                        <Badge variant={roleVariant(user.role)}>
+                          {t.roleLabels[user.role as keyof typeof t.roleLabels] ?? user.role}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
@@ -593,7 +921,7 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.isActive ? 'secondary' : 'outline'}>
-                          {user.isActive ? 'active' : 'inactive'}
+                          {user.isActive ? t.table.active : t.table.inactive}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -609,7 +937,7 @@ export default function UsersPage() {
                                 openEditUser(user);
                               }}
                             >
-                              Edit
+                              {t.rowActions.edit}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
@@ -617,7 +945,7 @@ export default function UsersPage() {
                                 setDeleteUser(user);
                               }}
                             >
-                              Remove
+                              {t.rowActions.remove}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -634,8 +962,7 @@ export default function UsersPage() {
         <TabsContent value="roles" className="mt-4 space-y-6">
           <div className="grid gap-4 md:grid-cols-3">
             {(['admin', 'developer', 'viewer'] as const).map((role) => {
-              const def = roleDescriptions[role] ?? { icon: Shield, description: '' };
-              const Icon = def.icon;
+              const Icon = roleIcons[role] ?? Shield;
               const count = roleCounts[role] ?? 0;
               return (
                 <div key={role} className="rounded-lg border p-4">
@@ -644,52 +971,80 @@ export default function UsersPage() {
                       <Icon className="size-4" aria-hidden="true" />
                     </div>
                     <div>
-                      <h3 className="font-semibold capitalize">{role}</h3>
-                      <p className="text-xs text-muted-foreground">
-                        {count} user{count !== 1 ? 's' : ''}
-                      </p>
+                      <h3 className="font-semibold">{t.roleLabels[role]}</h3>
+                      <p className="text-xs text-muted-foreground">{t.userCount(count)}</p>
                     </div>
                   </div>
-                  <p className="mt-3 text-sm text-muted-foreground">{def.description}</p>
+                  <p className="mt-3 text-sm text-muted-foreground">{t.roleDescriptions[role]}</p>
                 </div>
               );
             })}
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-semibold">Permission Matrix</h3>
+            <h3 className="mb-3 text-sm font-semibold">{t.matrix.heading}</h3>
             <div className="rounded-md border bg-background/30 backdrop-blur-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[300px]">Permission</TableHead>
-                    <TableHead className="text-center">Admin</TableHead>
-                    <TableHead className="text-center">Developer</TableHead>
-                    <TableHead className="text-center">Viewer</TableHead>
+                    <TableHead className="w-[300px]">{t.matrix.permission}</TableHead>
+                    <TableHead className="text-center">{t.matrix.admin}</TableHead>
+                    <TableHead className="text-center">{t.matrix.developer}</TableHead>
+                    <TableHead className="text-center">{t.matrix.viewer}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {permissionMatrix.map((group) => (
-                    <Fragment key={group.category}>
+                    <Fragment key={group.categoryKey}>
                       <TableRow>
                         <TableCell
                           colSpan={4}
                           className="bg-muted/50 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                         >
-                          {group.category}
+                          {t.categories[group.categoryKey as keyof typeof t.categories]}
                         </TableCell>
                       </TableRow>
                       {group.permissions.map((perm) => (
-                        <TableRow key={perm.name}>
-                          <TableCell className="text-sm">{perm.name}</TableCell>
+                        <TableRow key={perm.key}>
+                          <TableCell className="text-sm">{t.permissions[perm.key]}</TableCell>
                           <TableCell className="text-center">
-                            <PermissionIcon allowed={perm.admin} />
+                            {perm.admin ? (
+                              <Check
+                                className="mx-auto size-4 text-green-500"
+                                aria-label={t.matrix.allowed}
+                              />
+                            ) : (
+                              <Minus
+                                className="mx-auto size-4 text-muted-foreground/40"
+                                aria-label={t.matrix.notAllowed}
+                              />
+                            )}
                           </TableCell>
                           <TableCell className="text-center">
-                            <PermissionIcon allowed={perm.developer} />
+                            {perm.developer ? (
+                              <Check
+                                className="mx-auto size-4 text-green-500"
+                                aria-label={t.matrix.allowed}
+                              />
+                            ) : (
+                              <Minus
+                                className="mx-auto size-4 text-muted-foreground/40"
+                                aria-label={t.matrix.notAllowed}
+                              />
+                            )}
                           </TableCell>
                           <TableCell className="text-center">
-                            <PermissionIcon allowed={perm.viewer} />
+                            {perm.viewer ? (
+                              <Check
+                                className="mx-auto size-4 text-green-500"
+                                aria-label={t.matrix.allowed}
+                              />
+                            ) : (
+                              <Minus
+                                className="mx-auto size-4 text-muted-foreground/40"
+                                aria-label={t.matrix.notAllowed}
+                              />
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -698,9 +1053,7 @@ export default function UsersPage() {
                 </TableBody>
               </Table>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Roles are system-defined. Contact your administrator to change a user&apos;s role.
-            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{t.matrix.footnote}</p>
           </div>
         </TabsContent>
 
@@ -720,8 +1073,8 @@ export default function UsersPage() {
           {createStep === 'form' && (
             <>
               <DialogHeader>
-                <DialogTitle>Create User</DialogTitle>
-                <DialogDescription>Add a new user to the platform.</DialogDescription>
+                <DialogTitle>{t.createDialog.title}</DialogTitle>
+                <DialogDescription>{t.createDialog.description}</DialogDescription>
               </DialogHeader>
               <form
                 onSubmit={(e) => {
@@ -732,15 +1085,15 @@ export default function UsersPage() {
                 autoComplete="off"
               >
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="create-name">Name</Label>
+                  <Label htmlFor="create-name">{t.createDialog.name}</Label>
                   <Input id="create-name" name="name" required autoComplete="off" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="create-email">Email</Label>
+                  <Label htmlFor="create-email">{t.createDialog.email}</Label>
                   <Input id="create-email" name="email" type="email" required autoComplete="off" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="create-password">Password</Label>
+                  <Label htmlFor="create-password">{t.createDialog.password}</Label>
                   <div className="relative">
                     <Input
                       id="create-password"
@@ -768,20 +1121,20 @@ export default function UsersPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="create-role">Role</Label>
+                  <Label htmlFor="create-role">{t.createDialog.role}</Label>
                   <select
                     name="role"
                     id="create-role"
                     className="rounded-md border bg-background px-3 py-2 text-sm"
                     defaultValue="developer"
                   >
-                    <option value="admin">Admin</option>
-                    <option value="developer">Developer</option>
-                    <option value="viewer">Viewer</option>
+                    <option value="admin">{t.roleLabels.admin}</option>
+                    <option value="developer">{t.roleLabels.developer}</option>
+                    <option value="viewer">{t.roleLabels.viewer}</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="create-plan">Policy</Label>
+                  <Label htmlFor="create-plan">{t.createDialog.policy}</Label>
                   <select
                     name="policyId"
                     id="create-plan"
@@ -801,11 +1154,11 @@ export default function UsersPage() {
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={closeCreateDialog}>
-                    Cancel
+                    {t.createDialog.cancel}
                   </Button>
                   <Button type="submit" disabled={saving}>
                     {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-                    Create
+                    {t.createDialog.submit}
                   </Button>
                 </DialogFooter>
               </form>
@@ -818,14 +1171,14 @@ export default function UsersPage() {
                 <Check className="size-8 text-green-500 animate-in zoom-in-50 duration-300" />
               </div>
               <div className="text-center">
-                <h3 className="text-lg font-semibold">User Created</h3>
+                <h3 className="text-lg font-semibold">{t.assignStep.heading}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  <strong>{createdUserName}</strong> has been added to the platform.
+                  {t.assignStep.added(createdUserName)}
                 </p>
               </div>
               <div className="flex w-full flex-col gap-3">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="assign-agent-def">Assign Primary Agent</Label>
+                  <Label htmlFor="assign-agent-def">{t.assignStep.assignAgent}</Label>
                   <select
                     id="assign-agent-def"
                     className="rounded-md border bg-background px-3 py-2 text-sm"
@@ -835,20 +1188,18 @@ export default function UsersPage() {
                     }}
                     disabled={assigningAgent}
                   >
-                    <option value="">Select an agent...</option>
+                    <option value="">{t.assignStep.selectAgent}</option>
                     {agentDefs.map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.name}
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-muted-foreground">
-                    Assign a primary agent so this user can start conversations.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t.assignStep.help}</p>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={closeCreateDialog}>
-                    Skip
+                    {t.assignStep.skip}
                   </Button>
                   <Button
                     disabled={!selectedAgentId || assigningAgent}
@@ -857,7 +1208,7 @@ export default function UsersPage() {
                     }}
                   >
                     {assigningAgent && <Loader2 className="mr-2 size-4 animate-spin" />}
-                    Assign
+                    {t.assignStep.assign}
                   </Button>
                 </DialogFooter>
               </div>
@@ -870,15 +1221,14 @@ export default function UsersPage() {
                 <Check className="size-8 text-green-500 animate-in zoom-in-50 duration-300" />
               </div>
               <div className="text-center">
-                <h3 className="text-lg font-semibold">All Set!</h3>
+                <h3 className="text-lg font-semibold">{t.doneStep.heading}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  <strong>{createdUserName}</strong> has been created
                   {createdUserRole === 'viewer'
-                    ? ' with read-only access.'
-                    : ' and assigned a primary agent.'}
+                    ? t.doneStep.createdViewer(createdUserName)
+                    : t.doneStep.createdAgent(createdUserName)}
                 </p>
               </div>
-              <Button onClick={closeCreateDialog}>Done</Button>
+              <Button onClick={closeCreateDialog}>{t.doneStep.done}</Button>
             </div>
           )}
         </DialogContent>
@@ -896,8 +1246,8 @@ export default function UsersPage() {
         {editUser && (
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
-              <DialogDescription>Update {editUser.name}&apos;s profile.</DialogDescription>
+              <DialogTitle>{t.editDialog.title}</DialogTitle>
+              <DialogDescription>{t.editDialog.description(editUser.name)}</DialogDescription>
             </DialogHeader>
             <form
               onSubmit={(e) => {
@@ -917,11 +1267,11 @@ export default function UsersPage() {
               className="flex flex-col gap-4"
             >
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-name">Name</Label>
+                <Label htmlFor="edit-name">{t.editDialog.name}</Label>
                 <Input id="edit-name" name="name" defaultValue={editUser.name} required />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-role">Role</Label>
+                <Label htmlFor="edit-role">{t.editDialog.role}</Label>
                 <select
                   name="role"
                   id="edit-role"
@@ -934,13 +1284,13 @@ export default function UsersPage() {
                     }
                   }}
                 >
-                  <option value="admin">Admin</option>
-                  <option value="developer">Developer</option>
-                  <option value="viewer">Viewer</option>
+                  <option value="admin">{t.roleLabels.admin}</option>
+                  <option value="developer">{t.roleLabels.developer}</option>
+                  <option value="viewer">{t.roleLabels.viewer}</option>
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-plan">Policy</Label>
+                <Label htmlFor="edit-plan">{t.editDialog.policy}</Label>
                 <select
                   name="policyId"
                   id="edit-plan"
@@ -957,19 +1307,19 @@ export default function UsersPage() {
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-status">Status</Label>
+                <Label htmlFor="edit-status">{t.editDialog.status}</Label>
                 <select
                   name="isActive"
                   id="edit-status"
                   className="rounded-md border bg-background px-3 py-2 text-sm"
                   defaultValue={String(editUser.isActive)}
                 >
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
+                  <option value="true">{t.editDialog.active}</option>
+                  <option value="false">{t.editDialog.inactive}</option>
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-agent">Primary Agent</Label>
+                <Label htmlFor="edit-agent">{t.editDialog.primaryAgent}</Label>
                 <select
                   id="edit-agent"
                   className="rounded-md border bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
@@ -979,7 +1329,7 @@ export default function UsersPage() {
                   }}
                   disabled={editUserRole === 'viewer'}
                 >
-                  <option value="">No agent assigned</option>
+                  <option value="">{t.editDialog.noAgent}</option>
                   {agentDefs.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.name}
@@ -987,9 +1337,7 @@ export default function UsersPage() {
                   ))}
                 </select>
                 <p className="text-xs text-muted-foreground">
-                  {editUserRole === 'viewer'
-                    ? 'Viewers cannot run agents.'
-                    : 'The primary agent allows this user to start conversations.'}
+                  {editUserRole === 'viewer' ? t.editDialog.viewerHelp : t.editDialog.agentHelp}
                 </p>
               </div>
               <DialogFooter>
@@ -1000,11 +1348,11 @@ export default function UsersPage() {
                     setEditUser(null);
                   }}
                 >
-                  Cancel
+                  {t.editDialog.cancel}
                 </Button>
                 <Button type="submit" disabled={saving}>
                   {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-                  Save
+                  {t.editDialog.save}
                 </Button>
               </DialogFooter>
             </form>
@@ -1024,14 +1372,13 @@ export default function UsersPage() {
         {deleteUser && (
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Remove User</AlertDialogTitle>
+              <AlertDialogTitle>{t.deleteDialog.title}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove <strong>{deleteUser.name}</strong> (
-                {deleteUser.email})? This action cannot be undone.
+                {t.deleteDialog.confirm(deleteUser.name, deleteUser.email)}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t.deleteDialog.cancel}</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => {
@@ -1040,7 +1387,7 @@ export default function UsersPage() {
                 disabled={saving}
               >
                 {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-                Remove
+                {t.deleteDialog.remove}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

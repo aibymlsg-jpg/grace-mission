@@ -7,7 +7,28 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatFileSize } from '@/lib/format';
+import { useT, type Messages } from '@/lib/i18n';
 import type { FileContent } from '@clawix/shared';
+
+const messages = {
+  en: {
+    modified: '● Modified',
+    save: 'Save',
+    cancel: 'Cancel',
+    saveHint: 'Ctrl+S to save',
+  },
+  'zh-TW': {
+    modified: '● 已修改',
+    save: '儲存',
+    cancel: '取消',
+    saveHint: '按 Ctrl+S 儲存',
+  },
+} satisfies Messages<{
+  modified: string;
+  save: string;
+  cancel: string;
+  saveHint: string;
+}>;
 
 interface FileEditorProps {
   readonly file: FileContent;
@@ -49,6 +70,7 @@ function getLanguageExtension(filename: string) {
 }
 
 export function FileEditor({ file, onSave, onCancel, onDirtyChange }: FileEditorProps) {
+  const t = useT(messages);
   const [content, setContent] = useState(file.content ?? '');
   const [extensions, setExtensions] = useState<import('@codemirror/state').Extension[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -104,7 +126,7 @@ export function FileEditor({ file, onSave, onCancel, onDirtyChange }: FileEditor
       <CardHeader className="flex flex-row items-center gap-2 space-y-0 border-b px-4 py-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="truncate text-sm font-medium">{file.name}</span>
-          {isDirty && <span className="text-amber-500 text-xs font-medium">● Modified</span>}
+          {isDirty && <span className="text-amber-500 text-xs font-medium">{t.modified}</span>}
           <Badge variant="secondary" className="shrink-0 text-xs">
             {file.type}
           </Badge>
@@ -121,10 +143,10 @@ export function FileEditor({ file, onSave, onCancel, onDirtyChange }: FileEditor
             onClick={handleSave}
           >
             <Save className="size-3" />
-            Save
+            {t.save}
           </Button>
           <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onCancel}>
-            Cancel
+            {t.cancel}
           </Button>
         </div>
       </CardHeader>
@@ -145,7 +167,7 @@ export function FileEditor({ file, onSave, onCancel, onDirtyChange }: FileEditor
         />
       </CardContent>
       <div className="flex items-center justify-between border-t px-4 py-1.5 text-xs text-muted-foreground">
-        <span>Ctrl+S to save</span>
+        <span>{t.saveHint}</span>
         <span>{file.type}</span>
       </div>
     </Card>

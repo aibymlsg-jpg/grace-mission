@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PanelLeftClose, PanelLeftOpen, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authFetch } from '@/lib/auth';
+import { useT, type Messages } from '@/lib/i18n';
 import { useChat } from './use-chat';
 import { ChatThread } from './chat-thread';
 import { ChatInput, EmptyState } from './chat-input';
@@ -11,7 +12,34 @@ import { SessionSidebar } from './session-sidebar';
 
 const SIDEBAR_STORAGE_KEY = 'conversations-sidebar-open';
 
+const pageMessages = {
+  en: {
+    hideSessions: 'Hide sessions',
+    showSessions: 'Show sessions',
+    conversations: 'Conversations',
+    archived: '(Archived)',
+    stop: 'Stop',
+    archivedReadOnly: 'This conversation is archived and read-only.',
+  },
+  'zh-TW': {
+    hideSessions: '隱藏工作階段',
+    showSessions: '顯示工作階段',
+    conversations: '對話',
+    archived: '(已封存)',
+    stop: '停止',
+    archivedReadOnly: '此對話已封存，僅供唯讀。',
+  },
+} satisfies Messages<{
+  hideSessions: string;
+  showSessions: string;
+  conversations: string;
+  archived: string;
+  stop: string;
+  archivedReadOnly: string;
+}>;
+
 export default function ConversationsPage() {
+  const t = useT(pageMessages);
   // Initialize to false for SSR, then sync from localStorage after hydration
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -132,7 +160,7 @@ export default function ConversationsPage() {
             size="icon"
             className="size-8"
             onClick={handleSidebarToggle}
-            title={sidebarOpen ? 'Hide sessions' : 'Show sessions'}
+            title={sidebarOpen ? t.hideSessions : t.showSessions}
           >
             {sidebarOpen ? (
               <PanelLeftClose className="size-4" />
@@ -141,8 +169,8 @@ export default function ConversationsPage() {
             )}
           </Button>
           <span className="text-sm text-muted-foreground">
-            {currentSession?.topic ?? 'Conversations'}
-            {isArchived && <span className="ml-2 text-xs opacity-60">(Archived)</span>}
+            {currentSession?.topic ?? t.conversations}
+            {isArchived && <span className="ml-2 text-xs opacity-60">{t.archived}</span>}
           </span>
         </div>
         {error && (
@@ -173,13 +201,13 @@ export default function ConversationsPage() {
                   }}
                 >
                   <Square className="size-3" />
-                  Stop
+                  {t.stop}
                 </Button>
               </div>
             )}
             {isArchived ? (
               <div className="border-t px-6 py-4 text-center text-sm text-muted-foreground">
-                This conversation is archived and read-only.
+                {t.archivedReadOnly}
               </div>
             ) : (
               <ChatInput

@@ -7,7 +7,31 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatFileSize } from '@/lib/format';
+import { useT, type Messages } from '@/lib/i18n';
 import type { FileContent } from '@clawix/shared';
+
+const messages = {
+  en: {
+    selectToPreview: 'Select a file to preview',
+    fullPreview: 'Full preview',
+    editFile: 'Edit file',
+    tooLarge: 'File is too large to preview (> 1 MB)',
+    binaryFile: 'Binary file — preview not available',
+  },
+  'zh-TW': {
+    selectToPreview: '選擇檔案以預覽',
+    fullPreview: '完整預覽',
+    editFile: '編輯檔案',
+    tooLarge: '檔案過大無法預覽（> 1 MB）',
+    binaryFile: '二進位檔案 — 無法預覽',
+  },
+} satisfies Messages<{
+  selectToPreview: string;
+  fullPreview: string;
+  editFile: string;
+  tooLarge: string;
+  binaryFile: string;
+}>;
 
 interface FilePreviewProps {
   readonly file: FileContent | null;
@@ -18,6 +42,7 @@ interface FilePreviewProps {
 }
 
 export function FilePreview({ file, isLoading, onClose, onEdit, onFullPreview }: FilePreviewProps) {
+  const t = useT(messages);
   if (isLoading) {
     return (
       <Card className="flex h-full items-center justify-center">
@@ -29,7 +54,7 @@ export function FilePreview({ file, isLoading, onClose, onEdit, onFullPreview }:
   if (!file) {
     return (
       <Card className="flex h-full items-center justify-center">
-        <p className="text-sm text-muted-foreground">Select a file to preview</p>
+        <p className="text-sm text-muted-foreground">{t.selectToPreview}</p>
       </Card>
     );
   }
@@ -53,7 +78,7 @@ export function FilePreview({ file, isLoading, onClose, onEdit, onFullPreview }:
               size="icon"
               className="size-7 shrink-0"
               onClick={onFullPreview}
-              title="Full preview"
+              title={t.fullPreview}
             >
               <Eye className="size-3.5" />
             </Button>
@@ -66,7 +91,7 @@ export function FilePreview({ file, isLoading, onClose, onEdit, onFullPreview }:
                 size="icon"
                 className="size-7 shrink-0"
                 onClick={onEdit}
-                title="Edit file"
+                title={t.editFile}
               >
                 <Pencil className="size-3.5" />
               </Button>
@@ -81,9 +106,7 @@ export function FilePreview({ file, isLoading, onClose, onEdit, onFullPreview }:
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
             <FileWarning className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              {file.truncated
-                ? 'File is too large to preview (> 1 MB)'
-                : 'Binary file — preview not available'}
+              {file.truncated ? t.tooLarge : t.binaryFile}
             </p>
           </div>
         ) : file.type === 'markdown' ? (

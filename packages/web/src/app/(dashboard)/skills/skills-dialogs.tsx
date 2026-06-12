@@ -14,8 +14,180 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { authFetch } from '@/lib/auth';
+import { useT, type Messages } from '@/lib/i18n';
 
 const NAME_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+// ------------------------------------------------------------------ //
+//  Co-located translations                                            //
+// ------------------------------------------------------------------ //
+
+const messages = {
+  en: {
+    sampleLabels: {
+      'create-video-from-images': 'Image → Video (Gemini + Banana API)',
+      'create-ppt-from-images': 'Images → PowerPoint Template (python-pptx)',
+      'ocr-and-question-answering': 'OCR + Question Answering (pytesseract)',
+      'ngo-field-report-compiler': 'NGO Field Report Compiler',
+    },
+    create: {
+      title: 'Create skill',
+      descriptionPrefix: 'Scaffolds a new skill under',
+      descriptionSuffix: 'in your workspace.',
+      nameLabel: 'Skill name',
+      namePlaceholder: 'skill-name',
+      nameHintPrefix: 'Lowercase, hyphens only, max 64 chars (e.g.',
+      descriptionLabel: 'Description',
+      descriptionPlaceholder: 'What does this skill do, and when should the agent use it?',
+      descriptionHint: "This is the agent's trigger — be specific about when to load this skill.",
+      useTemplate: 'Use template',
+      orLoadExample: 'or load an example:',
+      selectExample: 'Select example…',
+      contentCustomised: '(customised)',
+      contentOptional: '(optional — auto-generated if blank)',
+      contentLabelPrefix: 'SKILL.md content',
+      contentHelp:
+        'Edit the full SKILL.md before creating. Leave blank to use the default scaffold — you can always edit it afterwards.',
+      contentPlaceholderDescription: 'What this skill does…',
+      cancel: 'Cancel',
+      submit: 'Create',
+      errInvalidName: 'Name must be lowercase alphanumeric with hyphens.',
+      errDescriptionRequired: 'Description is required.',
+      errFailed: 'Failed to create skill',
+    },
+    edit: {
+      titlePrefix: 'Edit',
+      description:
+        'Frontmatter must remain valid (name, description). For more complex edits, use the workspace file editor.',
+      cancel: 'Cancel',
+      save: 'Save',
+      errFailed: 'Failed to save',
+    },
+    rename: {
+      title: 'Rename skill',
+      descriptionPrefix: 'The directory and the',
+      descriptionSuffix: 'frontmatter field will both be updated.',
+      cancel: 'Cancel',
+      submit: 'Rename',
+      errInvalidName: 'Name must be lowercase alphanumeric with hyphens.',
+      errFailed: 'Failed to rename',
+    },
+    del: {
+      title: 'Delete skill',
+      confirmPrefix: 'Permanently deletes',
+      confirmSuffix: 'and all its files. This cannot be undone.',
+      cancel: 'Cancel',
+      submit: 'Delete',
+      errFailed: 'Failed to delete',
+    },
+  },
+  'zh-TW': {
+    sampleLabels: {
+      'create-video-from-images': '圖片 → 影片（Gemini + Banana API）',
+      'create-ppt-from-images': '圖片 → PowerPoint 範本（python-pptx）',
+      'ocr-and-question-answering': 'OCR + 問答（pytesseract）',
+      'ngo-field-report-compiler': 'NGO 現場報告編製器',
+    },
+    create: {
+      title: '建立技能',
+      descriptionPrefix: '在您的工作區下建立新技能，路徑為',
+      descriptionSuffix: '。',
+      nameLabel: '技能名稱',
+      namePlaceholder: 'skill-name',
+      nameHintPrefix: '僅限小寫字母與連字號，最多 64 個字元（例如',
+      descriptionLabel: '描述',
+      descriptionPlaceholder: '這個技能的用途是什麼？代理應在什麼情況下使用它？',
+      descriptionHint: '這是代理的觸發條件——請明確說明何時應載入此技能。',
+      useTemplate: '使用範本',
+      orLoadExample: '或載入範例：',
+      selectExample: '選擇範例…',
+      contentCustomised: '（已自訂）',
+      contentOptional: '（選填——留空則自動產生）',
+      contentLabelPrefix: 'SKILL.md 內容',
+      contentHelp: '在建立前編輯完整的 SKILL.md。留空則使用預設範本——您之後仍可隨時編輯。',
+      contentPlaceholderDescription: '這個技能的用途…',
+      cancel: '取消',
+      submit: '建立',
+      errInvalidName: '名稱必須為小寫英數字並以連字號分隔。',
+      errDescriptionRequired: '描述為必填。',
+      errFailed: '建立技能失敗',
+    },
+    edit: {
+      titlePrefix: '編輯',
+      description: 'Frontmatter 必須維持有效（name、description）。如需更複雜的編輯，請使用工作區檔案編輯器。',
+      cancel: '取消',
+      save: '儲存',
+      errFailed: '儲存失敗',
+    },
+    rename: {
+      title: '重新命名技能',
+      descriptionPrefix: '目錄與',
+      descriptionSuffix: 'frontmatter 欄位都會一併更新。',
+      cancel: '取消',
+      submit: '重新命名',
+      errInvalidName: '名稱必須為小寫英數字並以連字號分隔。',
+      errFailed: '重新命名失敗',
+    },
+    del: {
+      title: '刪除技能',
+      confirmPrefix: '永久刪除',
+      confirmSuffix: '及其所有檔案。此操作無法復原。',
+      cancel: '取消',
+      submit: '刪除',
+      errFailed: '刪除失敗',
+    },
+  },
+} satisfies Messages<{
+  sampleLabels: Record<string, string>;
+  create: {
+    title: string;
+    descriptionPrefix: string;
+    descriptionSuffix: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    nameHintPrefix: string;
+    descriptionLabel: string;
+    descriptionPlaceholder: string;
+    descriptionHint: string;
+    useTemplate: string;
+    orLoadExample: string;
+    selectExample: string;
+    contentCustomised: string;
+    contentOptional: string;
+    contentLabelPrefix: string;
+    contentHelp: string;
+    contentPlaceholderDescription: string;
+    cancel: string;
+    submit: string;
+    errInvalidName: string;
+    errDescriptionRequired: string;
+    errFailed: string;
+  };
+  edit: {
+    titlePrefix: string;
+    description: string;
+    cancel: string;
+    save: string;
+    errFailed: string;
+  };
+  rename: {
+    title: string;
+    descriptionPrefix: string;
+    descriptionSuffix: string;
+    cancel: string;
+    submit: string;
+    errInvalidName: string;
+    errFailed: string;
+  };
+  del: {
+    title: string;
+    confirmPrefix: string;
+    confirmSuffix: string;
+    cancel: string;
+    submit: string;
+    errFailed: string;
+  };
+}>;
 
 // ------------------------------------------------------------------ //
 //  Skill scaffold template                                            //
@@ -307,6 +479,7 @@ export function CreateDialog({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  const t = useT(messages);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
@@ -347,11 +520,11 @@ export function CreateDialog({
   const handleSubmit = async () => {
     setErr('');
     if (!NAME_REGEX.test(name)) {
-      setErr('Name must be lowercase alphanumeric with hyphens.');
+      setErr(t.create.errInvalidName);
       return;
     }
     if (description.trim().length === 0) {
-      setErr('Description is required.');
+      setErr(t.create.errDescriptionRequired);
       return;
     }
     setSaving(true);
@@ -374,7 +547,7 @@ export function CreateDialog({
       setContentOpen(false);
       onCreated();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Failed to create skill');
+      setErr(e instanceof Error ? e.message : t.create.errFailed);
     } finally {
       setSaving(false);
     }
@@ -384,39 +557,39 @@ export function CreateDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto !w-[56vw] !max-w-none">
         <DialogHeader>
-          <DialogTitle>Create skill</DialogTitle>
+          <DialogTitle>{t.create.title}</DialogTitle>
           <DialogDescription>
-            Scaffolds a new skill under <code>/skills/&lt;name&gt;/SKILL.md</code> in your
-            workspace.
+            {t.create.descriptionPrefix} <code>/skills/&lt;name&gt;/SKILL.md</code>{' '}
+            {t.create.descriptionSuffix}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
           {/* Name */}
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-muted-foreground">Skill name</label>
+            <label className="text-xs font-medium text-muted-foreground">{t.create.nameLabel}</label>
             <Input
-              placeholder="skill-name"
+              placeholder={t.create.namePlaceholder}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <p className="text-[11px] text-muted-foreground">
-              Lowercase, hyphens only, max 64 chars (e.g. <code>ocr-and-question-answering</code>)
+              {t.create.nameHintPrefix} <code>ocr-and-question-answering</code>)
             </p>
           </div>
 
           {/* Description */}
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-muted-foreground">Description</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              {t.create.descriptionLabel}
+            </label>
             <Textarea
-              placeholder="What does this skill do, and when should the agent use it?"
+              placeholder={t.create.descriptionPlaceholder}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
             />
-            <p className="text-[11px] text-muted-foreground">
-              This is the agent&apos;s trigger — be specific about when to load this skill.
-            </p>
+            <p className="text-[11px] text-muted-foreground">{t.create.descriptionHint}</p>
           </div>
 
           {/* Template / Example controls */}
@@ -427,17 +600,19 @@ export function CreateDialog({
               className="flex items-center gap-1 rounded border px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <Wand2 className="size-3" />
-              Use template
+              {t.create.useTemplate}
             </button>
-            <span className="text-xs text-muted-foreground">or load an example:</span>
+            <span className="text-xs text-muted-foreground">{t.create.orLoadExample}</span>
             <select
               className="flex-1 rounded border bg-background px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
               value=""
               onChange={(e) => loadSample(e.target.value)}
             >
-              <option value="" disabled>Select example…</option>
+              <option value="" disabled>{t.create.selectExample}</option>
               {SKILL_SAMPLES.map((s) => (
-                <option key={s.name} value={s.label}>{s.label}</option>
+                <option key={s.name} value={s.label}>
+                  {t.sampleLabels[s.name as keyof typeof t.sampleLabels] ?? s.label}
+                </option>
               ))}
             </select>
           </div>
@@ -450,20 +625,19 @@ export function CreateDialog({
               className="flex w-full items-center justify-between px-3 py-2 text-muted-foreground hover:text-foreground"
             >
               <span className="font-medium">
-                SKILL.md content {content.trim() ? '(customised)' : '(optional — auto-generated if blank)'}
+                {t.create.contentLabelPrefix}{' '}
+                {content.trim() ? t.create.contentCustomised : t.create.contentOptional}
               </span>
               <ChevronDown className={`size-3.5 transition-transform ${contentOpen ? 'rotate-180' : ''}`} />
             </button>
             {contentOpen && (
               <div className="border-t p-2">
-                <p className="mb-2 px-1 text-muted-foreground">
-                  Edit the full SKILL.md before creating. Leave blank to use the default scaffold — you can always edit it afterwards.
-                </p>
+                <p className="mb-2 px-1 text-muted-foreground">{t.create.contentHelp}</p>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   className="min-h-[40vh] font-mono text-xs leading-relaxed"
-                  placeholder={SKILL_CONTENT_TEMPLATE('my-skill', 'What this skill does…')}
+                  placeholder={SKILL_CONTENT_TEMPLATE('my-skill', t.create.contentPlaceholderDescription)}
                 />
               </div>
             )}
@@ -474,11 +648,11 @@ export function CreateDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
+            {t.create.cancel}
           </Button>
           <Button onClick={() => void handleSubmit()} disabled={saving}>
             {saving ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
-            Create
+            {t.create.submit}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -495,6 +669,7 @@ export function EditDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useT(messages);
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
@@ -517,7 +692,7 @@ export function EditDialog({
       });
       onSaved();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Failed to save');
+      setErr(e instanceof Error ? e.message : t.edit.errFailed);
     } finally {
       setSaving(false);
     }
@@ -527,11 +702,10 @@ export function EditDialog({
     <Dialog open={target !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="!w-[60vw] !max-w-none">
         <DialogHeader>
-          <DialogTitle>Edit {target.dirName}/SKILL.md</DialogTitle>
-          <DialogDescription>
-            Frontmatter must remain valid (name, description). For more complex edits, use the
-            workspace file editor.
-          </DialogDescription>
+          <DialogTitle>
+            {t.edit.titlePrefix} {target.dirName}/SKILL.md
+          </DialogTitle>
+          <DialogDescription>{t.edit.description}</DialogDescription>
         </DialogHeader>
         <Textarea
           value={content}
@@ -541,11 +715,11 @@ export function EditDialog({
         {err && <p className="text-sm text-destructive">{err}</p>}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
+            {t.edit.cancel}
           </Button>
           <Button onClick={() => void handleSave()} disabled={saving}>
             {saving ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
-            Save
+            {t.edit.save}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -562,6 +736,7 @@ export function RenameDialog({
   onClose: () => void;
   onRenamed: () => void;
 }) {
+  const t = useT(messages);
   const [newName, setNewName] = useState('');
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
@@ -576,7 +751,7 @@ export function RenameDialog({
   const handleSubmit = async () => {
     setErr('');
     if (!NAME_REGEX.test(newName)) {
-      setErr('Name must be lowercase alphanumeric with hyphens.');
+      setErr(t.rename.errInvalidName);
       return;
     }
     setSaving(true);
@@ -588,7 +763,7 @@ export function RenameDialog({
       });
       onRenamed();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Failed to rename');
+      setErr(e instanceof Error ? e.message : t.rename.errFailed);
     } finally {
       setSaving(false);
     }
@@ -598,20 +773,20 @@ export function RenameDialog({
     <Dialog open={target !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rename skill</DialogTitle>
+          <DialogTitle>{t.rename.title}</DialogTitle>
           <DialogDescription>
-            The directory and the <code>name:</code> frontmatter field will both be updated.
+            {t.rename.descriptionPrefix} <code>name:</code> {t.rename.descriptionSuffix}
           </DialogDescription>
         </DialogHeader>
         <Input value={newName} onChange={(e) => setNewName(e.target.value)} />
         {err && <p className="text-sm text-destructive">{err}</p>}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
+            {t.rename.cancel}
           </Button>
           <Button onClick={() => void handleSubmit()} disabled={saving}>
             {saving ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
-            Rename
+            {t.rename.submit}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -628,6 +803,7 @@ export function DeleteDialog({
   onClose: () => void;
   onDeleted: () => void;
 }) {
+  const t = useT(messages);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
 
@@ -640,7 +816,7 @@ export function DeleteDialog({
       await authFetch(`/api/v1/skills/${target.dirName}`, { method: 'DELETE' });
       onDeleted();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Failed to delete');
+      setErr(e instanceof Error ? e.message : t.del.errFailed);
     } finally {
       setSaving(false);
     }
@@ -650,20 +826,19 @@ export function DeleteDialog({
     <Dialog open={target !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete skill</DialogTitle>
+          <DialogTitle>{t.del.title}</DialogTitle>
           <DialogDescription>
-            Permanently deletes <strong>{target.name}</strong> and all its files. This cannot be
-            undone.
+            {t.del.confirmPrefix} <strong>{target.name}</strong> {t.del.confirmSuffix}
           </DialogDescription>
         </DialogHeader>
         {err && <p className="text-sm text-destructive">{err}</p>}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
+            {t.del.cancel}
           </Button>
           <Button variant="destructive" onClick={() => void handleConfirm()} disabled={saving}>
             {saving ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
-            Delete
+            {t.del.submit}
           </Button>
         </DialogFooter>
       </DialogContent>

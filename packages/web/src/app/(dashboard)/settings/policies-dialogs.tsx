@@ -14,7 +14,125 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { authFetch } from '@/lib/auth';
+import { useT, type Messages } from '@/lib/i18n';
 import type { ApiPolicy } from './policies-tab';
+
+// ------------------------------------------------------------------ //
+//  i18n                                                               //
+// ------------------------------------------------------------------ //
+
+const messages = {
+  en: {
+    create: {
+      title: 'Create Policy',
+      description: 'Define a new governance policy with quotas and limits.',
+      cancel: 'Cancel',
+      submit: 'Create',
+    },
+    edit: {
+      title: 'Edit Policy',
+      description: (name: string) => `Update settings for ${name}.`,
+      cancel: 'Cancel',
+      submit: 'Save',
+    },
+    fields: {
+      name: 'Name',
+      namePlaceholder: 'e.g. Standard, Pro, Enterprise',
+      description: 'Description',
+      descriptionPlaceholder: 'Brief description of this policy tier',
+      tokenBudget: 'Token Budget (cents/mo)',
+      tokenBudgetPlaceholder: 'Empty = unlimited',
+      tokenBudgetHelp: 'In USD cents. Leave empty for unlimited.',
+      maxAgents: 'Max Agents',
+      maxSkills: 'Max Skills',
+      maxMemoryItems: 'Max Memory Items',
+      maxGroupsOwned: 'Max Groups Owned',
+      allowedProviders: 'Allowed Providers',
+      loadingProviders: 'Loading providers...',
+      noProviders: 'No providers configured. Add providers in Settings → Providers first.',
+      providersHelp: 'Select which AI providers users on this policy can access.',
+      cronSection: 'Scheduled Tasks (Cron)',
+      cronEnable: 'Enable cron scheduling',
+      maxTasks: 'Max Tasks',
+      minInterval: 'Min Interval (s)',
+      maxTokensPerRun: 'Max Tokens/Run',
+      unlimited: 'Unlimited',
+    },
+  },
+  'zh-TW': {
+    create: {
+      title: '建立政策',
+      description: '定義一個包含配額與上限的新治理政策。',
+      cancel: '取消',
+      submit: '建立',
+    },
+    edit: {
+      title: '編輯政策',
+      description: (name: string) => `更新 ${name} 的設定。`,
+      cancel: '取消',
+      submit: '儲存',
+    },
+    fields: {
+      name: '名稱',
+      namePlaceholder: '例如：標準、專業、企業',
+      description: '描述',
+      descriptionPlaceholder: '此政策層級的簡短描述',
+      tokenBudget: 'Token 預算（美分／月）',
+      tokenBudgetPlaceholder: '留空 = 無限制',
+      tokenBudgetHelp: '以美分計。留空表示無限制。',
+      maxAgents: '最大代理數',
+      maxSkills: '最大技能數',
+      maxMemoryItems: '最大記憶項目數',
+      maxGroupsOwned: '最大擁有群組數',
+      allowedProviders: '允許的供應商',
+      loadingProviders: '正在載入供應商…',
+      noProviders: '尚未設定供應商。請先在「設定 → 供應商」中新增供應商。',
+      providersHelp: '選擇此政策的使用者可存取哪些 AI 供應商。',
+      cronSection: '排程任務（Cron）',
+      cronEnable: '啟用 cron 排程',
+      maxTasks: '最大任務數',
+      minInterval: '最小間隔（秒）',
+      maxTokensPerRun: '每次執行最大 Token',
+      unlimited: '無限制',
+    },
+  },
+} satisfies Messages<{
+  create: {
+    title: string;
+    description: string;
+    cancel: string;
+    submit: string;
+  };
+  edit: {
+    title: string;
+    description: (name: string) => string;
+    cancel: string;
+    submit: string;
+  };
+  fields: {
+    name: string;
+    namePlaceholder: string;
+    description: string;
+    descriptionPlaceholder: string;
+    tokenBudget: string;
+    tokenBudgetPlaceholder: string;
+    tokenBudgetHelp: string;
+    maxAgents: string;
+    maxSkills: string;
+    maxMemoryItems: string;
+    maxGroupsOwned: string;
+    allowedProviders: string;
+    loadingProviders: string;
+    noProviders: string;
+    providersHelp: string;
+    cronSection: string;
+    cronEnable: string;
+    maxTasks: string;
+    minInterval: string;
+    maxTokensPerRun: string;
+    unlimited: string;
+  };
+}>;
 
 // ------------------------------------------------------------------ //
 //  Types                                                              //
@@ -106,16 +224,15 @@ export function CreatePolicyDialog({
   saving: boolean;
   onSubmit: (data: Record<string, unknown>) => void;
 }) {
+  const t = useT(messages);
   const { providers, loading: providersLoading } = useProviders();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Policy</DialogTitle>
-          <DialogDescription>
-            Define a new governance policy with quotas and limits.
-          </DialogDescription>
+          <DialogTitle>{t.create.title}</DialogTitle>
+          <DialogDescription>{t.create.description}</DialogDescription>
         </DialogHeader>
         <form
           onSubmit={(e) => {
@@ -133,11 +250,11 @@ export function CreatePolicyDialog({
                 onOpenChange(false);
               }}
             >
-              Cancel
+              {t.create.cancel}
             </Button>
             <Button type="submit" disabled={saving || providersLoading}>
               {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Create
+              {t.create.submit}
             </Button>
           </DialogFooter>
         </form>
@@ -161,6 +278,7 @@ export function EditPolicyDialog({
   saving: boolean;
   onSubmit: (id: string, data: Record<string, unknown>) => void;
 }) {
+  const t = useT(messages);
   const { providers, loading: providersLoading } = useProviders();
 
   if (!policy) return null;
@@ -169,8 +287,8 @@ export function EditPolicyDialog({
     <Dialog open={policy !== null} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Policy</DialogTitle>
-          <DialogDescription>Update settings for {policy.name}.</DialogDescription>
+          <DialogTitle>{t.edit.title}</DialogTitle>
+          <DialogDescription>{t.edit.description(policy.name)}</DialogDescription>
         </DialogHeader>
         <form
           onSubmit={(e) => {
@@ -192,11 +310,11 @@ export function EditPolicyDialog({
                 onOpenChange(false);
               }}
             >
-              Cancel
+              {t.edit.cancel}
             </Button>
             <Button type="submit" disabled={saving || providersLoading}>
               {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Save
+              {t.edit.submit}
             </Button>
           </DialogFooter>
         </form>
@@ -218,43 +336,44 @@ function PolicyFormFields({
   providers: ProviderOption[];
   providersLoading: boolean;
 }) {
+  const t = useT(messages);
   return (
     <>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="policy-name">Name</Label>
+        <Label htmlFor="policy-name">{t.fields.name}</Label>
         <Input
           id="policy-name"
           name="name"
-          placeholder="e.g. Standard, Pro, Enterprise"
+          placeholder={t.fields.namePlaceholder}
           defaultValue={policy?.name ?? ''}
           required
         />
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="policy-description">Description</Label>
+        <Label htmlFor="policy-description">{t.fields.description}</Label>
         <Input
           id="policy-description"
           name="description"
-          placeholder="Brief description of this policy tier"
+          placeholder={t.fields.descriptionPlaceholder}
           defaultValue={policy?.description ?? ''}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="policy-maxTokenBudget">Token Budget (cents/mo)</Label>
+          <Label htmlFor="policy-maxTokenBudget">{t.fields.tokenBudget}</Label>
           <Input
             id="policy-maxTokenBudget"
             name="maxTokenBudget"
             type="number"
             min="0"
-            placeholder="Empty = unlimited"
+            placeholder={t.fields.tokenBudgetPlaceholder}
             defaultValue={policy?.maxTokenBudget ?? ''}
           />
-          <p className="text-xs text-muted-foreground">In USD cents. Leave empty for unlimited.</p>
+          <p className="text-xs text-muted-foreground">{t.fields.tokenBudgetHelp}</p>
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="policy-maxAgents">Max Agents</Label>
+          <Label htmlFor="policy-maxAgents">{t.fields.maxAgents}</Label>
           <Input
             id="policy-maxAgents"
             name="maxAgents"
@@ -268,7 +387,7 @@ function PolicyFormFields({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="policy-maxSkills">Max Skills</Label>
+          <Label htmlFor="policy-maxSkills">{t.fields.maxSkills}</Label>
           <Input
             id="policy-maxSkills"
             name="maxSkills"
@@ -279,7 +398,7 @@ function PolicyFormFields({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="policy-maxMemoryItems">Max Memory Items</Label>
+          <Label htmlFor="policy-maxMemoryItems">{t.fields.maxMemoryItems}</Label>
           <Input
             id="policy-maxMemoryItems"
             name="maxMemoryItems"
@@ -292,7 +411,7 @@ function PolicyFormFields({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="policy-maxGroupsOwned">Max Groups Owned</Label>
+        <Label htmlFor="policy-maxGroupsOwned">{t.fields.maxGroupsOwned}</Label>
         <Input
           id="policy-maxGroupsOwned"
           name="maxGroupsOwned"
@@ -304,16 +423,14 @@ function PolicyFormFields({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>Allowed Providers</Label>
+        <Label>{t.fields.allowedProviders}</Label>
         {providersLoading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" />
-            Loading providers...
+            {t.fields.loadingProviders}
           </div>
         ) : providers.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No providers configured. Add providers in Settings &rarr; Providers first.
-          </p>
+          <p className="text-sm text-muted-foreground">{t.fields.noProviders}</p>
         ) : (
           <div className="flex flex-wrap gap-4">
             {providers.map((prov) => (
@@ -329,14 +446,12 @@ function PolicyFormFields({
             ))}
           </div>
         )}
-        <p className="text-xs text-muted-foreground">
-          Select which AI providers users on this policy can access.
-        </p>
+        <p className="text-xs text-muted-foreground">{t.fields.providersHelp}</p>
       </div>
 
       {/* Cron Scheduling */}
       <div className="flex flex-col gap-2">
-        <Label>Scheduled Tasks (Cron)</Label>
+        <Label>{t.fields.cronSection}</Label>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -344,13 +459,13 @@ function PolicyFormFields({
             className="size-4 rounded border"
             defaultChecked={policy?.cronEnabled ?? false}
           />
-          Enable cron scheduling
+          {t.fields.cronEnable}
         </label>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="policy-maxScheduledTasks">Max Tasks</Label>
+          <Label htmlFor="policy-maxScheduledTasks">{t.fields.maxTasks}</Label>
           <Input
             id="policy-maxScheduledTasks"
             name="maxScheduledTasks"
@@ -360,7 +475,7 @@ function PolicyFormFields({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="policy-minCronIntervalSecs">Min Interval (s)</Label>
+          <Label htmlFor="policy-minCronIntervalSecs">{t.fields.minInterval}</Label>
           <Input
             id="policy-minCronIntervalSecs"
             name="minCronIntervalSecs"
@@ -370,13 +485,13 @@ function PolicyFormFields({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="policy-maxTokensPerCronRun">Max Tokens/Run</Label>
+          <Label htmlFor="policy-maxTokensPerCronRun">{t.fields.maxTokensPerRun}</Label>
           <Input
             id="policy-maxTokensPerCronRun"
             name="maxTokensPerCronRun"
             type="number"
             min="0"
-            placeholder="Unlimited"
+            placeholder={t.fields.unlimited}
             defaultValue={policy?.maxTokensPerCronRun ?? ''}
           />
         </div>

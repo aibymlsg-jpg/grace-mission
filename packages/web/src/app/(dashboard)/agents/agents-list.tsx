@@ -25,6 +25,82 @@ import { authFetch } from '@/lib/auth';
 import { useAnimeOnMount, staggerFadeUp, STAGGER } from '@/lib/anime';
 import { SuccessDialog } from '@/components/ui/success-dialog';
 import { CreateAgentDialog, EditAgentDialog } from './agents-dialogs';
+import { useT, type Messages } from '@/lib/i18n';
+
+// ------------------------------------------------------------------ //
+//  Messages                                                          //
+// ------------------------------------------------------------------ //
+
+const messages = {
+  en: {
+    title: 'Agent Definitions',
+    subtitle: 'Manage AI agent definitions and monitor their runs.',
+    createAgent: 'Create Agent',
+    failedToLoad: 'Failed to load agents',
+    failedToCreate: 'Failed to create agent',
+    failedToUpdate: 'Failed to update agent',
+    noAgents: 'No agents configured.',
+    colAgent: 'Agent',
+    colModel: 'Model',
+    colRole: 'Role',
+    colType: 'Type',
+    colSkills: 'Skills',
+    colEnabled: 'Enabled',
+    typePublic: 'Public',
+    typePrivate: 'Private',
+    skillsCount: (n: number) => `${n} skills`,
+    alwaysOn: 'Always on',
+    edit: 'Edit',
+    viewRuns: 'View Runs',
+    agentCreated: 'Agent Created',
+    createdMessage: (name: string) => `${name} has been created.`,
+  },
+  'zh-TW': {
+    title: '代理定義',
+    subtitle: '管理 AI 代理定義並監控其執行記錄。',
+    createAgent: '建立代理',
+    failedToLoad: '載入代理失敗',
+    failedToCreate: '建立代理失敗',
+    failedToUpdate: '更新代理失敗',
+    noAgents: '尚未設定任何代理。',
+    colAgent: '代理',
+    colModel: '模型',
+    colRole: '角色',
+    colType: '類型',
+    colSkills: '技能',
+    colEnabled: '已啟用',
+    typePublic: '公開',
+    typePrivate: '私人',
+    skillsCount: (n: number) => `${n} 個技能`,
+    alwaysOn: '永遠啟用',
+    edit: '編輯',
+    viewRuns: '檢視執行記錄',
+    agentCreated: '代理已建立',
+    createdMessage: (name: string) => `已建立 ${name}。`,
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  createAgent: string;
+  failedToLoad: string;
+  failedToCreate: string;
+  failedToUpdate: string;
+  noAgents: string;
+  colAgent: string;
+  colModel: string;
+  colRole: string;
+  colType: string;
+  colSkills: string;
+  colEnabled: string;
+  typePublic: string;
+  typePrivate: string;
+  skillsCount: (n: number) => string;
+  alwaysOn: string;
+  edit: string;
+  viewRuns: string;
+  agentCreated: string;
+  createdMessage: (name: string) => string;
+}>;
 
 // ------------------------------------------------------------------ //
 //  Types (exported for use in dialogs)                                //
@@ -90,6 +166,7 @@ function serializeSorts(sorts: SortEntry[]): string {
 export function AgentsList() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const t = useT(messages);
   const [agents, setAgents] = useState<ApiAgent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -166,11 +243,11 @@ export function AgentsList() {
       const res = await authFetch<PaginatedAgents>('/api/v1/agents?limit=100');
       setAgents(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load agents');
+      setError(err instanceof Error ? err.message : t.failedToLoad);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchAgents();
@@ -201,9 +278,9 @@ export function AgentsList() {
       });
       setCreateOpen(false);
       await fetchAgents();
-      setSuccessMessage(`${form.get('name')} has been created.`);
+      setSuccessMessage(t.createdMessage(String(form.get('name'))));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create agent');
+      setError(err instanceof Error ? err.message : t.failedToCreate);
     } finally {
       setSaving(false);
     }
@@ -235,7 +312,7 @@ export function AgentsList() {
       setEditAgent(null);
       await fetchAgents();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update agent');
+      setError(err instanceof Error ? err.message : t.failedToUpdate);
     } finally {
       setSaving(false);
     }
@@ -251,7 +328,7 @@ export function AgentsList() {
       });
       await fetchAgents();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update agent');
+      setError(err instanceof Error ? err.message : t.failedToUpdate);
     } finally {
       setSaving(false);
     }
@@ -261,10 +338,8 @@ export function AgentsList() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Agent Definitions</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage AI agent definitions and monitor their runs.
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
         </div>
         <Button
           onClick={() => {
@@ -272,7 +347,7 @@ export function AgentsList() {
           }}
         >
           <Plus className="mr-2 size-4" />
-          Create Agent
+          {t.createAgent}
         </Button>
       </div>
 
@@ -288,7 +363,7 @@ export function AgentsList() {
         </div>
       ) : agents.length === 0 ? (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm p-8 text-center text-sm text-muted-foreground">
-          No agents configured.
+          {t.noAgents}
         </div>
       ) : (
         <div className="rounded-md border bg-background/30 backdrop-blur-sm">
@@ -301,7 +376,7 @@ export function AgentsList() {
                     toggleSort('name');
                   }}
                 >
-                  Agent {getSortIcon('name')}
+                  {t.colAgent} {getSortIcon('name')}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer select-none"
@@ -309,7 +384,7 @@ export function AgentsList() {
                     toggleSort('model');
                   }}
                 >
-                  Model {getSortIcon('model')}
+                  {t.colModel} {getSortIcon('model')}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer select-none"
@@ -317,7 +392,7 @@ export function AgentsList() {
                     toggleSort('role');
                   }}
                 >
-                  Role {getSortIcon('role')}
+                  {t.colRole} {getSortIcon('role')}
                 </TableHead>
                 <TableHead
                   className="cursor-pointer select-none"
@@ -325,16 +400,16 @@ export function AgentsList() {
                     toggleSort('type');
                   }}
                 >
-                  Type {getSortIcon('type')}
+                  {t.colType} {getSortIcon('type')}
                 </TableHead>
-                <TableHead>Skills</TableHead>
+                <TableHead>{t.colSkills}</TableHead>
                 <TableHead
                   className="cursor-pointer select-none"
                   onClick={() => {
                     toggleSort('enabled');
                   }}
                 >
-                  Enabled {getSortIcon('enabled')}
+                  {t.colEnabled} {getSortIcon('enabled')}
                 </TableHead>
                 <TableHead className="w-[50px]" />
               </TableRow>
@@ -358,17 +433,17 @@ export function AgentsList() {
                   </TableCell>
                   <TableCell>
                     {agent.isOfficial ? (
-                      <Badge variant="outline">Public</Badge>
+                      <Badge variant="outline">{t.typePublic}</Badge>
                     ) : (
-                      <Badge variant="secondary">Private</Badge>
+                      <Badge variant="secondary">{t.typePrivate}</Badge>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{agent.skillIds.length} skills</Badge>
+                    <Badge variant="outline">{t.skillsCount(agent.skillIds.length)}</Badge>
                   </TableCell>
                   <TableCell>
                     {agent.role === 'primary' ? (
-                      <span className="text-muted-foreground text-sm">Always on</span>
+                      <span className="text-muted-foreground text-sm">{t.alwaysOn}</span>
                     ) : (
                       <Switch
                         checked={agent.isActive}
@@ -392,10 +467,10 @@ export function AgentsList() {
                             setEditAgent(agent);
                           }}
                         >
-                          Edit
+                          {t.edit}
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/agents/${agent.id}`}>View Runs</Link>
+                          <Link href={`/agents/${agent.id}`}>{t.viewRuns}</Link>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -430,7 +505,7 @@ export function AgentsList() {
         onOpenChange={(open) => {
           if (!open) setSuccessMessage('');
         }}
-        title="Agent Created"
+        title={t.agentCreated}
         description={successMessage}
       />
     </div>

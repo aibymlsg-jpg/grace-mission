@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { DirectoryListing, FileEntry } from '@clawix/shared';
 import { authFetch } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { useT, type Messages } from '@/lib/i18n';
 import { FolderColumns, type FolderDef } from '../folder-columns';
 
 const FOLDERS: readonly FolderDef[] = [
@@ -14,7 +15,37 @@ const FOLDERS: readonly FolderDef[] = [
   { path: '/drafts', label: 'drafts' },
 ];
 
+const messages = {
+  en: {
+    title: 'Communications',
+    subtitle: 'newsletters · advocacy · social',
+    startConversation: 'Start conversation',
+    descBefore: 'Newsletters, social posts, op-eds and advocacy briefs. Managed by the ',
+    descAgent: 'Communications',
+    descMiddle: ' agent. All outputs land in ',
+    descAfter: ' — a human publishes.',
+  },
+  'zh-TW': {
+    title: '傳播溝通',
+    subtitle: '電子報 · 倡議 · 社群',
+    startConversation: '開始對話',
+    descBefore: '電子報、社群貼文、評論文章與倡議簡報。由',
+    descAgent: '傳播溝通',
+    descMiddle: '代理管理。所有輸出皆存放於',
+    descAfter: '，由人員發布。',
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  startConversation: string;
+  descBefore: string;
+  descAgent: string;
+  descMiddle: string;
+  descAfter: string;
+}>;
+
 export default function CommsPage() {
+  const t = useT(messages);
   const [columns, setColumns] = useState<Record<string, readonly FileEntry[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -47,23 +78,24 @@ export default function CommsPage() {
       <header className="flex flex-col gap-1 border-b border-border/60 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">Communications</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-              newsletters · advocacy · social
+              {t.subtitle}
             </span>
           </div>
           <Button variant="outline" size="sm" asChild>
             <Link href="/conversations">
               <MessageSquare className="mr-2 size-4" />
-              Start conversation
+              {t.startConversation}
             </Link>
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Newsletters, social posts, op-eds and advocacy briefs. Managed by the{' '}
-          <span className="font-medium text-foreground">Communications</span> agent. All outputs land
-          in <code className="rounded bg-foreground/5 px-1 font-mono text-xs">comms/drafts/</code>{' '}
-          — a human publishes.
+          {t.descBefore}
+          <span className="font-medium text-foreground">{t.descAgent}</span>
+          {t.descMiddle}
+          <code className="rounded bg-foreground/5 px-1 font-mono text-xs">comms/drafts/</code>
+          {t.descAfter}
         </p>
       </header>
 

@@ -3,12 +3,45 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { Eye, EyeOff, GalleryVerticalEnd, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, GalleryVerticalEnd, Languages, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/components/auth-provider';
 import { ApiError } from '@/lib/api';
+import { useLanguage, useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    heading: 'Login to Clawix',
+    subheading: 'Enter your email below to login to your account',
+    email: 'Email',
+    password: 'Password',
+    login: 'Login',
+    wait: (n: number) => `Wait ${n}s`,
+    loginFailed: 'Login failed',
+    switchLanguage: 'Switch language',
+  },
+  'zh-TW': {
+    heading: '登入 Clawix',
+    subheading: '請在下方輸入您的電子郵件以登入帳戶',
+    email: '電子郵件',
+    password: '密碼',
+    login: '登入',
+    wait: (n: number) => `請等待 ${n} 秒`,
+    loginFailed: '登入失敗',
+    switchLanguage: '切換語言',
+  },
+} satisfies Messages<{
+  heading: string;
+  subheading: string;
+  email: string;
+  password: string;
+  login: string;
+  wait: (n: number) => string;
+  loginFailed: string;
+  switchLanguage: string;
+}>;
 
 export default function LoginPage() {
   return (
@@ -22,6 +55,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
+  const { lang, toggleLang } = useLanguage();
+  const t = useT(messages);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -62,7 +97,7 @@ function LoginForm() {
         setWaitTime(seconds);
         setError(err.message);
       } else {
-        setError(err instanceof Error ? err.message : 'Login failed');
+        setError(err instanceof Error ? err.message : t.loginFailed);
       }
     } finally {
       setIsLoading(false);
@@ -75,12 +110,25 @@ function LoginForm() {
     <div className="flex min-h-svh w-full">
       {/* Left panel */}
       <div className="flex flex-1 flex-col gap-4 p-10">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <GalleryVerticalEnd className="size-4" />
+        {/* Logo + language toggle */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <GalleryVerticalEnd className="size-4" />
+            </div>
+            <span className="text-sm font-medium">Clawix</span>
           </div>
-          <span className="text-sm font-medium">Clawix</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-label={t.switchLanguage}
+            onClick={toggleLang}
+            className="gap-1.5 text-muted-foreground"
+          >
+            <Languages className="size-4" />
+            {lang === 'en' ? '中文' : 'English'}
+          </Button>
         </div>
 
         {/* Login form */}
@@ -88,10 +136,8 @@ function LoginForm() {
           <div className="flex w-full max-w-[320px] flex-col gap-7">
             {/* Header */}
             <div className="flex flex-col gap-1 text-center">
-              <h1 className="text-2xl font-bold tracking-tight">Login to Clawix</h1>
-              <p className="text-sm text-muted-foreground">
-                Enter your email below to login to your account
-              </p>
+              <h1 className="text-2xl font-bold tracking-tight">{t.heading}</h1>
+              <p className="text-sm text-muted-foreground">{t.subheading}</p>
             </div>
 
             {/* Form */}
@@ -104,7 +150,7 @@ function LoginForm() {
               <div className="flex flex-col gap-6">
                 {/* Email field */}
                 <div className="flex flex-col gap-3">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t.email}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -120,7 +166,7 @@ function LoginForm() {
 
                 {/* Password field */}
                 <div className="flex flex-col gap-3">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t.password}</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -151,7 +197,7 @@ function LoginForm() {
 
               <Button type="submit" className="w-full" disabled={isDisabled}>
                 {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {waitTime > 0 ? `Wait ${waitTime}s` : 'Login'}
+                {waitTime > 0 ? t.wait(waitTime) : t.login}
               </Button>
             </form>
           </div>

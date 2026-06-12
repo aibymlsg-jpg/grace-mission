@@ -14,6 +14,7 @@ import {
   CreditCard,
   FolderOpen,
   Heart,
+  Languages,
   MapPin,
   MonitorPlay,
   LogOut,
@@ -32,6 +33,7 @@ import {
 import { useTheme } from 'next-themes';
 import anime from 'animejs';
 import { EASING } from '@/lib/anime';
+import { useLanguage, useT, type Messages } from '@/lib/i18n';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -57,54 +59,132 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const platformItems = [
-  {
-    title: 'Conversations',
-    icon: MessageSquare,
-    href: '/conversations',
-  },
-  {
-    title: 'Workspace',
-    icon: FolderOpen,
-    href: '/workspace',
-  },
-  {
-    title: 'Projector',
-    icon: MonitorPlay,
-    href: '/projector',
-  },
-  {
-    title: 'Skills',
-    icon: Wrench,
-    href: '/skills',
-  },
-  {
-    title: 'Agents',
-    icon: Bot,
-    href: '/agents',
-  },
-];
-
 interface NavItem {
-  readonly title: string;
+  readonly key: string;
   readonly href: string;
   readonly icon: typeof BookOpen;
   readonly adminOnly?: boolean;
 }
 
+const platformItems: readonly NavItem[] = [
+  { key: 'conversations', icon: MessageSquare, href: '/conversations' },
+  { key: 'workspace', icon: FolderOpen, href: '/workspace' },
+  { key: 'projector', icon: MonitorPlay, href: '/projector' },
+  { key: 'skills', icon: Wrench, href: '/skills' },
+  { key: 'agents', icon: Bot, href: '/agents' },
+];
+
 const ngoItems: readonly NavItem[] = [
-  { title: 'Programs', href: '/ngo/programs', icon: Target },
-  { title: 'Donors', href: '/ngo/donors', icon: Heart },
-  { title: 'M&E', href: '/ngo/mne', icon: BarChart3 },
-  { title: 'Communications', href: '/ngo/comms', icon: Newspaper },
-  { title: 'Field Ops', href: '/ngo/field-ops', icon: MapPin },
+  { key: 'programs', href: '/ngo/programs', icon: Target },
+  { key: 'donors', href: '/ngo/donors', icon: Heart },
+  { key: 'mne', href: '/ngo/mne', icon: BarChart3 },
+  { key: 'comms', href: '/ngo/comms', icon: Newspaper },
+  { key: 'fieldOps', href: '/ngo/field-ops', icon: MapPin },
 ];
 
 const governanceItems: readonly NavItem[] = [
-  { title: 'Dashboard', href: '/dashboard', icon: BookOpen },
-  { title: 'Token Usage', href: '/governance/tokens', icon: Coins },
-  { title: 'Audit Logs', href: '/governance/audit', icon: ScrollText },
+  { key: 'dashboard', href: '/dashboard', icon: BookOpen },
+  { key: 'tokenUsage', href: '/governance/tokens', icon: Coins },
+  { key: 'auditLogs', href: '/governance/audit', icon: ScrollText },
 ];
+
+const settingsItems: readonly NavItem[] = [
+  { key: 'users', href: '/settings/users', icon: Users },
+  { key: 'policies', href: '/settings/policies', icon: CreditCard },
+  { key: 'channels', href: '/settings/channels', icon: Radio },
+  { key: 'providers', href: '/settings/providers', icon: Bot },
+];
+
+const messages = {
+  en: {
+    brandTagline: 'Enterprise AI Platform',
+    groupWorkspace: 'Workspace',
+    groupNgo: 'NGO Relevant',
+    groupGovernance: 'Governance',
+    nav: {
+      conversations: 'Conversations',
+      workspace: 'Workspace',
+      projector: 'Projector',
+      skills: 'Skills',
+      agents: 'Agents',
+      programs: 'Programs',
+      donors: 'Donors',
+      mne: 'M&E',
+      comms: 'Communications',
+      fieldOps: 'Field Ops',
+      dashboard: 'Dashboard',
+      tokenUsage: 'Token Usage',
+      auditLogs: 'Audit Logs',
+      settings: 'Settings',
+      users: 'Users',
+      policies: 'Policies',
+      channels: 'Channels',
+      providers: 'Providers',
+    },
+    lightMode: 'Light mode',
+    darkMode: 'Dark mode',
+    toggleTheme: 'Toggle theme',
+    switchToLight: 'Switch to light mode',
+    switchToDark: 'Switch to dark mode',
+    language: 'Language',
+    switchLanguage: 'Switch language',
+    profile: 'Profile',
+    logout: 'Log out',
+    userFallback: 'User',
+  },
+  'zh-TW': {
+    brandTagline: '企業級 AI 平台',
+    groupWorkspace: '工作區',
+    groupNgo: 'NGO 相關',
+    groupGovernance: '治理',
+    nav: {
+      conversations: '對話',
+      workspace: '工作區',
+      projector: '投影台',
+      skills: '技能',
+      agents: '代理',
+      programs: '計畫',
+      donors: '捐助者',
+      mne: '監測與評估',
+      comms: '傳播溝通',
+      fieldOps: '現場運作',
+      dashboard: '儀表板',
+      tokenUsage: 'Token 用量',
+      auditLogs: '稽核日誌',
+      settings: '設定',
+      users: '使用者',
+      policies: '政策',
+      channels: '頻道',
+      providers: '供應商',
+    },
+    lightMode: '淺色模式',
+    darkMode: '深色模式',
+    toggleTheme: '切換主題',
+    switchToLight: '切換至淺色模式',
+    switchToDark: '切換至深色模式',
+    language: '語言',
+    switchLanguage: '切換語言',
+    profile: '個人資料',
+    logout: '登出',
+    userFallback: '使用者',
+  },
+} satisfies Messages<{
+  brandTagline: string;
+  groupWorkspace: string;
+  groupNgo: string;
+  groupGovernance: string;
+  nav: Record<string, string>;
+  lightMode: string;
+  darkMode: string;
+  toggleTheme: string;
+  switchToLight: string;
+  switchToDark: string;
+  language: string;
+  switchLanguage: string;
+  profile: string;
+  logout: string;
+  userFallback: string;
+}>;
 
 // 2px left stripe on hover/active — matches the lift-and-stripe vocabulary used
 // across Memory, Groups, and Skills cards.
@@ -116,6 +196,8 @@ export function AppSidebar() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
+  const { lang, toggleLang } = useLanguage();
+  const t = useT(messages);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -154,7 +236,7 @@ export function AppSidebar() {
               <Link href="/">
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Clawix</span>
-                  <span className="truncate text-xs">Enterprise AI Platform</span>
+                  <span className="truncate text-xs">{t.brandTagline}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -165,20 +247,20 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-            Workspace
+            {t.groupWorkspace}
           </SidebarGroupLabel>
           <SidebarMenu>
             {platformItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem key={item.key}>
                 <SidebarMenuButton
                   asChild
                   isActive={isActive(item.href)}
-                  tooltip={item.title}
+                  tooltip={t.nav[item.key as keyof typeof t.nav]}
                   className={navButtonClass}
                 >
                   <Link href={item.href}>
                     <item.icon />
-                    <span>{item.title}</span>
+                    <span>{t.nav[item.key as keyof typeof t.nav]}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -188,20 +270,20 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-            NGO Relevant
+            {t.groupNgo}
           </SidebarGroupLabel>
           <SidebarMenu>
             {ngoItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem key={item.key}>
                 <SidebarMenuButton
                   asChild
                   isActive={isActive(item.href)}
-                  tooltip={item.title}
+                  tooltip={t.nav[item.key as keyof typeof t.nav]}
                   className={navButtonClass}
                 >
                   <Link href={item.href}>
                     <item.icon />
-                    <span>{item.title}</span>
+                    <span>{t.nav[item.key as keyof typeof t.nav]}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -211,22 +293,22 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-            Governance
+            {t.groupGovernance}
           </SidebarGroupLabel>
           <SidebarMenu>
             {governanceItems
               .filter((item) => !item.adminOnly || user?.role === 'admin')
               .map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.href)}
-                    tooltip={item.title}
+                    tooltip={t.nav[item.key as keyof typeof t.nav]}
                     className={navButtonClass}
                   >
                     <Link href={item.href}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span>{t.nav[item.key as keyof typeof t.nav]}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -250,23 +332,18 @@ export function AppSidebar() {
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
                       isActive={pathname.startsWith('/settings')}
-                      tooltip="Settings"
+                      tooltip={t.nav.settings}
                       className={navButtonClass}
                     >
                       <Settings2 />
-                      <span>Settings</span>
+                      <span>{t.nav.settings}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {[
-                        { title: 'Users', href: '/settings/users', icon: Users },
-                        { title: 'Policies', href: '/settings/policies', icon: CreditCard },
-                        { title: 'Channels', href: '/settings/channels', icon: Radio },
-                        { title: 'Providers', href: '/settings/providers', icon: Bot },
-                      ].map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
+                      {settingsItems.map((item) => (
+                        <SidebarMenuSubItem key={item.key}>
                           <SidebarMenuSubButton
                             asChild
                             isActive={isActive(item.href)}
@@ -274,7 +351,7 @@ export function AppSidebar() {
                           >
                             <Link href={item.href}>
                               <item.icon />
-                              <span>{item.title}</span>
+                              <span>{t.nav[item.key as keyof typeof t.nav]}</span>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -292,15 +369,25 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              tooltip={isDark ? 'Light mode' : 'Dark mode'}
+              aria-label={isDark ? t.switchToLight : t.switchToDark}
+              tooltip={isDark ? t.lightMode : t.darkMode}
               onClick={() => {
                 setTheme(isDark ? 'light' : 'dark');
               }}
             >
               <Sun className="size-4 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute size-4 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
-              <span>{mounted ? (isDark ? 'Light mode' : 'Dark mode') : 'Toggle theme'}</span>
+              <span>{mounted ? (isDark ? t.lightMode : t.darkMode) : t.toggleTheme}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              aria-label={t.switchLanguage}
+              tooltip={t.language}
+              onClick={toggleLang}
+            >
+              <Languages className="size-4" />
+              <span>{lang === 'en' ? '中文' : 'English'}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
@@ -314,7 +401,7 @@ export function AppSidebar() {
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {user?.email.split('@')[0] ?? 'User'}
+                      {user?.email.split('@')[0] ?? t.userFallback}
                     </span>
                     <span className="truncate text-xs text-muted-foreground">
                       {user?.email ?? 'user@example.com'}
@@ -334,7 +421,7 @@ export function AppSidebar() {
                   }}
                 >
                   <User className="mr-2 size-4" />
-                  Profile
+                  {t.profile}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -345,7 +432,7 @@ export function AppSidebar() {
                   }}
                 >
                   <LogOut className="mr-2 size-4" />
-                  Log out
+                  {t.logout}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

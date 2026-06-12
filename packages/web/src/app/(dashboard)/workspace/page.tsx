@@ -9,6 +9,7 @@ import { ApiError } from '@/lib/api';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useAnimeOnMount } from '@/lib/anime/use-anime';
 import { staggerFadeUp, STAGGER } from '@/lib/anime';
+import { useT, type Messages } from '@/lib/i18n';
 import { WorkspaceBreadcrumbs } from './breadcrumbs';
 import { WorkspaceToolbar } from './workspace-toolbar';
 import { FileList } from './file-list';
@@ -33,7 +34,64 @@ const FileEditor = dynamic(() => import('./file-editor').then((m) => ({ default:
   ssr: false,
 });
 
+const messages = {
+  en: {
+    title: 'Workspace',
+    subtitle: 'Browse files in your workspace',
+    editTitle: (name: string) => `Edit ${name}`,
+    editFallbackName: 'file',
+    errors: {
+      loadDirectory: 'Failed to load directory',
+      loadFile: 'Failed to load file',
+      createEntry: 'Failed to create entry',
+      delete: 'Failed to delete',
+      rename: 'Failed to rename',
+      move: 'Failed to move',
+      download: 'Failed to download file',
+      downloadFailed: 'Download failed',
+      save: 'Failed to save file',
+      reload: 'Failed to reload file',
+    },
+  },
+  'zh-TW': {
+    title: '工作區',
+    subtitle: '瀏覽您工作區中的檔案',
+    editTitle: (name: string) => `編輯 ${name}`,
+    editFallbackName: '檔案',
+    errors: {
+      loadDirectory: '無法載入目錄',
+      loadFile: '無法載入檔案',
+      createEntry: '無法建立項目',
+      delete: '無法刪除',
+      rename: '無法重新命名',
+      move: '無法移動',
+      download: '無法下載檔案',
+      downloadFailed: '下載失敗',
+      save: '無法儲存檔案',
+      reload: '無法重新載入檔案',
+    },
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  editTitle: (name: string) => string;
+  editFallbackName: string;
+  errors: {
+    loadDirectory: string;
+    loadFile: string;
+    createEntry: string;
+    delete: string;
+    rename: string;
+    move: string;
+    download: string;
+    downloadFailed: string;
+    save: string;
+    reload: string;
+  };
+}>;
+
 function WorkspacePageContent() {
+  const t = useT(messages);
   const searchParams = useSearchParams();
   const initialPath = searchParams.get('path') ?? '/';
   const [currentPath, setCurrentPath] = useState(initialPath);
@@ -67,11 +125,11 @@ function WorkspacePageContent() {
       setListing(data);
       setCurrentPath(data.path);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load directory');
+      setError(err instanceof Error ? err.message : t.errors.loadDirectory);
     } finally {
       setIsLoadingDir(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchFileContent = useCallback(async (entry: FileEntry) => {
     setSelectedPath(entry.path);
@@ -83,12 +141,12 @@ function WorkspacePageContent() {
       );
       setSelectedFile(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load file');
+      setError(err instanceof Error ? err.message : t.errors.loadFile);
       setSelectedFile(null);
     } finally {
       setIsLoadingFile(false);
     }
-  }, []);
+  }, [t]);
 
   const handleNavigate = useCallback(
     (path: string) => {
@@ -140,10 +198,10 @@ function WorkspacePageContent() {
         setShowCreateDialog(null);
         fetchDirectory(currentPath);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create entry');
+        setError(err instanceof Error ? err.message : t.errors.createEntry);
       }
     },
-    [showCreateDialog, currentPath, fetchDirectory],
+    [showCreateDialog, currentPath, fetchDirectory, t],
   );
 
   const handleDelete = useCallback(async () => {
@@ -161,9 +219,9 @@ function WorkspacePageContent() {
       }
       fetchDirectory(currentPath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete');
+      setError(err instanceof Error ? err.message : t.errors.delete);
     }
-  }, [deleteTarget, currentPath, fetchDirectory, selectedPath]);
+  }, [deleteTarget, currentPath, fetchDirectory, selectedPath, t]);
 
   const handleRename = useCallback(
     async (entry: FileEntry, newName: string) => {
@@ -175,10 +233,10 @@ function WorkspacePageContent() {
         });
         fetchDirectory(currentPath);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to rename');
+        setError(err instanceof Error ? err.message : t.errors.rename);
       }
     },
-    [currentPath, fetchDirectory],
+    [currentPath, fetchDirectory, t],
   );
 
   const handleMove = useCallback(
@@ -193,10 +251,10 @@ function WorkspacePageContent() {
         setMoveTarget(null);
         fetchDirectory(currentPath);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to move');
+        setError(err instanceof Error ? err.message : t.errors.move);
       }
     },
-    [moveTarget, currentPath, fetchDirectory],
+    [moveTarget, currentPath, fetchDirectory, t],
   );
 
   const handleDownload = useCallback(async (entry: FileEntry) => {
@@ -209,7 +267,7 @@ function WorkspacePageContent() {
         `${apiBase}/api/v1/workspace/files/download?path=${encodeURIComponent(entry.path)}`,
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );
-      if (!res.ok) throw new Error('Download failed');
+      if (!res.ok) throw new Error(t.errors.downloadFailed);
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -219,9 +277,9 @@ function WorkspacePageContent() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to download file');
+      setError(err instanceof Error ? err.message : t.errors.download);
     }
-  }, []);
+  }, [t]);
 
   const handleEdit = useCallback(() => {
     setEditing(true);
@@ -254,11 +312,11 @@ function WorkspacePageContent() {
           setPendingContent(content);
           setShowConflictDialog(true);
         } else {
-          setError(err instanceof Error ? err.message : 'Failed to save file');
+          setError(err instanceof Error ? err.message : t.errors.save);
         }
       }
     },
-    [selectedFile, currentPath, fetchDirectory],
+    [selectedFile, currentPath, fetchDirectory, t],
   );
 
   const handleCancelEdit = useCallback(() => {
@@ -306,9 +364,9 @@ function WorkspacePageContent() {
       setPendingContent(null);
       fetchDirectory(currentPath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save file');
+      setError(err instanceof Error ? err.message : t.errors.save);
     }
-  }, [selectedFile, pendingContent, currentPath, fetchDirectory]);
+  }, [selectedFile, pendingContent, currentPath, fetchDirectory, t]);
 
   const handleReloadFile = useCallback(async () => {
     if (!selectedFile) return;
@@ -322,9 +380,9 @@ function WorkspacePageContent() {
       // Stay in edit mode with fresh content
       setEditingDirty(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reload file');
+      setError(err instanceof Error ? err.message : t.errors.reload);
     }
-  }, [selectedFile]);
+  }, [selectedFile, t]);
 
   const handleSelectFile = useCallback(
     (entry: FileEntry) => {
@@ -354,8 +412,8 @@ function WorkspacePageContent() {
       <div className="flex items-center gap-3">
         <FolderOpen className="size-6 text-amber-500" />
         <div>
-          <h1 className="text-lg font-semibold">Workspace</h1>
-          <p className="text-sm text-muted-foreground">Browse files in your workspace</p>
+          <h1 className="text-lg font-semibold">{t.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
         </div>
       </div>
 
@@ -496,7 +554,9 @@ function WorkspacePageContent() {
           showCloseButton={false}
           className="flex h-[85vh] !w-[40vw] !max-w-none flex-col gap-0 p-0 overflow-hidden [&>*]:h-full"
         >
-          <DialogTitle className="sr-only">Edit {selectedFile?.name ?? 'file'}</DialogTitle>
+          <DialogTitle className="sr-only">
+            {t.editTitle(selectedFile?.name ?? t.editFallbackName)}
+          </DialogTitle>
           {editing && selectedFile && (
             <FileEditor
               file={selectedFile}

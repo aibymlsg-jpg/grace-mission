@@ -4,6 +4,21 @@ import Link from 'next/link';
 import { ArrowUpRight, FileText, Folder } from 'lucide-react';
 import type { FileEntry } from '@clawix/shared';
 import { Button } from '@/components/ui/button';
+import { useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    openInWorkspace: (label: string) => `Open ${label} in workspace`,
+    noFiles: 'No files yet.',
+  },
+  'zh-TW': {
+    openInWorkspace: (label: string) => `在工作區開啟 ${label}`,
+    noFiles: '尚無檔案。',
+  },
+} satisfies Messages<{
+  openInWorkspace: (label: string) => string;
+  noFiles: string;
+}>;
 
 export interface FolderDef {
   readonly path: string;
@@ -27,6 +42,7 @@ export function FolderColumns({
 }
 
 function Column({ label, path, items }: { label: string; path: string; items: readonly FileEntry[] }) {
+  const t = useT(messages);
   return (
     <div className="flex w-72 shrink-0 flex-col gap-3 rounded-md border bg-muted/30 p-3">
       <div className="flex items-center justify-between border-b border-border/50 pb-2">
@@ -41,7 +57,7 @@ function Column({ label, path, items }: { label: string; path: string; items: re
           variant="ghost"
           className="size-6"
           asChild
-          title={`Open ${label} in workspace`}
+          title={t.openInWorkspace(label)}
         >
           <Link href={`/workspace?path=${encodeURIComponent(path)}`}>
             <ArrowUpRight className="size-3.5" />
@@ -51,7 +67,7 @@ function Column({ label, path, items }: { label: string; path: string; items: re
 
       <div className="flex flex-col gap-2">
         {items.length === 0 ? (
-          <p className="text-xs text-muted-foreground/60">No files yet.</p>
+          <p className="text-xs text-muted-foreground/60">{t.noFiles}</p>
         ) : (
           items.map((entry) => <FileCard key={entry.name} entry={entry} folderPath={path} />)
         )}

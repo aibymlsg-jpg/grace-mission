@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Archive, ChevronRight, Loader2, MessageSquarePlus, Pencil, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { authFetch } from '@/lib/auth';
+import { useT, type Messages } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import {
   ContextMenu,
@@ -21,6 +22,67 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import type { ChatSession } from './use-chat';
+
+/* ------------------------------------------------------------------ */
+/*  i18n                                                               */
+/* ------------------------------------------------------------------ */
+
+const messages = {
+  en: {
+    today: 'Today',
+    yesterday: 'Yesterday',
+    dateLocale: 'en-US',
+    searchPlaceholder: 'Search conversations...',
+    noMatching: 'No matching conversations',
+    noConversations: 'No conversations yet',
+    sessionFallback: (date: string) => `Session — ${date}`,
+    rename: 'Rename',
+    renameTitle: 'Rename Conversation',
+    renameDescription: 'Enter a new name for this conversation.',
+    renamePlaceholder: 'Conversation topic...',
+    cancel: 'Cancel',
+    save: 'Save',
+    newChatTitle: 'Start New Conversation',
+    newChatDescription:
+      'Starting a new conversation will archive your current one. You can still view it later in the sidebar.',
+    archiveAndStart: 'Archive & Start New',
+  },
+  'zh-TW': {
+    today: '今天',
+    yesterday: '昨天',
+    dateLocale: 'zh-TW',
+    searchPlaceholder: '搜尋對話…',
+    noMatching: '找不到符合的對話',
+    noConversations: '尚無對話',
+    sessionFallback: (date: string) => `工作階段 — ${date}`,
+    rename: '重新命名',
+    renameTitle: '重新命名對話',
+    renameDescription: '為此對話輸入新名稱。',
+    renamePlaceholder: '對話主題…',
+    cancel: '取消',
+    save: '儲存',
+    newChatTitle: '開始新對話',
+    newChatDescription: '開始新對話會封存您目前的對話。您之後仍可在側邊欄檢視。',
+    archiveAndStart: '封存並開始新對話',
+  },
+} satisfies Messages<{
+  today: string;
+  yesterday: string;
+  dateLocale: string;
+  searchPlaceholder: string;
+  noMatching: string;
+  noConversations: string;
+  sessionFallback: (date: string) => string;
+  rename: string;
+  renameTitle: string;
+  renameDescription: string;
+  renamePlaceholder: string;
+  cancel: string;
+  save: string;
+  newChatTitle: string;
+  newChatDescription: string;
+  archiveAndStart: string;
+}>;
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -52,17 +114,20 @@ function getDayKey(dateStr: string): string {
 }
 
 // Human-friendly label for a day group: "Today", "Yesterday", or a localized date.
-function formatDayLabel(dateStr: string): string {
+function formatDayLabel(
+  dateStr: string,
+  labels: { today: string; yesterday: string; locale: string },
+): string {
   const date = new Date(dateStr);
   const today = new Date();
   const todayKey = getDayKey(today.toISOString());
   const dayKey = getDayKey(dateStr);
-  if (dayKey === todayKey) return 'Today';
+  if (dayKey === todayKey) return labels.today;
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
-  if (dayKey === getDayKey(yesterday.toISOString())) return 'Yesterday';
+  if (dayKey === getDayKey(yesterday.toISOString())) return labels.yesterday;
   const sameYear = date.getFullYear() === today.getFullYear();
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(labels.locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -70,9 +135,9 @@ function formatDayLabel(dateStr: string): string {
   });
 }
 
-function formatShortDate(dateStr: string): string {
+function formatShortDate(dateStr: string, locale: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 /* ------------------------------------------------------------------ */
@@ -90,6 +155,7 @@ export function SessionSidebar({
   onLoadMore,
   onSessionUpdated,
 }: SessionSidebarProps) {
+  const t = useT(messages);
   const [renameSession, setRenameSession] = useState<ChatSession | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [saving, setSaving] = useState(false);
@@ -113,10 +179,10 @@ export function SessionSidebar({
     const query = searchQuery.toLowerCase();
     return sessions.filter((session) => {
       const topic = session.topic?.toLowerCase() ?? '';
-      const date = formatShortDate(session.createdAt).toLowerCase();
+      const date = formatShortDate(session.createdAt, t.dateLocale).toLowerCase();
       return topic.includes(query) || date.includes(query);
     });
-  }, [sessions, searchQuery]);
+  }, [sessions, searchQuery, t.dateLocale]);
 
   // Sort sessions by createdAt descending (newest first)
   const sorted = useMemo(
@@ -230,7 +296,7 @@ export function SessionSidebar({
       {searchOpen && (
         <div className="px-3 pb-2">
           <Input
-            placeholder="Search conversations..."
+            placeholder={t.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-8 text-sm"
@@ -247,13 +313,17 @@ export function SessionSidebar({
           </div>
         ) : sorted.length === 0 ? (
           <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-            {searchQuery ? 'No matching conversations' : 'No conversations yet'}
+            {searchQuery ? t.noMatching : t.noConversations}
           </p>
         ) : (
           dayKeys.map((dayKey) => {
             const daySessions = groups.get(dayKey) ?? [];
             const isExpanded = expandedDays.has(dayKey);
-            const label = formatDayLabel(daySessions[0]!.createdAt);
+            const label = formatDayLabel(daySessions[0]!.createdAt, {
+              today: t.today,
+              yesterday: t.yesterday,
+              locale: t.dateLocale,
+            });
             return (
               <div key={dayKey}>
                 <button
@@ -289,14 +359,15 @@ export function SessionSidebar({
                             <Archive className="size-3 shrink-0 text-muted-foreground" />
                           )}
                           <span className="truncate">
-                            {session.topic ?? `Session — ${formatShortDate(session.createdAt)}`}
+                            {session.topic ??
+                              t.sessionFallback(formatShortDate(session.createdAt, t.dateLocale))}
                           </span>
                         </button>
                       </ContextMenuTrigger>
                       <ContextMenuContent>
                         <ContextMenuItem onClick={() => handleRename(session)}>
                           <Pencil className="mr-2 size-4" />
-                          Rename
+                          {t.rename}
                         </ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
@@ -319,13 +390,13 @@ export function SessionSidebar({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rename Conversation</DialogTitle>
-            <DialogDescription>Enter a new name for this conversation.</DialogDescription>
+            <DialogTitle>{t.renameTitle}</DialogTitle>
+            <DialogDescription>{t.renameDescription}</DialogDescription>
           </DialogHeader>
           <Input
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
-            placeholder="Conversation topic..."
+            placeholder={t.renamePlaceholder}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !saving) {
                 void handleRenameSubmit();
@@ -334,11 +405,11 @@ export function SessionSidebar({
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setRenameSession(null)} disabled={saving}>
-              Cancel
+              {t.cancel}
             </Button>
             <Button onClick={() => void handleRenameSubmit()} disabled={saving}>
               {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-              Save
+              {t.save}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -348,15 +419,12 @@ export function SessionSidebar({
       <Dialog open={confirmNewChat} onOpenChange={setConfirmNewChat}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Start New Conversation</DialogTitle>
-            <DialogDescription>
-              Starting a new conversation will archive your current one. You can still view it later
-              in the sidebar.
-            </DialogDescription>
+            <DialogTitle>{t.newChatTitle}</DialogTitle>
+            <DialogDescription>{t.newChatDescription}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setConfirmNewChat(false)}>
-              Cancel
+              {t.cancel}
             </Button>
             <Button
               onClick={() => {
@@ -364,7 +432,7 @@ export function SessionSidebar({
                 onNewChat(true);
               }}
             >
-              Archive & Start New
+              {t.archiveAndStart}
             </Button>
           </DialogFooter>
         </DialogContent>

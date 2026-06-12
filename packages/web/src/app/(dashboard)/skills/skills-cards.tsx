@@ -12,6 +12,33 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    builtinBadge: 'builtin',
+    customBadge: 'custom',
+    edit: 'Edit',
+    rename: 'Rename',
+    delete: 'Delete',
+    manageFiles: 'Manage files',
+  },
+  'zh-TW': {
+    builtinBadge: '內建',
+    customBadge: '自訂',
+    edit: '編輯',
+    rename: '重新命名',
+    delete: '刪除',
+    manageFiles: '管理檔案',
+  },
+} satisfies Messages<{
+  builtinBadge: string;
+  customBadge: string;
+  edit: string;
+  rename: string;
+  delete: string;
+  manageFiles: string;
+}>;
 
 export interface Skill {
   name: string;
@@ -31,6 +58,7 @@ export function dirNameFromPath(skillPath: string): string {
 }
 
 export function BuiltinCard({ skill }: { skill: Skill }) {
+  const t = useT(messages);
   return (
     <Card>
       <CardHeader>
@@ -38,7 +66,7 @@ export function BuiltinCard({ skill }: { skill: Skill }) {
           <div className="flex size-10 items-center justify-center rounded-lg border bg-muted">
             <BookOpen className="size-5 text-muted-foreground" />
           </div>
-          <Badge variant="outline">builtin</Badge>
+          <Badge variant="outline">{t.builtinBadge}</Badge>
         </div>
         <CardTitle className="text-base">{skill.name}</CardTitle>
         <CardDescription className="line-clamp-3">{skill.description}</CardDescription>
@@ -63,6 +91,7 @@ export function CustomCard({
   onRename: () => void;
   onDelete: () => void;
 }) {
+  const t = useT(messages);
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -70,7 +99,7 @@ export function CustomCard({
           <div className="flex size-10 items-center justify-center rounded-lg border bg-muted">
             <BookOpen className="size-5 text-muted-foreground" />
           </div>
-          <Badge variant="secondary">custom</Badge>
+          <Badge variant="secondary">{t.customBadge}</Badge>
         </div>
         <CardTitle className="text-base">{skill.name}</CardTitle>
         <CardDescription className="line-clamp-3">{skill.description}</CardDescription>
@@ -81,19 +110,19 @@ export function CustomCard({
       <CardFooter className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={onEdit}>
           <Pencil className="mr-1 size-3" />
-          Edit
+          {t.edit}
         </Button>
         <Button size="sm" variant="outline" onClick={onRename}>
-          Rename
+          {t.rename}
         </Button>
         <Button size="sm" variant="outline" onClick={onDelete}>
           <Trash className="mr-1 size-3" />
-          Delete
+          {t.delete}
         </Button>
         <Button size="sm" variant="ghost" asChild>
           <Link href={`/workspace?path=/skills/${dirName}`}>
             <FolderOpen className="mr-1 size-3" />
-            Manage files
+            {t.manageFiles}
           </Link>
         </Button>
       </CardFooter>

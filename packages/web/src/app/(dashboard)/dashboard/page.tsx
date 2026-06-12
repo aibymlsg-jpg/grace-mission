@@ -15,6 +15,98 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { authFetch } from '@/lib/auth';
+import { useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    heading: 'Dashboard',
+    subheading: "Here's an overview of your AI orchestration platform.",
+    loadFailed: 'Failed to load dashboard data',
+    totalRuns: 'Total Runs',
+    totalRunsSubtitle: 'all time',
+    activeAgents: 'Active Agents',
+    activeAgentsSubtitle: 'definitions',
+    tokenUsage: 'Token Usage',
+    tokenUsageSubtitle: (cost: string) => `$${cost} this month`,
+    pendingTasks: 'Pending Tasks',
+    pendingTasksSubtitle: 'in queue',
+    recentRuns: 'Recent Agent Runs',
+    recentRunsDescription: 'Latest activity across all agents.',
+    noRuns: 'No agent runs yet.',
+    colAgent: 'Agent',
+    colStatus: 'Status',
+    colDuration: 'Duration',
+    colTime: 'Time',
+    recentActivity: 'Recent Activity',
+    recentActivityDescription: 'Latest actions in your workspace.',
+    noActivity: 'No activity yet.',
+    justNow: 'just now',
+    minsAgo: (n: number) => `${n}m ago`,
+    hoursAgo: (n: number) => `${n}h ago`,
+    daysAgo: (n: number) => `${n}d ago`,
+    durationSecs: (n: number) => `${n}s`,
+    durationMins: (m: number, s: number) => `${m}m ${s}s`,
+  },
+  'zh-TW': {
+    heading: '儀表板',
+    subheading: '以下是您的 AI 協作平台概覽。',
+    loadFailed: '無法載入儀表板資料',
+    totalRuns: '總執行次數',
+    totalRunsSubtitle: '歷來總計',
+    activeAgents: '啟用中的代理',
+    activeAgentsSubtitle: '定義',
+    tokenUsage: 'Token 用量',
+    tokenUsageSubtitle: (cost: string) => `本月 $${cost}`,
+    pendingTasks: '待處理任務',
+    pendingTasksSubtitle: '佇列中',
+    recentRuns: '近期代理執行記錄',
+    recentRunsDescription: '所有代理的最新活動。',
+    noRuns: '尚無代理執行記錄。',
+    colAgent: '代理',
+    colStatus: '狀態',
+    colDuration: '耗時',
+    colTime: '時間',
+    recentActivity: '近期活動',
+    recentActivityDescription: '工作區的最新操作。',
+    noActivity: '尚無活動。',
+    justNow: '剛剛',
+    minsAgo: (n: number) => `${n} 分鐘前`,
+    hoursAgo: (n: number) => `${n} 小時前`,
+    daysAgo: (n: number) => `${n} 天前`,
+    durationSecs: (n: number) => `${n} 秒`,
+    durationMins: (m: number, s: number) => `${m} 分 ${s} 秒`,
+  },
+} satisfies Messages<{
+  heading: string;
+  subheading: string;
+  loadFailed: string;
+  totalRuns: string;
+  totalRunsSubtitle: string;
+  activeAgents: string;
+  activeAgentsSubtitle: string;
+  tokenUsage: string;
+  tokenUsageSubtitle: (cost: string) => string;
+  pendingTasks: string;
+  pendingTasksSubtitle: string;
+  recentRuns: string;
+  recentRunsDescription: string;
+  noRuns: string;
+  colAgent: string;
+  colStatus: string;
+  colDuration: string;
+  colTime: string;
+  recentActivity: string;
+  recentActivityDescription: string;
+  noActivity: string;
+  justNow: string;
+  minsAgo: (n: number) => string;
+  hoursAgo: (n: number) => string;
+  daysAgo: (n: number) => string;
+  durationSecs: (n: number) => string;
+  durationMins: (m: number, s: number) => string;
+}>;
+
+type T = typeof messages.en;
 
 interface DashboardStats {
   totalRuns: number;
@@ -49,24 +141,24 @@ function formatNumber(n: number): string {
   return String(n);
 }
 
-function formatDuration(ms: number | null): string {
+function formatDuration(ms: number | null, t: T): string {
   if (ms === null) return '—';
   const secs = Math.floor(ms / 1000);
-  if (secs < 60) return `${secs}s`;
+  if (secs < 60) return t.durationSecs(secs);
   const mins = Math.floor(secs / 60);
   const remainSecs = secs % 60;
-  return `${mins}m ${remainSecs}s`;
+  return t.durationMins(mins, remainSecs);
 }
 
-function formatTimeAgo(iso: string): string {
+function formatTimeAgo(iso: string, t: T): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t.justNow;
+  if (mins < 60) return t.minsAgo(mins);
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t.hoursAgo(hours);
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t.daysAgo(days);
 }
 
 function statusVariant(status: string) {
@@ -88,6 +180,7 @@ export default function DashboardPage() {
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const t = useT(messages);
 
   useAnimeOnMount(staggerFadeUp('[data-animate="stat-cards"] > div', { stagger: STAGGER.wide }));
 
@@ -104,11 +197,11 @@ export default function DashboardPage() {
       setRecentRuns(Array.isArray(runsRes) ? runsRes : []);
       setRecentActivity(Array.isArray(activityRes) ? activityRes : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+      setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchData();
@@ -116,27 +209,27 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: 'Total Runs',
+      title: t.totalRuns,
       value: stats ? formatNumber(stats.totalRuns) : '—',
-      subtitle: 'all time',
+      subtitle: t.totalRunsSubtitle,
       icon: Activity,
     },
     {
-      title: 'Active Agents',
+      title: t.activeAgents,
       value: stats ? String(stats.activeAgents) : '—',
-      subtitle: 'definitions',
+      subtitle: t.activeAgentsSubtitle,
       icon: Bot,
     },
     {
-      title: 'Token Usage',
+      title: t.tokenUsage,
       value: stats ? formatNumber(stats.tokenUsage.totalTokens) : '—',
-      subtitle: stats ? `$${stats.tokenUsage.totalEstimatedCostUsd.toFixed(2)} this month` : '',
+      subtitle: stats ? t.tokenUsageSubtitle(stats.tokenUsage.totalEstimatedCostUsd.toFixed(2)) : '',
       icon: Coins,
     },
     {
-      title: 'Pending Tasks',
+      title: t.pendingTasks,
       value: stats ? String(stats.scheduledTasks) : '—',
-      subtitle: 'in queue',
+      subtitle: t.pendingTasksSubtitle,
       icon: CalendarClock,
     },
   ];
@@ -145,10 +238,8 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Here&apos;s an overview of your AI orchestration platform.
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t.heading}</h1>
+          <p className="text-sm text-muted-foreground">{t.subheading}</p>
         </div>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
@@ -161,10 +252,8 @@ export default function DashboardPage() {
     <VantaBackground effect="topology" className="min-h-[calc(100vh-3.5rem)] p-6">
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Here&apos;s an overview of your AI orchestration platform.
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t.heading}</h1>
+          <p className="text-sm text-muted-foreground">{t.subheading}</p>
         </div>
 
         {error && (
@@ -193,22 +282,20 @@ export default function DashboardPage() {
           {/* Recent runs table */}
           <Card className="lg:col-span-3">
             <CardHeader>
-              <CardTitle>Recent Agent Runs</CardTitle>
-              <CardDescription>Latest activity across all agents.</CardDescription>
+              <CardTitle>{t.recentRuns}</CardTitle>
+              <CardDescription>{t.recentRunsDescription}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentRuns.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  No agent runs yet.
-                </div>
+                <div className="py-6 text-center text-sm text-muted-foreground">{t.noRuns}</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Agent</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Time</TableHead>
+                      <TableHead>{t.colAgent}</TableHead>
+                      <TableHead>{t.colStatus}</TableHead>
+                      <TableHead>{t.colDuration}</TableHead>
+                      <TableHead>{t.colTime}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -219,10 +306,10 @@ export default function DashboardPage() {
                           <Badge variant={statusVariant(run.status)}>{run.status}</Badge>
                         </TableCell>
                         <TableCell className="tabular-nums">
-                          {formatDuration(run.durationMs)}
+                          {formatDuration(run.durationMs, t)}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {formatTimeAgo(run.startedAt)}
+                          {formatTimeAgo(run.startedAt, t)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -235,14 +322,12 @@ export default function DashboardPage() {
           {/* Recent activity */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest actions in your workspace.</CardDescription>
+              <CardTitle>{t.recentActivity}</CardTitle>
+              <CardDescription>{t.recentActivityDescription}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentActivity.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  No activity yet.
-                </div>
+                <div className="py-6 text-center text-sm text-muted-foreground">{t.noActivity}</div>
               ) : (
                 <div className="space-y-4">
                   {recentActivity.map((activity) => (
@@ -255,7 +340,7 @@ export default function DashboardPage() {
                           <span>{activity.resource}</span>
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {formatTimeAgo(activity.createdAt)}
+                          {formatTimeAgo(activity.createdAt, t)}
                         </p>
                       </div>
                     </div>

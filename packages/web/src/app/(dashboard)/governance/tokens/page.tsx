@@ -8,6 +8,93 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { authFetch } from '@/lib/auth';
+import { useT, type Messages } from '@/lib/i18n';
+
+const messages = {
+  en: {
+    title: 'Token Usage',
+    description: 'Monitor token consumption, costs, and budget utilization.',
+    axisTokens: 'Tokens',
+    tooltipTokens: (date: string, n: number) => `${date}: ${n.toLocaleString()} tokens`,
+    noAgentData: 'No agent usage data.',
+    statMonthlyBudget: 'Monthly Budget',
+    statUsed: 'Used',
+    statRemaining: 'Remaining',
+    statUtilization: 'Utilization',
+    valueUnlimited: 'Unlimited',
+    valueNa: 'N/A',
+    unitTokens: 'tokens',
+    unitOfBudget: 'of budget',
+    tabDaily: 'Daily',
+    tabWeekly: 'Weekly',
+    tabMonthly: 'Monthly',
+    usageOverTime: 'Usage Over Time',
+    usageOverTimeDesc: 'Token consumption trend for the current month.',
+    noUsageData: 'No usage data for this period.',
+    perUserBreakdown: 'Per-User Breakdown',
+    perUserBreakdownDesc: 'Token usage and cost by user. Click a row to see agent-level details.',
+    colUser: 'User',
+    colInput: 'Input',
+    colOutput: 'Output',
+    colTotal: 'Total',
+    colEstCost: 'Est. Cost',
+  },
+  'zh-TW': {
+    title: 'Token 用量',
+    description: '監測 Token 消耗、費用與預算使用情形。',
+    axisTokens: 'Token',
+    tooltipTokens: (date: string, n: number) => `${date}：${n.toLocaleString()} Token`,
+    noAgentData: '無代理用量資料。',
+    statMonthlyBudget: '每月預算',
+    statUsed: '已使用',
+    statRemaining: '剩餘',
+    statUtilization: '使用率',
+    valueUnlimited: '無上限',
+    valueNa: '無',
+    unitTokens: 'Token',
+    unitOfBudget: '佔預算',
+    tabDaily: '每日',
+    tabWeekly: '每週',
+    tabMonthly: '每月',
+    usageOverTime: '用量趨勢',
+    usageOverTimeDesc: '本月 Token 消耗趨勢。',
+    noUsageData: '此期間無用量資料。',
+    perUserBreakdown: '各使用者明細',
+    perUserBreakdownDesc: '各使用者的 Token 用量與費用。點選列以查看代理層級細節。',
+    colUser: '使用者',
+    colInput: '輸入',
+    colOutput: '輸出',
+    colTotal: '總計',
+    colEstCost: '預估費用',
+  },
+} satisfies Messages<{
+  title: string;
+  description: string;
+  axisTokens: string;
+  tooltipTokens: (date: string, n: number) => string;
+  noAgentData: string;
+  statMonthlyBudget: string;
+  statUsed: string;
+  statRemaining: string;
+  statUtilization: string;
+  valueUnlimited: string;
+  valueNa: string;
+  unitTokens: string;
+  unitOfBudget: string;
+  tabDaily: string;
+  tabWeekly: string;
+  tabMonthly: string;
+  usageOverTime: string;
+  usageOverTimeDesc: string;
+  noUsageData: string;
+  perUserBreakdown: string;
+  perUserBreakdownDesc: string;
+  colUser: string;
+  colInput: string;
+  colOutput: string;
+  colTotal: string;
+  colEstCost: string;
+}>;
 
 interface TokenSummary {
   budget: {
@@ -67,6 +154,7 @@ function formatCompact(n: number): string {
 }
 
 function UsageLineChart({ data, maxValue }: { data: DailyUsage[]; maxValue: number }) {
+  const t = useT(messages);
   const lineRef = useRef<SVGPathElement>(null);
   const areaRef = useRef<SVGPathElement>(null);
 
@@ -173,7 +261,7 @@ function UsageLineChart({ data, maxValue }: { data: DailyUsage[]; maxValue: numb
         {/* Data points */}
         {points.map((p) => (
           <circle key={p.date} cx={p.x} cy={p.y} r={4} fill="currentColor" fillOpacity={0.8}>
-            <title>{`${p.date}: ${formatNumber(p.totalTokens)} tokens`}</title>
+            <title>{t.tooltipTokens(p.date, p.totalTokens)}</title>
           </circle>
         ))}
 
@@ -209,7 +297,7 @@ function UsageLineChart({ data, maxValue }: { data: DailyUsage[]; maxValue: numb
           className="fill-muted-foreground"
           fontSize={11}
         >
-          Tokens
+          {t.axisTokens}
         </text>
       </svg>
     </div>
@@ -217,6 +305,7 @@ function UsageLineChart({ data, maxValue }: { data: DailyUsage[]; maxValue: numb
 }
 
 function UserBreakdownRow({ user }: { user: UserUsage }) {
+  const t = useT(messages);
   const [agents, setAgents] = useState<AgentUsage[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -256,7 +345,7 @@ function UserBreakdownRow({ user }: { user: UserUsage }) {
       </CollapsibleTrigger>
       <CollapsibleContent>
         {agents.length === 0 && loaded ? (
-          <div className="px-10 py-3 text-sm text-muted-foreground">No agent usage data.</div>
+          <div className="px-10 py-3 text-sm text-muted-foreground">{t.noAgentData}</div>
         ) : (
           <div className="bg-muted/30">
             {agents.map((agent) => (
@@ -288,6 +377,7 @@ function UserBreakdownRow({ user }: { user: UserUsage }) {
 }
 
 export default function TokenUsagePage() {
+  const t = useT(messages);
   const [period, setPeriod] = useState('daily');
   const [summary, setSummary] = useState<TokenSummary | null>(null);
   const [userBreakdown, setUserBreakdown] = useState<UserUsage[]>([]);
@@ -324,20 +414,20 @@ export default function TokenUsagePage() {
 
   const stats = [
     {
-      title: 'Monthly Budget',
-      value: summary?.budget.unlimited ? 'Unlimited' : formatNumber(budgetTokens ?? 0),
-      subtitle: summary?.budget.unlimited ? '' : 'tokens',
+      title: t.statMonthlyBudget,
+      value: summary?.budget.unlimited ? t.valueUnlimited : formatNumber(budgetTokens ?? 0),
+      subtitle: summary?.budget.unlimited ? '' : t.unitTokens,
     },
-    { title: 'Used', value: formatNumber(usedTokens), subtitle: 'tokens' },
+    { title: t.statUsed, value: formatNumber(usedTokens), subtitle: t.unitTokens },
     {
-      title: 'Remaining',
-      value: remainingTokens !== null ? formatNumber(remainingTokens) : 'N/A',
-      subtitle: remainingTokens !== null ? 'tokens' : '',
+      title: t.statRemaining,
+      value: remainingTokens !== null ? formatNumber(remainingTokens) : t.valueNa,
+      subtitle: remainingTokens !== null ? t.unitTokens : '',
     },
     {
-      title: 'Utilization',
-      value: utilization ? `${utilization}%` : 'N/A',
-      subtitle: utilization ? 'of budget' : '',
+      title: t.statUtilization,
+      value: utilization ? `${utilization}%` : t.valueNa,
+      subtitle: utilization ? t.unitOfBudget : '',
     },
   ];
 
@@ -348,10 +438,8 @@ export default function TokenUsagePage() {
     return (
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Token Usage</h1>
-          <p className="text-sm text-muted-foreground">
-            Monitor token consumption, costs, and budget utilization.
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.description}</p>
         </div>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
@@ -363,10 +451,8 @@ export default function TokenUsagePage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Token Usage</h1>
-        <p className="text-sm text-muted-foreground">
-          Monitor token consumption, costs, and budget utilization.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight">{t.title}</h1>
+        <p className="text-sm text-muted-foreground">{t.description}</p>
       </div>
 
       {/* Budget stats */}
@@ -388,22 +474,22 @@ export default function TokenUsagePage() {
 
       <Tabs value={period} onValueChange={setPeriod}>
         <TabsList>
-          <TabsTrigger value="daily">Daily</TabsTrigger>
-          <TabsTrigger value="weekly">Weekly</TabsTrigger>
-          <TabsTrigger value="monthly">Monthly</TabsTrigger>
+          <TabsTrigger value="daily">{t.tabDaily}</TabsTrigger>
+          <TabsTrigger value="weekly">{t.tabWeekly}</TabsTrigger>
+          <TabsTrigger value="monthly">{t.tabMonthly}</TabsTrigger>
         </TabsList>
 
         <TabsContent value={period} className="mt-4 flex flex-col gap-6">
           {/* Usage chart */}
           <Card>
             <CardHeader>
-              <CardTitle>Usage Over Time</CardTitle>
-              <CardDescription>Token consumption trend for the current month.</CardDescription>
+              <CardTitle>{t.usageOverTime}</CardTitle>
+              <CardDescription>{t.usageOverTimeDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               {chartData.length === 0 ? (
                 <div className="flex h-[280px] items-center justify-center text-sm text-muted-foreground">
-                  No usage data for this period.
+                  {t.noUsageData}
                 </div>
               ) : (
                 <UsageLineChart data={chartData} maxValue={maxDaily} />
@@ -414,24 +500,22 @@ export default function TokenUsagePage() {
           {/* Per-user breakdown */}
           <Card>
             <CardHeader>
-              <CardTitle>Per-User Breakdown</CardTitle>
-              <CardDescription>
-                Token usage and cost by user. Click a row to see agent-level details.
-              </CardDescription>
+              <CardTitle>{t.perUserBreakdown}</CardTitle>
+              <CardDescription>{t.perUserBreakdownDesc}</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {/* Header */}
               <div className="flex items-center gap-2 border-b px-4 py-2 text-xs font-medium text-muted-foreground">
                 <span className="w-3.5" />
-                <span className="flex-1">User</span>
-                <span className="w-24 text-right">Input</span>
-                <span className="w-24 text-right">Output</span>
-                <span className="w-24 text-right">Total</span>
-                <span className="w-20 text-right">Est. Cost</span>
+                <span className="flex-1">{t.colUser}</span>
+                <span className="w-24 text-right">{t.colInput}</span>
+                <span className="w-24 text-right">{t.colOutput}</span>
+                <span className="w-24 text-right">{t.colTotal}</span>
+                <span className="w-20 text-right">{t.colEstCost}</span>
               </div>
               {userBreakdown.length === 0 ? (
                 <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                  No usage data for this period.
+                  {t.noUsageData}
                 </div>
               ) : (
                 userBreakdown.map((user) => <UserBreakdownRow key={user.userId} user={user} />)

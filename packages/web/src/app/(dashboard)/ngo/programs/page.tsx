@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { DirectoryListing, FileEntry } from '@clawix/shared';
 import { authFetch } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { useT, type Messages } from '@/lib/i18n';
 import { FolderColumns, type FolderDef } from '../folder-columns';
 
 const FOLDERS: readonly FolderDef[] = [
@@ -15,7 +16,34 @@ const FOLDERS: readonly FolderDef[] = [
   { path: '/status', label: 'status' },
 ];
 
+const messages = {
+  en: {
+    title: 'Programs',
+    subtitle: 'coordination · planning',
+    startConversation: 'Start conversation',
+    descBefore: 'Workplans, partner register, activity tracker and weekly status notes. Managed by the ',
+    descAgent: 'Program Coordinator',
+    descAfter: ' agent.',
+  },
+  'zh-TW': {
+    title: '計畫',
+    subtitle: '協調 · 規劃',
+    startConversation: '開始對話',
+    descBefore: '工作計畫、夥伴名冊、活動追蹤與每週進度摘要。由',
+    descAgent: '計畫協調員',
+    descAfter: '代理管理。',
+  },
+} satisfies Messages<{
+  title: string;
+  subtitle: string;
+  startConversation: string;
+  descBefore: string;
+  descAgent: string;
+  descAfter: string;
+}>;
+
 export default function ProgramsPage() {
+  const t = useT(messages);
   const [columns, setColumns] = useState<Record<string, readonly FileEntry[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -48,21 +76,22 @@ export default function ProgramsPage() {
       <header className="flex flex-col gap-1 border-b border-border/60 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">Programs</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-              coordination · planning
+              {t.subtitle}
             </span>
           </div>
           <Button variant="outline" size="sm" asChild>
             <Link href="/conversations">
               <MessageSquare className="mr-2 size-4" />
-              Start conversation
+              {t.startConversation}
             </Link>
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Workplans, partner register, activity tracker and weekly status notes. Managed by the{' '}
-          <span className="font-medium text-foreground">Program Coordinator</span> agent.
+          {t.descBefore}
+          <span className="font-medium text-foreground">{t.descAgent}</span>
+          {t.descAfter}
         </p>
       </header>
 
