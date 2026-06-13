@@ -51,6 +51,19 @@ network policy and resource limits.
 4. **Shared resource limits** — The PID 256 / CPU 0.5 / mem 512 MB caps are
    shared between the agent process and any Python subprocesses it spawns.
 
+### Interim mitigation already applied (Option 1)
+
+Python-aware deny patterns added to `shell.ts` (2026-06-13) covering:
+- `subprocess.run/call/Popen/check_output/check_call` with dangerous commands
+- `os.system` with dangerous commands
+- `os.execv/execve/execvp` (process replacement)
+- `os.fork`
+- `shutil.rmtree` on root paths
+
+Limitation: only catches inline Python (`python3 -c "..."` and heredocs).
+Script-file invocations (`python3 script.py`) cannot be inspected — full
+isolation requires the Phase 2 python-runner below.
+
 ### Phase 2 implementation plan
 
 - Port `python_run_net` tool from upstream `clawix/packages/api/src/engine/tools/python/`

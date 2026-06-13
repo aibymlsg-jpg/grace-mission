@@ -21,6 +21,7 @@ interface DenyPattern {
 }
 
 const DENY_PATTERNS: readonly DenyPattern[] = [
+  // Shell destructive commands
   { regex: /\brm\s+-[rf]{1,2}\s+\//, reason: 'rm -rf / is destructive' },
   { regex: /\brm\s+-[rf]{1,2}\s+\*/, reason: 'rm -rf * is destructive' },
   { regex: /\b(mkfs|diskpart)\b/, reason: 'disk formatting is not allowed' },
@@ -39,6 +40,31 @@ const DENY_PATTERNS: readonly DenyPattern[] = [
   { regex: /:\(\)\s*\{.*\};\s*:/, reason: 'fork bomb detected' },
   { regex: /\bpython\s+-c\s+.*fork/, reason: 'python fork bomb detected' },
   { regex: /\bperl\s+-e\s+.*fork/, reason: 'perl fork bomb detected' },
+
+  // Python inline bypass patterns — catch dangerous calls embedded in python3 -c "..."
+  // or heredocs. checkSegment() lowercases input so all patterns below are lowercase.
+  // Note: script-file invocations (python3 script.py) cannot be inspected this way —
+  // full isolation requires the Phase 2 python-runner (see docs/PHASE2.md P2-001).
+  {
+    regex: /subprocess\.(run|call|popen|check_output|check_call)\s*\(.*['"](rm|sudo|shutdown|reboot|poweroff|halt|mkfs|dd)\b/,
+    reason: 'dangerous command via Python subprocess is not allowed',
+  },
+  {
+    regex: /os\.system\s*\(\s*['"].*?(rm\s+-[rf]|sudo|shutdown|reboot|poweroff|halt)/,
+    reason: 'dangerous command via Python os.system is not allowed',
+  },
+  {
+    regex: /os\.(execv|execve|execvp|execvpe|execl|execle|execlp)\s*\(/,
+    reason: 'process replacement via os.exec is not allowed',
+  },
+  {
+    regex: /os\.fork\s*\(/,
+    reason: 'os.fork is not allowed',
+  },
+  {
+    regex: /shutil\.rmtree\s*\(\s*['"]\//,
+    reason: 'shutil.rmtree on root path is destructive',
+  },
 ];
 
 /**
