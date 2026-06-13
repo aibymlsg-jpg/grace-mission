@@ -1006,7 +1006,7 @@ export default function UsersPage() {
                       </TableRow>
                       {group.permissions.map((perm) => (
                         <TableRow key={perm.key}>
-                          <TableCell className="text-sm">{t.permissions[perm.key]}</TableCell>
+                          <TableCell className="text-sm">{t.permissions[perm.key as keyof typeof t.permissions]}</TableCell>
                           <TableCell className="text-center">
                             {perm.admin ? (
                               <Check
