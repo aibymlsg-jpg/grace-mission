@@ -97,9 +97,9 @@ const settingsItems: readonly NavItem[] = [
 
 const messages = {
   en: {
-    brandTagline: 'Enterprise AI Platform',
+    brandTagline: 'Gospel Mission AI',
     groupWorkspace: 'Workspace',
-    groupNgo: 'NGO Relevant',
+    groupNgo: 'Ministry',
     groupGovernance: 'Governance',
     nav: {
       conversations: 'Conversations',
@@ -107,11 +107,11 @@ const messages = {
       projector: 'Projector',
       skills: 'Skills',
       agents: 'Agents',
-      programs: 'Programs',
-      donors: 'Donors',
-      mne: 'M&E',
-      comms: 'Communications',
-      fieldOps: 'Field Ops',
+      programs: 'Ministries',
+      donors: 'Stewardship',
+      mne: 'Kingdom Impact',
+      comms: 'Proclamation',
+      fieldOps: 'Mission Field',
       dashboard: 'Dashboard',
       tokenUsage: 'Token Usage',
       auditLogs: 'Audit Logs',
@@ -133,9 +133,9 @@ const messages = {
     userFallback: 'User',
   },
   'zh-TW': {
-    brandTagline: '企業級 AI 平台',
+    brandTagline: '福音宣教 AI',
     groupWorkspace: '工作區',
-    groupNgo: 'NGO 相關',
+    groupNgo: '事工',
     groupGovernance: '治理',
     nav: {
       conversations: '對話',
@@ -143,11 +143,11 @@ const messages = {
       projector: '投影台',
       skills: '技能',
       agents: '代理',
-      programs: '計畫',
-      donors: '捐助者',
-      mne: '監測與評估',
-      comms: '傳播溝通',
-      fieldOps: '現場運作',
+      programs: '事工計畫',
+      donors: '財務管理',
+      mne: '國度成效',
+      comms: '宣揚福音',
+      fieldOps: '宣教工場',
       dashboard: '儀表板',
       tokenUsage: 'Token 用量',
       auditLogs: '稽核日誌',
@@ -233,9 +233,9 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/conversations">
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Clawix</span>
+                  <span className="truncate font-semibold">Grace Mission</span>
                   <span className="truncate text-xs">{t.brandTagline}</span>
                 </div>
               </Link>

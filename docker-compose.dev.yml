@@ -51,7 +51,7 @@ services:
       - ./packages/shared/package.json:/app/packages/shared/package.json
       - ./packages/shared/tsconfig.json:/app/packages/shared/tsconfig.json
       - ./package.json:/app/package.json
-      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml.host:ro
       - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
       - ./tsconfig.base.json:/app/tsconfig.base.json
       - api_node_modules:/app/node_modules
@@ -76,21 +76,21 @@ services:
       SKILLS_CUSTOM_HOST_DIR: ${CLAWIX_HOST_SKILLS_DIR:-${PWD}/skills/custom}
     command: >
       sh -c "apt-get update && apt-get install -y --no-install-recommends docker.io && rm -rf /var/lib/apt/lists/* &&
+             cp /app/pnpm-lock.yaml.host /app/pnpm-lock.yaml &&
              corepack enable &&
-             corepack prepare pnpm@latest --activate &&
              pnpm install --frozen-lockfile &&
              pnpm --filter @clawix/shared build &&
              pnpm --filter @clawix/api exec prisma generate &&
              chown -R $(stat -c '%u:%g' /app/packages/api/prisma/schema.prisma) /app/packages/api/src/generated &&
              pnpm --filter @clawix/api exec prisma migrate deploy --schema=prisma/schema.prisma &&
-             pnpm --filter @clawix/api exec node -e \"
+             (pnpm --filter @clawix/api exec node -e \"
                const { Client } = require('pg');
                const c = new Client({ connectionString: process.env.DATABASE_URL });
                c.connect()
                 .then(() => c.query('SELECT count(*) FROM \\\"User\\\"'))
                 .then(r => { c.end(); process.exit(Number(r.rows[0].count) > 0 ? 0 : 1); })
                 .catch(() => { c.end(); process.exit(1); });
-             \" || pnpm --filter @clawix/api exec prisma db seed &&
+             \" || pnpm --filter @clawix/api exec prisma db seed) &&
              pnpm --filter @clawix/api exec nest start --watch"
     depends_on:
       postgres:
@@ -116,7 +116,7 @@ services:
       - ./packages/shared/package.json:/app/packages/shared/package.json
       - ./packages/shared/tsconfig.json:/app/packages/shared/tsconfig.json
       - ./package.json:/app/package.json
-      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml.host:ro
       - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
       - ./tsconfig.base.json:/app/tsconfig.base.json
       - web_node_modules:/app/node_modules
@@ -128,8 +128,8 @@ services:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3001
     command: >
-      sh -c "corepack enable &&
-             corepack prepare pnpm@latest --activate &&
+      sh -c "cp /app/pnpm-lock.yaml.host /app/pnpm-lock.yaml &&
+             corepack enable &&
              pnpm install --frozen-lockfile &&
              pnpm --filter @clawix/shared build &&
              pnpm --filter @clawix/web dev"

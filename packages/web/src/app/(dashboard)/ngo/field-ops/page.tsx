@@ -16,20 +16,20 @@ const FOLDERS: readonly FolderDef[] = [
 
 const messages = {
   en: {
-    title: 'Field Operations',
+    title: 'Mission Field',
     subtitle: 'logistics · risk · safeguarding',
     startConversation: 'Start conversation',
     descBefore: 'Logistics lists, risk register and safeguarding incident records. Managed by the ',
-    descAgent: 'Field Operations',
+    descAgent: 'Mission Field',
     descAfter:
       ' agent. Incident documentation is post-triage only — a human triages first.',
   },
   'zh-TW': {
-    title: '現場運作',
+    title: '宣教工場',
     subtitle: '後勤 · 風險 · 防護',
     startConversation: '開始對話',
     descBefore: '後勤清單、風險登記與防護事件記錄。由',
-    descAgent: '現場運作',
+    descAgent: '宣教工場',
     descAfter: '代理管理。事件記錄僅限分流後建立 — 須由人員先行分流。',
   },
 } satisfies Messages<{

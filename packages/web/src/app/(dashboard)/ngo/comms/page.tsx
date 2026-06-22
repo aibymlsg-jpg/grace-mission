@@ -17,20 +17,20 @@ const FOLDERS: readonly FolderDef[] = [
 
 const messages = {
   en: {
-    title: 'Communications',
-    subtitle: 'newsletters · advocacy · social',
+    title: 'Proclamation',
+    subtitle: 'newsletters · witness · social',
     startConversation: 'Start conversation',
-    descBefore: 'Newsletters, social posts, op-eds and advocacy briefs. Managed by the ',
-    descAgent: 'Communications',
+    descBefore: 'Newsletters, social posts, testimonies and advocacy briefs. Managed by the ',
+    descAgent: 'Proclamation',
     descMiddle: ' agent. All outputs land in ',
     descAfter: ' — a human publishes.',
   },
   'zh-TW': {
-    title: '傳播溝通',
-    subtitle: '電子報 · 倡議 · 社群',
+    title: '宣揚福音',
+    subtitle: '電子報 · 見證 · 社群',
     startConversation: '開始對話',
-    descBefore: '電子報、社群貼文、評論文章與倡議簡報。由',
-    descAgent: '傳播溝通',
+    descBefore: '電子報、社群貼文、見證分享與倡議簡報。由',
+    descAgent: '宣揚福音',
     descMiddle: '代理管理。所有輸出皆存放於',
     descAfter: '，由人員發布。',
   },

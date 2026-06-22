@@ -42,6 +42,8 @@ export default function ConversationsPage() {
   const t = useT(pageMessages);
   // Initialize to false for SSR, then sync from localStorage after hydration
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Drafts a scenario prompt into ChatInput for review instead of sending it immediately
+  const [prefillRequest, setPrefillRequest] = useState<{ text: string; id: number } | null>(null);
 
   // Sync sidebar state from localStorage after mount (avoids hydration mismatch)
   useEffect(() => {
@@ -130,6 +132,10 @@ export default function ConversationsPage() {
     sendMessage(content);
   }
 
+  function handlePrefillSuggestion(content: string) {
+    setPrefillRequest({ text: content, id: Date.now() });
+  }
+
   return (
     <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
       {/* Session sidebar with slide animation */}
@@ -215,17 +221,19 @@ export default function ConversationsPage() {
                 disabled={isTyping}
                 isConnected={isConnected}
                 userMessages={userMessageHistory}
+                prefillRequest={prefillRequest}
               />
             )}
           </>
         ) : (
           <>
-            <EmptyState onSelectSuggestion={handleSend} />
+            <EmptyState onSelectSuggestion={handleSend} onPrefillSuggestion={handlePrefillSuggestion} />
             <ChatInput
               onSend={handleSend}
               disabled={isTyping}
               isConnected={isConnected}
               userMessages={userMessageHistory}
+              prefillRequest={prefillRequest}
             />
           </>
         )}

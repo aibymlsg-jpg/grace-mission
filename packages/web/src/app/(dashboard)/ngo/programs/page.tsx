@@ -18,19 +18,19 @@ const FOLDERS: readonly FolderDef[] = [
 
 const messages = {
   en: {
-    title: 'Programs',
-    subtitle: 'coordination · planning',
+    title: 'Ministries',
+    subtitle: 'discipleship · outreach · church planting',
     startConversation: 'Start conversation',
     descBefore: 'Workplans, partner register, activity tracker and weekly status notes. Managed by the ',
-    descAgent: 'Program Coordinator',
+    descAgent: 'Ministry Coordinator',
     descAfter: ' agent.',
   },
   'zh-TW': {
-    title: '計畫',
-    subtitle: '協調 · 規劃',
+    title: '事工計畫',
+    subtitle: '門徒訓練 · 外展 · 植堂',
     startConversation: '開始對話',
     descBefore: '工作計畫、夥伴名冊、活動追蹤與每週進度摘要。由',
-    descAgent: '計畫協調員',
+    descAgent: '事工協調員',
     descAfter: '代理管理。',
   },
 } satisfies Messages<{

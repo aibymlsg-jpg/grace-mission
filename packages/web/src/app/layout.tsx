@@ -7,8 +7,8 @@ import { LanguageProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Clawix',
-  description: 'Enterprise-grade multi-agent AI orchestration platform',
+  title: 'Grace Mission',
+  description: 'AI-powered platform for gospel mission, discipleship, and ministry administration',
 };
 
 export default function RootLayout({

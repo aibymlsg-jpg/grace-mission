@@ -18,20 +18,20 @@ const FOLDERS: readonly FolderDef[] = [
 
 const messages = {
   en: {
-    title: 'Monitoring & Evaluation',
-    subtitle: 'indicators · data · forms',
+    title: 'Kingdom Impact',
+    subtitle: 'discipleship indicators · data · forms',
     startConversation: 'Start conversation',
     descBefore:
-      'SMART indicators, data-collection forms, period validation and dashboard summaries. Managed by the ',
-    descAgent: 'M&E',
+      'Discipleship indicators, data-collection forms, period validation and dashboard summaries. Managed by the ',
+    descAgent: 'Kingdom Impact',
     descAfter: ' agent.',
   },
   'zh-TW': {
-    title: '監測與評估',
-    subtitle: '指標 · 資料 · 表單',
+    title: '國度成效',
+    subtitle: '門徒指標 · 資料 · 表單',
     startConversation: '開始對話',
-    descBefore: 'SMART 指標、資料蒐集表單、期間驗證與儀表板摘要。由',
-    descAgent: '監測與評估',
+    descBefore: '門徒成長指標、資料蒐集表單、期間驗證與儀表板摘要。由',
+    descAgent: '國度成效',
     descAfter: '代理管理。',
   },
 } satisfies Messages<{

@@ -18,19 +18,19 @@ const FOLDERS: readonly FolderDef[] = [
 
 const messages = {
   en: {
-    title: 'Donor Engagement',
-    subtitle: 'proposals · reports · research',
+    title: 'Stewardship',
+    subtitle: 'giving · grants · faithful reporting',
     startConversation: 'Start conversation',
     descBefore: 'Proposals, narrative reports, log-frames and donor research. Managed by the ',
-    descAgent: 'Donor Engagement',
+    descAgent: 'Stewardship',
     descAfter: ' agent.',
   },
   'zh-TW': {
-    title: '捐助者互動',
-    subtitle: '提案 · 報告 · 研究',
+    title: '財務管理',
+    subtitle: '奉獻 · 補助 · 忠心報告',
     startConversation: '開始對話',
     descBefore: '提案、敘述性報告、邏輯框架與捐助者研究。由',
-    descAgent: '捐助者互動',
+    descAgent: '財務管理',
     descAfter: '代理管理。',
   },
 } satisfies Messages<{
