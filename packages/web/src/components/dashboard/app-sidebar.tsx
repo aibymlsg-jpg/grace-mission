@@ -8,6 +8,7 @@ import {
   BarChart3,
   BookOpen,
   Bot,
+  CalendarClock,
   ChevronRight,
   ChevronsUpDown,
   Coins,
@@ -72,6 +73,7 @@ const platformItems: readonly NavItem[] = [
   { key: 'projector', icon: MonitorPlay, href: '/projector' },
   { key: 'skills', icon: Wrench, href: '/skills' },
   { key: 'agents', icon: Bot, href: '/agents' },
+  { key: 'tasks', icon: CalendarClock, href: '/tasks' },
 ];
 
 const ngoItems: readonly NavItem[] = [
@@ -98,7 +100,7 @@ const settingsItems: readonly NavItem[] = [
 const messages = {
   en: {
     brandTagline: 'Gospel Mission AI',
-    groupWorkspace: 'Workspace',
+    groupWorkspace: 'Work with Agents',
     groupNgo: 'Ministry',
     groupGovernance: 'Governance',
     nav: {
@@ -107,6 +109,7 @@ const messages = {
       projector: 'Projector',
       skills: 'Skills',
       agents: 'Agents',
+      tasks: 'Scheduled Tasks',
       programs: 'Ministries',
       donors: 'Stewardship',
       mne: 'Kingdom Impact',
@@ -134,7 +137,7 @@ const messages = {
   },
   'zh-TW': {
     brandTagline: '福音宣教 AI',
-    groupWorkspace: '工作區',
+    groupWorkspace: '與代理協作',
     groupNgo: '事工',
     groupGovernance: '治理',
     nav: {
@@ -143,6 +146,7 @@ const messages = {
       projector: '投影台',
       skills: '技能',
       agents: '代理',
+      tasks: '排程任務',
       programs: '事工計畫',
       donors: '財務管理',
       mne: '國度成效',

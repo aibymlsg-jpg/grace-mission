@@ -34,6 +34,7 @@ export class WorkspaceSeederService {
 
     await fs.mkdir(workspacePath, { recursive: true });
     await fs.mkdir(path.join(workspacePath, 'memory'), { recursive: true });
+    await fs.mkdir(path.join(workspacePath, 'schedule'), { recursive: true });
 
     for (const filename of BOOTSTRAP_FILES) {
       const targetPath = path.join(workspacePath, filename);

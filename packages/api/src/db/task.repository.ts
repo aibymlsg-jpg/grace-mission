@@ -24,13 +24,16 @@ export class TaskRepository {
     return task;
   }
 
-  async findAll(pagination: PaginationInput): Promise<PaginatedResponse<Task>> {
+  async findAll(
+    pagination: PaginationInput,
+  ): Promise<PaginatedResponse<Task & { agentDefinition: { name: string } }>> {
     const paginationArgs = buildPaginationArgs(pagination);
 
     const [data, total] = await Promise.all([
       this.prisma.task.findMany({
         ...paginationArgs,
         orderBy: { createdAt: 'desc' },
+        include: { agentDefinition: { select: { name: true } } },
       }),
       this.prisma.task.count(),
     ]);
