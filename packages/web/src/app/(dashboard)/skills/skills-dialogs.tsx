@@ -501,7 +501,7 @@ export function CreateDialog({
   useEffect(() => {
     if (!content.trim()) return;
     setContent((prev) => prev.replace(/^(name:\s*).*$/m, `name: ${name}`));
-  }, [name]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [name]);
 
   const loadSample = (label: string) => {
     const sample = SKILL_SAMPLES.find((s) => s.label === label);

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Loader2, MonitorPlay, Sparkles } from 'lucide-react';
 import { authFetch, getAccessToken } from '@/lib/auth';
 import { cn } from '@/lib/utils';
-import { useT, useLanguage, type Messages, type Lang } from '@/lib/i18n';
+import { useT, useLanguage, type Messages } from '@/lib/i18n';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { buildDemoHtml, DEMO_KEY } from './demo';
 
@@ -221,7 +221,7 @@ export default function ProjectorPage() {
     setSaveStatus(null);
     setLoadingHtml(false);
     setActiveItem(DEMO_KEY);
-    setActiveHtml(buildDemoHtml(lang as Lang));
+    setActiveHtml(buildDemoHtml(lang));
   }, [lang]);
 
   const closeViewer = useCallback(() => {

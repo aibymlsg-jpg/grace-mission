@@ -82,7 +82,7 @@ const COPY: Record<Lang, DemoCopy> = {
     previewLede: 'A real micro-tool is just HTML + a little JS. Drag the numbers:',
     raisedLabel: 'Raised (USD)',
     goalLabel: 'Goal (USD)',
-    progress: (pct) => pct + '% of goal reached',
+    progress: (pct) => `${pct}% of goal reached`,
     skillHeading: 'Generated SKILL.md',
     save: 'Save SKILL.md to workspace',
     saveHint: 'Saving…',

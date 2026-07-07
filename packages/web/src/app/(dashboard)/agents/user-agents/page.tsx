@@ -1203,7 +1203,7 @@ function ToolsReference() {
                   {t.tools[groupKey] as string}
                 </p>
                 {tools.map((toolName) => {
-                  const entry = t.tools.entries[toolName as keyof typeof t.tools.entries]!;
+                  const entry = t.tools.entries[toolName as keyof typeof t.tools.entries];
                   const isOpen = expandedTool === toolName;
                   return (
                     <div key={toolName} className="mb-1 overflow-hidden rounded-md border">
