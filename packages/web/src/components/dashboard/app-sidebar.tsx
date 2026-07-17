@@ -25,6 +25,7 @@ import {
   Radio,
   ScrollText,
   Settings2,
+  ShieldAlert,
   Sun,
   Target,
   User,
@@ -83,6 +84,7 @@ const ngoItems: readonly NavItem[] = [
   { key: 'mne', href: '/ngo/mne', icon: BarChart3 },
   { key: 'comms', href: '/ngo/comms', icon: Newspaper },
   { key: 'fieldOps', href: '/ngo/field-ops', icon: MapPin },
+  { key: 'incidents', href: '/ngo/incidents', icon: ShieldAlert },
 ];
 
 const governanceItems: readonly NavItem[] = [
@@ -116,6 +118,7 @@ const messages = {
       mne: 'Kingdom Impact',
       comms: 'Proclamation',
       fieldOps: 'Mission Field',
+      incidents: 'Safeguarding',
       dashboard: 'Dashboard',
       tokenUsage: 'Token Usage',
       auditLogs: 'Audit Logs',
@@ -153,6 +156,7 @@ const messages = {
       mne: '國度成效',
       comms: '宣揚福音',
       fieldOps: '宣教工場',
+      incidents: '安全防護',
       dashboard: '儀表板',
       tokenUsage: 'Token 用量',
       auditLogs: '稽核日誌',

@@ -5,6 +5,7 @@ import * as fs from 'fs/promises';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { createLogger } from '@clawix/shared';
 import { UserAgentRepository } from '../db/user-agent.repository.js';
 import { resolveWorkspacePaths } from '../engine/workspace-resolver.js';
 import type { DirectoryListing, FileContent, FileEntry, FileType } from '@clawix/shared';
+import { UserRole } from '../generated/prisma/enums.js';
 import { ScopedFs } from './scoped-fs.js';
 
 const logger = createLogger('workspace');
@@ -114,9 +116,19 @@ export class WorkspaceService {
     return { fs: new ScopedFs(localPath), basePath: localPath };
   }
 
-  async listDirectory(userId: string, dirPath: string): Promise<DirectoryListing> {
+  private assertPathAllowed(relativePath: string, role: UserRole): void {
+    if (
+      (relativePath === '/incidents/keys' || relativePath.startsWith('/incidents/keys/')) &&
+      role !== UserRole.admin
+    ) {
+      throw new ForbiddenException('This folder is restricted to admin users');
+    }
+  }
+
+  async listDirectory(userId: string, dirPath: string, role: UserRole): Promise<DirectoryListing> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
     const resolved = sfs.resolve(dirPath);
+    this.assertPathAllowed('/' + path.relative(basePath, resolved), role);
 
     let stat: Awaited<ReturnType<typeof sfs.stat>>;
     try {
@@ -193,9 +205,10 @@ export class WorkspaceService {
     };
   }
 
-  async readFile(userId: string, filePath: string): Promise<FileContent> {
+  async readFile(userId: string, filePath: string, role: UserRole): Promise<FileContent> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
     const resolved = sfs.resolve(filePath);
+    this.assertPathAllowed('/' + path.relative(basePath, resolved), role);
 
     let stat: Awaited<ReturnType<typeof sfs.stat>>;
     try {
@@ -237,10 +250,12 @@ export class WorkspaceService {
     filePath: string,
     content: string,
     expectedModifiedAt: string,
-    force = false,
+    force: boolean,
+    role: UserRole,
   ): Promise<{ path: string; size: number; modifiedAt: string }> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
     const resolved = sfs.resolve(filePath);
+    this.assertPathAllowed('/' + path.relative(basePath, resolved), role);
 
     let stat: Awaited<ReturnType<typeof sfs.stat>>;
     try {
@@ -285,8 +300,10 @@ export class WorkspaceService {
     userId: string,
     entryPath: string,
     type: 'file' | 'directory',
+    role: UserRole,
   ): Promise<FileEntry> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
+    this.assertPathAllowed('/' + path.relative(basePath, sfs.resolve(entryPath)), role);
     if (await sfs.exists(entryPath)) {
       throw new ConflictException('Path already exists');
     }
@@ -309,13 +326,20 @@ export class WorkspaceService {
     );
   }
 
-  async renameEntry(userId: string, entryPath: string, newName: string): Promise<FileEntry> {
+  async renameEntry(
+    userId: string,
+    entryPath: string,
+    newName: string,
+    role: UserRole,
+  ): Promise<FileEntry> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
+    this.assertPathAllowed('/' + path.relative(basePath, sfs.resolve(entryPath)), role);
     if (!(await sfs.exists(entryPath))) throw new NotFoundException('Path not found');
     const resolved = sfs.resolve(entryPath);
     const parentDir = path.dirname(resolved);
     const newResolved = path.join(parentDir, newName);
     const newRelativePath = '/' + path.relative(basePath, newResolved);
+    this.assertPathAllowed(newRelativePath, role);
     if (await sfs.exists(newRelativePath))
       throw new ConflictException(`"${newName}" already exists in this directory`);
     await sfs.rename(entryPath, newRelativePath);
@@ -331,8 +355,15 @@ export class WorkspaceService {
     );
   }
 
-  async moveEntry(userId: string, entryPath: string, destination: string): Promise<FileEntry> {
+  async moveEntry(
+    userId: string,
+    entryPath: string,
+    destination: string,
+    role: UserRole,
+  ): Promise<FileEntry> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
+    this.assertPathAllowed('/' + path.relative(basePath, sfs.resolve(entryPath)), role);
+    this.assertPathAllowed('/' + path.relative(basePath, sfs.resolve(destination)), role);
     if (!(await sfs.exists(entryPath))) throw new NotFoundException('Source path not found');
     const destStat = await sfs.stat(destination).catch(() => null);
     if (!destStat?.isDirectory()) throw new NotFoundException('Destination directory not found');
@@ -356,8 +387,13 @@ export class WorkspaceService {
     );
   }
 
-  async deleteEntry(userId: string, entryPath: string): Promise<{ path: string; deleted: true }> {
+  async deleteEntry(
+    userId: string,
+    entryPath: string,
+    role: UserRole,
+  ): Promise<{ path: string; deleted: true }> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
+    this.assertPathAllowed('/' + path.relative(basePath, sfs.resolve(entryPath)), role);
     if (!(await sfs.exists(entryPath))) throw new NotFoundException('Path not found');
     const resolved = sfs.resolve(entryPath);
     const relativePath = '/' + path.relative(basePath, resolved);
@@ -369,13 +405,15 @@ export class WorkspaceService {
   async downloadFile(
     userId: string,
     filePath: string,
+    role: UserRole,
   ): Promise<{
     stream: NodeJS.ReadableStream;
     filename: string;
     contentType: string;
     size: number;
   }> {
-    const { fs: sfs } = await this.createScopedFs(userId);
+    const { fs: sfs, basePath } = await this.createScopedFs(userId);
+    this.assertPathAllowed('/' + path.relative(basePath, sfs.resolve(filePath)), role);
     let stat: Awaited<ReturnType<typeof sfs.stat>>;
     try {
       stat = await sfs.stat(filePath);
@@ -452,10 +490,12 @@ export class WorkspaceService {
     dirPath: string,
     filename: string,
     data: Buffer,
-    overwrite = false,
-    fileRelativePath: string | null = null,
+    overwrite: boolean,
+    fileRelativePath: string | null,
+    role: UserRole,
   ): Promise<FileEntry> {
     const { fs: sfs, basePath } = await this.createScopedFs(userId);
+    this.assertPathAllowed('/' + path.relative(basePath, sfs.resolve(dirPath)), role);
     if (dirPath !== '/') {
       const dirStat = await sfs.stat(dirPath).catch(() => null);
       if (!dirStat?.isDirectory()) throw new NotFoundException('Target directory not found');

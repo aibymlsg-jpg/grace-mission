@@ -60,7 +60,7 @@ export class WorkspaceController {
     @Req() req: { user: JwtPayload },
     @Query('path') dirPath?: string,
   ): Promise<DirectoryListing> {
-    return this.workspaceService.listDirectory(req.user.sub, dirPath ?? '/');
+    return this.workspaceService.listDirectory(req.user.sub, dirPath ?? '/', req.user.role);
   }
 
   @Get('files/content')
@@ -71,7 +71,7 @@ export class WorkspaceController {
     if (!filePath) {
       throw new BadRequestException('path query parameter is required');
     }
-    return this.workspaceService.readFile(req.user.sub, filePath);
+    return this.workspaceService.readFile(req.user.sub, filePath, req.user.role);
   }
 
   @Put('files/content')
@@ -85,14 +85,20 @@ export class WorkspaceController {
       parsed.path,
       parsed.content,
       parsed.expectedModifiedAt,
-      parsed.force,
+      parsed.force ?? false,
+      req.user.role,
     );
   }
 
   @Post('files')
   async createEntry(@Req() req: { user: JwtPayload }, @Body() body: unknown): Promise<FileEntry> {
     const parsed = createEntrySchema.parse(body);
-    return this.workspaceService.createEntry(req.user.sub, parsed.path, parsed.type);
+    return this.workspaceService.createEntry(
+      req.user.sub,
+      parsed.path,
+      parsed.type,
+      req.user.role,
+    );
   }
 
   @Post('files/upload')
@@ -117,19 +123,30 @@ export class WorkspaceController {
       buffer,
       overwrite === 'true',
       relativePath as string | null,
+      req.user.role,
     );
   }
 
   @Patch('files/rename')
   async renameEntry(@Req() req: { user: JwtPayload }, @Body() body: unknown): Promise<FileEntry> {
     const parsed = renameSchema.parse(body);
-    return this.workspaceService.renameEntry(req.user.sub, parsed.path, parsed.newName);
+    return this.workspaceService.renameEntry(
+      req.user.sub,
+      parsed.path,
+      parsed.newName,
+      req.user.role,
+    );
   }
 
   @Patch('files/move')
   async moveEntry(@Req() req: { user: JwtPayload }, @Body() body: unknown): Promise<FileEntry> {
     const parsed = moveSchema.parse(body);
-    return this.workspaceService.moveEntry(req.user.sub, parsed.path, parsed.destination);
+    return this.workspaceService.moveEntry(
+      req.user.sub,
+      parsed.path,
+      parsed.destination,
+      req.user.role,
+    );
   }
 
   @Delete('files')
@@ -138,7 +155,7 @@ export class WorkspaceController {
     @Body() body: unknown,
   ): Promise<DeleteResponse> {
     const parsed = deleteSchema.parse(body);
-    return this.workspaceService.deleteEntry(req.user.sub, parsed.path);
+    return this.workspaceService.deleteEntry(req.user.sub, parsed.path, req.user.role);
   }
 
   @Get('files/download')
@@ -153,6 +170,7 @@ export class WorkspaceController {
     const { stream, filename, contentType, size } = await this.workspaceService.downloadFile(
       req.user.sub,
       filePath,
+      req.user.role,
     );
     reply!.header('Content-Type', contentType);
     reply!.header('Content-Disposition', `attachment; filename="${filename}"`);

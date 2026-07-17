@@ -1,32 +1,39 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Loader2, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import type { DirectoryListing, FileEntry } from '@clawix/shared';
 import { authFetch } from '@/lib/auth';
+import { useAuth } from '@/components/auth-provider';
 import { Button } from '@/components/ui/button';
 import { useT, type Messages } from '@/lib/i18n';
 import { FolderColumns, type FolderDef } from '../folder-columns';
 
-const FOLDERS: readonly FolderDef[] = [{ path: '/field-ops', label: 'field-ops' }];
+const BASE_FOLDERS: readonly FolderDef[] = [
+  { path: '/incidents/triage', label: 'triage' },
+  { path: '/incidents/records', label: 'records' },
+];
+
+const ADMIN_FOLDER: FolderDef = { path: '/incidents/keys', label: 'keys' };
 
 const messages = {
   en: {
-    title: 'Mission Field',
-    subtitle: 'logistics · risk · safety',
+    title: 'Safeguarding',
+    subtitle: 'triage · records · protection',
     startConversation: 'Start conversation',
-    descBefore: 'Logistics lists and risk register. Managed by the ',
+    descBefore:
+      'Post-triage documentation only — a human triages every incident first. Managed by the ',
     descAgent: 'Mission Field',
-    descAfter: ' agent. Safeguarding incidents are tracked separately.',
+    descAfter: ' agent.',
   },
   'zh-TW': {
-    title: '宣教工場',
-    subtitle: '後勤 · 風險 · 安全',
+    title: '安全防護',
+    subtitle: '分流 · 記錄 · 保護',
     startConversation: '開始對話',
-    descBefore: '後勤清單與風險登記。由',
+    descBefore: '僅限分流後建立記錄 — 每起事件須由人員先行分流。由',
     descAgent: '宣教工場',
-    descAfter: '代理管理。防護事件另於安全防護頁面追蹤。',
+    descAfter: '代理管理。',
   },
 } satisfies Messages<{
   title: string;
@@ -37,8 +44,13 @@ const messages = {
   descAfter: string;
 }>;
 
-export default function FieldOpsPage() {
+export default function IncidentsPage() {
   const t = useT(messages);
+  const { user } = useAuth();
+  const folders = useMemo<readonly FolderDef[]>(
+    () => (user?.role === 'admin' ? [...BASE_FOLDERS, ADMIN_FOLDER] : BASE_FOLDERS),
+    [user?.role],
+  );
   const [columns, setColumns] = useState<Record<string, readonly FileEntry[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -47,20 +59,20 @@ export default function FieldOpsPage() {
     setLoading(true);
     setError('');
     const results = await Promise.allSettled(
-      FOLDERS.map((f) =>
+      folders.map((f) =>
         authFetch<DirectoryListing>(
           `/api/v1/workspace/files?path=${encodeURIComponent(f.path)}`,
         ),
       ),
     );
     const next: Record<string, readonly FileEntry[]> = {};
-    FOLDERS.forEach(({ label }, i) => {
+    folders.forEach(({ label }, i) => {
       const r = results[i];
       if (r) next[label] = r.status === 'fulfilled' ? r.value.entries : [];
     });
     setColumns(next);
     setLoading(false);
-  }, []);
+  }, [folders]);
 
   useEffect(() => {
     void load();
@@ -101,7 +113,7 @@ export default function FieldOpsPage() {
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <FolderColumns folders={FOLDERS} columns={columns} />
+        <FolderColumns folders={folders} columns={columns} />
       )}
     </div>
   );
