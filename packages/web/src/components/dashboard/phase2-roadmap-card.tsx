@@ -8,12 +8,12 @@ interface RoadmapItem {
 }
 
 const NEXT_UP: readonly RoadmapItem[] = [
-  { title: 'Safeguarding & Incidents Dashboard', eta: '~1–2 wks' },
   { title: 'Partners Directory', eta: '~1 wk' },
   { title: 'Prayer Request Intake', eta: '~2 wks' },
   { title: 'Mission Trip Fields', eta: '~1 wk' },
   { title: 'Kingdom Impact Indicators', eta: '~2–3 wks' },
   { title: 'Evangelism & Outreach Agent', eta: '~2 wks' },
+  { title: 'Financial Stewardship & Ledger Export', eta: '~3–4 wks' },
 ];
 
 const LATER: readonly RoadmapItem[] = [
