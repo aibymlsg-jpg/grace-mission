@@ -14,6 +14,7 @@ import {
   Coins,
   CreditCard,
   FolderOpen,
+  HandHeart,
   Heart,
   Languages,
   MapPin,
@@ -85,6 +86,7 @@ const ngoItems: readonly NavItem[] = [
   { key: 'comms', href: '/ngo/comms', icon: Newspaper },
   { key: 'fieldOps', href: '/ngo/field-ops', icon: MapPin },
   { key: 'incidents', href: '/ngo/incidents', icon: ShieldAlert },
+  { key: 'prayer', href: '/ngo/prayer', icon: HandHeart },
 ];
 
 const governanceItems: readonly NavItem[] = [
@@ -119,6 +121,7 @@ const messages = {
       comms: 'Proclamation',
       fieldOps: 'Mission Field',
       incidents: 'Safeguarding',
+      prayer: 'Prayer Requests',
       dashboard: 'Dashboard',
       tokenUsage: 'Token Usage',
       auditLogs: 'Audit Logs',
@@ -157,6 +160,7 @@ const messages = {
       comms: '宣揚福音',
       fieldOps: '宣教工場',
       incidents: '安全防護',
+      prayer: '代禱事項',
       dashboard: '儀表板',
       tokenUsage: 'Token 用量',
       auditLogs: '稽核日誌',

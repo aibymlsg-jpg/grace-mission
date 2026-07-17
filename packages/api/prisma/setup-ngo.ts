@@ -92,6 +92,10 @@ incidents/
   triage/       — human focal point triage notes
   records/      — agent-produced incident records (pseudonyms only)
   keys/         — identity-pseudonym maps (human access only)
+prayer-requests/
+  new/          — submitted via the /prayer command, awaiting review
+  praying/      — a human has picked this up
+  answered/     — resolved or no longer active
 field-ops/
   logistics/    — procurement option lists
   risk/         — trip risk assessments and risk register
@@ -147,6 +151,9 @@ const WORKSPACE_FOLDERS = [
   'incidents/triage',
   'incidents/records',
   'incidents/keys',
+  'prayer-requests/new',
+  'prayer-requests/praying',
+  'prayer-requests/answered',
   'field-ops/logistics',
   'field-ops/risk',
   'field-ops/assets',

@@ -133,6 +133,8 @@ async function main() {
   }
   const deployMode = mode === '1' ? 'production' : 'development';
   const composeFile = deployMode === 'production' ? COMPOSE_PROD : COMPOSE_DEV;
+  const apiPort = deployMode === 'production' ? 3003 : 3001;
+  const webPort = deployMode === 'production' ? 3002 : 3000;
   ok(`${deployMode} — ${composeFile.replace(ROOT + '/', '')}`);
 
   // Short-circuit if .env exists: we don't re-prompt or overwrite secrets.
@@ -332,7 +334,7 @@ async function main() {
       if (useHttps) {
         warn(
           'HTTPS only works if a TLS-terminating proxy (Caddy, Traefik, nginx, ' +
-            'Tailscale Funnel) sits in front of ports 3000/3001. The API trusts ' +
+            `Tailscale Funnel) sits in front of ports ${webPort}/${apiPort}. The API trusts ` +
             'X-Forwarded-Proto from the proxy.',
         );
       }
@@ -386,11 +388,11 @@ async function main() {
 
     const scheme = useHttps ? 'https' : 'http';
     const wsScheme = useHttps ? 'wss' : 'ws';
-    const webOrigin = `${scheme}://${publicHost}:3000`;
-    const apiUrl = `${scheme}://${publicHost}:3001`;
-    const wsUrl = `${wsScheme}://${publicHost}:3001`;
+    const webOrigin = `${scheme}://${publicHost}:${webPort}`;
+    const apiUrl = `${scheme}://${publicHost}:${apiPort}`;
+    const wsUrl = `${wsScheme}://${publicHost}:${apiPort}`;
     // CORS only allows the public origin (plus any operator-supplied extras).
-    // We deliberately do NOT auto-include http://localhost:3000: the refresh
+    // We deliberately do NOT auto-include http://localhost:{webPort}: the refresh
     // cookie is SameSite=Strict, so browsing the dashboard via a different
     // host than the one baked into the web bundle would log the user out on
     // every reload (cross-site cookie blocked) — login looks fine, refresh
@@ -551,7 +553,7 @@ async function main() {
 
   step('Waiting for API /health');
   info('This may take up to 3 minutes on first run (installing deps, migrations, bootstrap).');
-  const healthy = await waitForHealth('http://localhost:3001/health', 180);
+  const healthy = await waitForHealth(`http://localhost:${apiPort}/health`, 180);
   if (!healthy) {
     fail('API did not become healthy within 3 minutes.');
     info(`Check logs: docker compose -f "${composeFile}" logs api`);
@@ -560,8 +562,8 @@ async function main() {
   ok('API is healthy');
 
   console.log(`\n${bold(green('=== Installation complete ==='))}\n`);
-  const finalApi = answers?.apiUrl ?? 'http://localhost:3001';
-  const finalWeb = answers?.webOrigin ?? 'http://localhost:3000';
+  const finalApi = answers?.apiUrl ?? `http://localhost:${apiPort}`;
+  const finalWeb = answers?.webOrigin ?? `http://localhost:${webPort}`;
   console.log(`  ${bold('API:')}           ${cyan(finalApi)}`);
   console.log(`  ${bold('Web dashboard:')} ${cyan(finalWeb)}`);
   if (deployMode === 'production' && answers) {

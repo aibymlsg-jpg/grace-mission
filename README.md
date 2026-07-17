@@ -245,7 +245,7 @@ The user-facing agent. It knows all five specialists, when to spawn each, the fu
 
 Seeded via `scripts/setup-ngo.mjs` and `packages/api/prisma/setup-ngo.ts`:
 
-- **28 folders** at `data/users/<userId>/workspace/`: `plans/`, `programs/`, `partners/`, `activities/`, `donors/`, `proposals/`, `reports/`, `mne/` (`raw/`, `processed/`, `quality/`, `indicators/`, `forms/`), `field-ops/`, `incidents/`, `comms/`, `finance/`, `briefs/`, `drafts/`, `status/`, `skills/`
+- **31 folders** at `data/users/<userId>/workspace/`: `plans/`, `programs/`, `partners/`, `activities/`, `donors/`, `proposals/`, `reports/`, `mne/` (`raw/`, `processed/`, `quality/`, `indicators/`, `forms/`), `field-ops/`, `incidents/`, `prayer-requests/`, `comms/`, `finance/`, `briefs/`, `drafts/`, `status/`, `skills/`
 - **7 skill files** copied from `reference/` into `workspace/skills/`
 - `.clawix/audit.log` initialised (append-only)
 - A workspace `README.md` explaining the layout and agent roster

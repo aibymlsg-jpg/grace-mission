@@ -100,6 +100,8 @@ async function main() {
     deployMode = 'production';
   }
   const composeFile = deployMode === 'production' ? COMPOSE_PROD : COMPOSE_DEV;
+  const apiPort = deployMode === 'production' ? 3003 : 3001;
+  const webPort = deployMode === 'production' ? 3002 : 3000;
 
   console.log(`\n${bold('=== Clawix Updater ===')} (${deployMode})\n`);
 
@@ -143,7 +145,7 @@ async function main() {
   }
 
   step('Waiting for API /health');
-  const healthy = await waitForHealth('http://localhost:3001/health', 180);
+  const healthy = await waitForHealth(`http://localhost:${apiPort}/health`, 180);
   if (!healthy) {
     fail('API did not become healthy within 3 minutes.');
     console.log(`  Check logs: docker compose -f "${composeFile}" logs api`);
@@ -152,8 +154,8 @@ async function main() {
   ok('API is healthy');
 
   console.log(`\n${bold(green('=== Update complete ==='))}\n`);
-  console.log(`  ${bold('API:')}           ${cyan('http://localhost:3001')}`);
-  console.log(`  ${bold('Web dashboard:')} ${cyan('http://localhost:3000')}`);
+  console.log(`  ${bold('API:')}           ${cyan(`http://localhost:${apiPort}`)}`);
+  console.log(`  ${bold('Web dashboard:')} ${cyan(`http://localhost:${webPort}`)}`);
   console.log('');
 }
 

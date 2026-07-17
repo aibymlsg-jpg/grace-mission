@@ -97,6 +97,7 @@ export class MessageRouterService {
         channelId: channel.id,
         senderId,
         agentDefinitionId: userAgent.agentDefinitionId,
+        role: user.role,
       });
 
       // Some commands (e.g. /create-skill) rewrite the input and forward to the agent.
