@@ -10,12 +10,30 @@ import { BoardView } from '@/components/dashboard/board-game/BoardView';
 import { CardPanel } from '@/components/dashboard/board-game/CardPanel';
 import { DiceRoller } from '@/components/dashboard/board-game/DiceRoller';
 import { Button } from '@/components/ui/button';
+import { ComingSoon } from '@/components/dashboard/coming-soon';
 import ruthGame from './ruth.game.json';
 
 const DEF = ruthGame as unknown as GameDefinition;
 const DEFAULT_PLAYERS = ['Ruth', 'Boaz', 'Naomi', 'Orpah'];
 
+// Flip to true once the game-studio agent wiring ships (Phase 2) and this
+// demo is backed by real persistence instead of localStorage.
+const GAME_ENABLED = false;
+
 export default function GamePage() {
+  if (!GAME_ENABLED) {
+    return (
+      <ComingSoon
+        title="The Journey of Ruth"
+        description="A Scripture board game of loyalty, harvest, and redemption for family devotion and youth ministry."
+        eta="Phase 2"
+      />
+    );
+  }
+  return <GamePageContent />;
+}
+
+function GamePageContent() {
   const [playerCount, setPlayerCount] = useState<number | null>(null);
 
   const [state, dispatch] = useReducer(

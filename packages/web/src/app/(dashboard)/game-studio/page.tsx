@@ -11,6 +11,7 @@ import { StepCharacters } from '@/components/dashboard/game-studio/StepCharacter
 import { StepCards } from '@/components/dashboard/game-studio/StepCards';
 import { StepWin } from '@/components/dashboard/game-studio/StepWin';
 import { StepExport } from '@/components/dashboard/game-studio/StepExport';
+import { ComingSoon } from '@/components/dashboard/coming-soon';
 
 const STEPS: { id: WizardStep; label: string; icon: string; description: string }[] = [
   { id: 'identity',   label: 'Identity',   icon: '🎭', description: 'Theme, title & rules' },
@@ -21,7 +22,24 @@ const STEPS: { id: WizardStep; label: string; icon: string; description: string 
   { id: 'export',     label: 'Export',     icon: '📦', description: 'Preview & download' },
 ];
 
+// Flip to true once this wizard is wired to the real game-studio agent's
+// storyboard-approval pipeline (Phase 2) instead of building in-memory only.
+const GAME_STUDIO_ENABLED = false;
+
 export default function GameStudioPage() {
+  if (!GAME_STUDIO_ENABLED) {
+    return (
+      <ComingSoon
+        title="Game Studio"
+        description="Build short, Scripture-rooted narrative games for VBS and youth ministry through a storyboard-first, human-approved pipeline."
+        eta="Phase 2"
+      />
+    );
+  }
+  return <GameStudioPageContent />;
+}
+
+function GameStudioPageContent() {
   const [state, dispatch] = useReducer(studioReducer, INITIAL_STATE);
 
   const currentIndex = STEPS.findIndex((s) => s.id === state.step);

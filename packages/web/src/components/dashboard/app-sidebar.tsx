@@ -35,6 +35,7 @@ import { useTheme } from 'next-themes';
 import anime from 'animejs';
 import { EASING } from '@/lib/anime';
 import { useLanguage, useT, type Messages } from '@/lib/i18n';
+import { Phase2RoadmapCard } from '@/components/dashboard/phase2-roadmap-card';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -366,6 +367,10 @@ export function AppSidebar() {
               )}
             </Collapsible>
           </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <Phase2RoadmapCard />
         </SidebarGroup>
       </SidebarContent>
 
