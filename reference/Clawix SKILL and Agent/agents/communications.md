@@ -1,6 +1,6 @@
 ---
 name: communications
-description: Drafts newsletters, social posts, op-eds, press releases, and advocacy briefs. Use this agent when the user wants external-audience text — supporters, media, the public. Do NOT use it for donor reports (donor-engagement) or partner briefs (program-coordinator). It drafts only — humans publish.
+description: Drafts newsletters, social posts, op-eds, press releases, and advocacy briefs. Use this agent when the user wants external-audience text — supporters, media, the public. Do NOT use it for supporter reports (donor-engagement) or partner briefs (program-coordinator). It drafts only — humans publish.
 allowed-tools: Read, Write, Edit, Grep, Glob
 working-dir: workspace://
 reads-skills: [ngo-comms, data-protection]

@@ -1,10 +1,10 @@
 ---
 name: donor-proposal
-description: How to structure a donor proposal that holds together logically — Theory of Change, log-frame, indicators, budget narrative, risk matrix. Used by the donor-engagement agent. Read this before drafting any proposal or concept note.
+description: How to structure a supporter proposal that holds together logically — Theory of Change, log-frame, indicators, budget narrative, risk matrix. Used by the donor-engagement agent. Read this before drafting any proposal or concept note.
 applies-to: donor-engagement
 ---
 
-# Donor proposal — drafting standard
+# Supporter proposal — drafting standard
 
 A proposal is not a wish list. It is a chain of logic: *if we do these activities, we will produce these outputs, which will achieve these outcomes, contributing to this impact, given these assumptions.* If the chain breaks, the proposal fails — even if every section reads beautifully.
 
@@ -16,16 +16,16 @@ A proposal is not a wish list. It is a chain of logic: *if we do these activitie
 4. **Activities and workplan** — what we will actually do, by quarter.
 5. **Budget narrative** — explanatory text only. The numbers live in the spreadsheet; the narrative justifies the lines.
 6. **Risk matrix** — likelihood × impact, mitigation per risk.
-7. **Sustainability and exit** — what continues after the grant ends. Donors care.
+7. **Sustainability and exit** — what continues after the grant ends. Supporters care.
 8. **Organizational capacity** — relevant past performance, with citations to filed reports.
 
 If you start with "activities" you will produce a list of things the NGO knows how to do, not a coherent intervention. Outcomes first.
 
 ## Indicator selection rule
 
-Map your indicators against the donor's reporting framework. Common frameworks:
+Map your indicators against the supporter's reporting framework. Common frameworks:
 
-| Donor / framework | Indicator style | Notes |
+| Supporter / framework | Indicator style | Notes |
 |--|--|--|
 | FCDO (UK) | Output + outcome split, value-for-money KPIs | Disaggregate by sex, age, disability where possible. |
 | USAID | F-indicators or custom; rigorous baseline expected | Often requires standard F-indicators *plus* a few custom. |
@@ -37,7 +37,7 @@ Map your indicators against the donor's reporting framework. Common frameworks:
 
 ## Budget narrative — what to include
 
-For each major line: what it pays for, why it is needed for the activities described, the cost basis (per-unit and quantity), any cost-share with another donor or the NGO's core funds.
+For each major line: what it pays for, why it is needed for the activities described, the cost basis (per-unit and quantity), any cost-share with another supporter or the NGO's core funds.
 
 ## Things that get proposals rejected
 

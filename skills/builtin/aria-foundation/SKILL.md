@@ -1,20 +1,20 @@
 ---
 name: aria-foundation
-description: Stakeholder audience profiles, communication principles, impact framing, and ethical standards for NGO external-facing work. Load when drafting donor documents, community communications, or partner-facing materials.
+description: Stakeholder audience profiles, communication principles, impact framing, and ethical standards for NGO external-facing work. Load when drafting supporter documents, community communications, or partner-facing materials.
 version: 1.0.0
 author: clawix-ngo
-tags: [ngo, communications, donors, stakeholders, ethics]
+tags: [ngo, communications, supporters, stakeholders, ethics]
 ---
 
 # NGO Stakeholder & Communication Intelligence
 
-Reference this skill when calibrating tone, depth, and ethical framing for any document that will be read by donors, partners, community members, or researchers.
+Reference this skill when calibrating tone, depth, and ethical framing for any document that will be read by supporters, partners, community members, or researchers.
 
 ---
 
 ## Stakeholder Profiles
 
-### Institutional Donors & Foundations
+### Institutional Supporters & Foundations
 **What they need:** Rigorous impact evidence, clear theory of change, fiduciary confidence, transparent variance reporting.
 **Emotional reality:** They carry the weight of choosing well among competing goods. They want to trust the organisation — not be sold to.
 **Engage with:** Governance structures, measurable outcomes, risk frameworks, portfolio alignment, honest acknowledgement of what did not work.
@@ -24,7 +24,7 @@ Reference this skill when calibrating tone, depth, and ethical framing for any d
 **Emotional reality:** They are navigating internal sceptics and want visible, shareable wins they can justify internally.
 **Engage with:** SDG alignment, storytelling assets, stakeholder visibility, concrete beneficiary numbers, reputational risk management.
 
-### Individual Donors & Champions
+### Individual Supporters & Champions
 **What they need:** A story they can believe in, proof their contribution matters, a personal connection to human impact.
 **Emotional reality:** They give from hope and care. They fear being manipulated or losing their money to overhead. They want to feel part of something real.
 **Engage with:** Specific lives changed (with consent), community voices in their own words, clear fund-use transparency, the personal role they played.
@@ -62,9 +62,9 @@ When presenting data: *"What does this mean for a real person in a real place?"*
 - Use **we** when speaking as the organisation — the work is collective, not branded.
 
 ### Tone by audience
-- **Institutional donors:** Warm, honest, evidence-grounded. Never salesy. Share the complexity alongside the hope. Acknowledge what did not go as planned.
+- **Institutional supporters:** Warm, honest, evidence-grounded. Never salesy. Share the complexity alongside the hope. Acknowledge what did not go as planned.
 - **CSR partners:** Strategic and concrete. Surface what is measurable and attributable. Avoid mission-speak that does not connect to business value.
-- **Individual donors:** Specific and human. Lead with a story. Numbers support the story; they do not replace it.
+- **Individual supporters:** Specific and human. Lead with a story. Numbers support the story; they do not replace it.
 - **Academic partners:** Intellectually honest and methodologically careful. Acknowledge what the data does not show. Never inflate effect sizes.
 - **Community members and local partners:** Patient and culturally attentive. Ask before assuming. Listen more than explaining.
 
@@ -85,6 +85,6 @@ When presenting data: *"What does this mean for a real person in a real place?"*
 
 **Competitive Neutrality:** Do not disparage peer NGOs. If a comparison is requested, present it factually without value judgements. The mission is shared across the sector; the work is complementary.
 
-**AI Accountability:** When an AI system made a recommendation that a human later reviewed and approved, keep that visible in the audit trail. Do not present AI-assisted drafts as purely human-authored to donors or partners.
+**AI Accountability:** When an AI system made a recommendation that a human later reviewed and approved, keep that visible in the audit trail. Do not present AI-assisted drafts as purely human-authored to supporters or partners.
 
 **Human gates on irreversible actions:** AI proposes; humans decide. Nothing is submitted, published, signed, or paid without a named human acting. This principle is non-negotiable regardless of time pressure or funder deadline.

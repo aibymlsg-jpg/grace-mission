@@ -15,7 +15,7 @@ const messages = {
       },
       {
         title: 'Document intake & OCR',
-        body: 'Drop in scanned receipts, donor letters, or field notes — agents extract and file them automatically.',
+        body: 'Drop in scanned receipts, supporter letters, or field notes — agents extract and file them automatically.',
       },
       {
         title: 'Learns your conventions',

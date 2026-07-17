@@ -1,6 +1,6 @@
 ---
 name: impact-report
-description: How to write a donor narrative report that stands up to scrutiny — structure by donor type, evidence-citation rules, variance reporting, beneficiary-story rules. Used by the donor-engagement agent.
+description: How to write a supporter narrative report that stands up to scrutiny — structure by supporter type, evidence-citation rules, variance reporting, beneficiary-story rules. Used by the donor-engagement agent.
 applies-to: donor-engagement
 ---
 
@@ -8,15 +8,15 @@ applies-to: donor-engagement
 
 ## The rule that matters most
 
-A narrative report is not marketing. It is the NGO's account of what was promised, what was done, what changed, and why. Donors who repeat-fund are the ones who got honest reports the first time.
+A narrative report is not marketing. It is the NGO's account of what was promised, what was done, what changed, and why. Supporters who repeat-fund are the ones who got honest reports the first time.
 
-## Structure by donor archetype
+## Structure by supporter archetype
 
-**Outcome-led donors (SDC, BMZ, several private foundations):** start with what changed in the population, then trace back to activities.
+**Outcome-led supporters (SDC, BMZ, several private foundations):** start with what changed in the population, then trace back to activities.
 
-**Activity-and-output donors (some bilateral mechanisms, many emergency funds):** report activity completion and beneficiary counts first; outcomes section may be lighter but still required.
+**Activity-and-output supporters (some bilateral mechanisms, many emergency funds):** report activity completion and beneficiary counts first; outcomes section may be lighter but still required.
 
-**Mixed (FCDO, USAID, ECHO, GAC):** follow the donor's exact template. Do not reorder sections.
+**Mixed (FCDO, USAID, ECHO, GAC):** follow the supporter's exact template. Do not reorder sections.
 
 In all three, the variance section is non-optional.
 
@@ -26,7 +26,7 @@ In all three, the variance section is non-optional.
 Half a page maximum. What was the period, what was promised, what was delivered, what shifted, what's next. No surprises later in the document.
 
 ### Context update
-Has the operating environment changed? Conflict, drought, election, currency shock, partner staffing. Be specific. Donors cross-reference this against ReliefWeb, INFORM, and their own field intel.
+Has the operating environment changed? Conflict, drought, election, currency shock, partner staffing. Be specific. Supporters cross-reference this against ReliefWeb, INFORM, and their own field intel.
 
 ### Activity progress
 A table: planned activity, planned dose (e.g., trainings × beneficiaries), actual dose, % of plan, brief commentary. Numbers come from `mne/processed/<period>.md`. Cite the path.
@@ -41,17 +41,17 @@ Two or three. Each requires a source file with `consent: shareable` and `consent
 Update the risk matrix. Risks that materialized: what was the response, what is the residual. New risks: what is the mitigation.
 
 ### Financial narrative (if requested)
-Variance against budget by line. Reasons. Reallocations approved by the donor in writing only.
+Variance against budget by line. Reasons. Reallocations approved by the supporter in writing only.
 
 ### Lessons and adaptations
-What did the period teach the NGO? What changes in the next period? Donors notice the absence of this section.
+What did the period teach the NGO? What changes in the next period? Supporters notice the absence of this section.
 
 ### Next period plan
-Brief. Keyed to the workplan and any donor-approved changes.
+Brief. Keyed to the workplan and any supporter-approved changes.
 
 ## Evidence-citation rules
 
-Every numeric claim cites a path inside the workspace: `(see mne/processed/2026-q2.md, OUT-1.1)`. Every story cites its consented source: `(consented source: stories/farida.md, consent-scope: narrative-reporting)`. Donors increasingly check.
+Every numeric claim cites a path inside the workspace: `(see mne/processed/2026-q2.md, OUT-1.1)`. Every story cites its consented source: `(consented source: stories/farida.md, consent-scope: narrative-reporting)`. Supporters increasingly check.
 
 ## Variance reporting — the part most NGOs do badly
 
@@ -66,7 +66,7 @@ If actual is above target:
 - Check: were beneficiaries double-counted? Was the indicator definition slipped to make the number bigger? Be honest.
 - Consider whether the target was set too low and should be revised upward in the next period.
 
-## Things that get reports rejected (or quietly downgrade the donor relationship)
+## Things that get reports rejected (or quietly downgrade the supporter relationship)
 
 - "On track" with no underlying numbers.
 - Beneficiary stories that recycle from the proposal.

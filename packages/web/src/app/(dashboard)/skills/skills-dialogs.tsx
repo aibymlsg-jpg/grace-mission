@@ -407,13 +407,13 @@ See \`scripts/ocr_extract.py\` for the full implementation.`,
   {
     label: 'NGO Field Report Compiler',
     name: 'ngo-field-report-compiler',
-    description: 'Compile structured field reports from raw notes, photos, and data files in the workspace. Use when a field officer needs to turn unstructured observations into a formatted impact report for donors or management.',
+    description: 'Compile structured field reports from raw notes, photos, and data files in the workspace. Use when a field officer needs to turn unstructured observations into a formatted impact report for supporters or management.',
     content: `---
 name: ngo-field-report-compiler
-description: Compile structured field reports from raw notes, photos, and data files in the workspace. Use when a field officer needs to turn unstructured observations into a formatted impact report for donors or management.
+description: Compile structured field reports from raw notes, photos, and data files in the workspace. Use when a field officer needs to turn unstructured observations into a formatted impact report for supporters or management.
 version: 1.0.0
 author: AIbyML Org
-tags: [ngo, reporting, field-ops, donors, impact]
+tags: [ngo, reporting, field-ops, supporters, impact]
 ---
 
 # NGO Field Report Compiler
@@ -428,7 +428,7 @@ Transform raw field notes, activity logs, and supporting files into a profession
 - Saves the final report as a .md or .docx file to /workspace/output/
 
 ## Skills loaded alongside this skill
-- Load \`aria-foundation\` for donor communication tone, impact framing, and ethical standards
+- Load \`aria-foundation\` for supporter communication tone, impact framing, and ethical standards
 
 ## Usage
 1. **Prepare data**: Place field notes (.txt/.md) and any CSV data in /workspace/field-data/
@@ -440,7 +440,7 @@ Transform raw field notes, activity logs, and supporting files into a profession
 1. \`list_directory\` on /workspace/field-data/ to inventory available files
 2. \`read_file\` each source file to load content into context
 3. Structure into the standard report template (sections below)
-4. Apply aria-foundation tone guidance for the intended audience (default: institutional donor)
+4. Apply aria-foundation tone guidance for the intended audience (default: institutional supporter)
 5. \`write_file\` the compiled report to /workspace/output/
 
 ## Standard report sections

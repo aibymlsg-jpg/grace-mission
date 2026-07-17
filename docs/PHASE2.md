@@ -97,12 +97,12 @@ When an agent is asked to validate or package a skill, it calls the `shell`
 tool, which runs `docker exec` into the `clawix-agent-xxxx` container:
 
 ```
-User: "Validate my new donor-outreach skill"
+User: "Validate my new supporter-outreach skill"
 
 Agent → shell tool:
   docker exec clawix-agent-a1b2c3 \
     python3 /skills/builtin/skill-creator/scripts/quick_validate.py \
-            /workspace/skills/donor-outreach
+            /workspace/skills/supporter-outreach
 
 Result returned to agent, then to user.
 ```

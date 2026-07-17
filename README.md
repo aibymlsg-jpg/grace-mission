@@ -25,7 +25,7 @@ You talk to them in plain language, the same way you'd brief a colleague. They d
 
 Three promises sit underneath everything Clawix does:
 
-- 🧑‍⚖️ **A human is always in charge.** Clawix only ever produces *drafts*. It never sends an email, posts to social media, or submits anything to a donor on its own. A person always presses "send".
+- 🧑‍⚖️ **A human is always in charge.** Clawix only ever produces *drafts*. It never sends an email, posts to social media, or submits anything to a supporter on its own. A person always presses "send".
 - 🔒 **Your data stays yours.** Clawix runs on your organisation's own server. Beneficiary names and personal details are deliberately kept out of its memory.
 - ✅ **It won't make things up.** If a figure or fact is missing, the assistants mark it clearly (e.g. `[FILL: 2024 beneficiary count]`) rather than inventing a number.
 
@@ -38,12 +38,12 @@ At the front desk is the **NGO Programme Assistant**. This is who you talk to. Y
 | The specialist | Think of them as… | Ask them for… |
 | --- | --- | --- |
 | **Programme Coordinator** | Your planning and tracking officer | Workplans, partner lists, activity trackers, weekly status notes |
-| **Donor Engagement** | Your fundraising and grants officer | Proposals, donor reports, log-frames, and research into who might fund you |
+| **Supporter Engagement** | Your fundraising and grants officer | Proposals, supporter reports, log-frames, and research into who might fund you |
 | **Monitoring & Evaluation** | Your data and results officer | SMART indicators, data-collection forms, checking data quality, dashboard summaries |
 | **Communications** | Your storytelling and outreach officer | Newsletters, social media posts, op-eds, advocacy briefs |
 | **Field Operations** | Your logistics and safety officer | Logistics lists, risk registers, and writing up incident records *after* a person has handled the situation |
 
-Each specialist has been given a set of **best-practice guides** ("skills") to read before it drafts — for example, how donors like FCDO, USAID and ECHO expect proposals to be structured, or the data-protection rules for handling sensitive information. So you're not just getting generic text; you're getting drafts that follow the standards your sector expects.
+Each specialist has been given a set of **best-practice guides** ("skills") to read before it drafts — for example, how supporters like FCDO, USAID and ECHO expect proposals to be structured, or the data-protection rules for handling sensitive information. So you're not just getting generic text; you're getting drafts that follow the standards your sector expects.
 
 ---
 
@@ -68,7 +68,7 @@ In the web dashboard, open **Conversations** and choose the **NGO Programme Assi
 
 Describe what you need the way you'd ask a colleague. You don't need special commands or keywords. For example:
 
-> *"Find donors for a water and sanitation programme in West Africa."*
+> *"Find supporters for a water and sanitation programme in West Africa."*
 > → The assistant researches funders and saves a shortlist for you to review.
 
 > *"Design SMART indicators for a livelihoods programme."*
@@ -86,7 +86,7 @@ Describe what you need the way you'd ask a colleague. You don't need special com
 
 Everything the assistants produce is saved as **drafts** in a tidy set of folders set up for your organisation — for example `proposals/`, `reports/`, `mne/`, `comms/drafts/`, `field-ops/` and so on. You'll find the draft waiting there (and in the conversation) so you can open it, edit it, and finish it your way.
 
-Nothing in those "drafts" folders has been sent anywhere. Sending — to a donor, a mailing list, or social media — is always a deliberate step **you** take.
+Nothing in those "drafts" folders has been sent anywhere. Sending — to a supporter, a mailing list, or social media — is always a deliberate step **you** take.
 
 ---
 
@@ -94,7 +94,7 @@ Nothing in those "drafts" folders has been sent anywhere. Sending — to a donor
 
 These rules are built into Clawix. Knowing them helps you trust what it gives you:
 
-1. **Drafts only — a human always sends.** Emails, donor submissions, and social posts are prepared for you, never sent automatically.
+1. **Drafts only — a human always sends.** Emails, supporter submissions, and social posts are prepared for you, never sent automatically.
 2. **Beneficiary privacy is protected.** Personal details of the people you serve are kept out of the assistants' memory. When incidents are written up, real names are replaced with pseudonyms; the key linking them is kept separate and is people-only.
 3. **Safeguarding comes first.** Field Operations will **not** handle a safeguarding disclosure or make first-contact decisions. A trained person deals with the situation; the assistant only helps *document* it afterwards, and mandatory-reporting flags can't be quietly removed.
 4. **No invented facts or figures.** Missing data is flagged for you to fill in, not guessed.
@@ -118,7 +118,7 @@ So there are no surprises, Clawix deliberately **does not**:
 ## Tips for getting great results
 
 - **Be specific.** "Draft a 2-page concept note for a $50,000 girls' education project in rural Kenya" beats "write a proposal".
-- **Point to context.** Mention the programme, the donor, or the time period so the assistant uses the right material.
+- **Point to context.** Mention the programme, the supporter, or the time period so the assistant uses the right material.
 - **Review every draft.** Treat it as a strong first draft from a capable colleague — your judgement and local knowledge make it final.
 - **Fill in the `[FILL: …]` marks.** These are deliberate prompts where only you have the real number or detail.
 - **Ask follow-ups.** "Make it shorter", "use a more formal tone", or "add a risk section" all work in the same conversation.
@@ -217,7 +217,7 @@ pnpm run dev                         # API on :3001, dashboard on :3000
 
 ## NGO configuration reference
 
-A complete multi-agent setup for small-to-mid-size NGOs (10–80 staff, multi-donor, often field-based). All reference files live under `reference/Clawix SKILL and Agent/`.
+A complete multi-agent setup for small-to-mid-size NGOs (10–80 staff, multi-supporter, often field-based). All reference files live under `reference/Clawix SKILL and Agent/`.
 
 ### The five specialist agents
 
@@ -226,7 +226,7 @@ Created via `scripts/seed-ngo-agents.mjs` — each with `role: worker`, `isOffic
 | Agent | Responsibility | Tools | Reads skills |
 |---|---|---|---|
 | `program-coordinator` | Workplan, partner register, activity tracker, weekly status notes | Read, Write, Edit, Grep, Glob | safeguarding, ngo-comms |
-| `donor-engagement` | Proposals, narrative reports, log-frames, donor research | Read, Write, Edit, Grep, Glob, WebSearch (domain-allowlisted) | donor-proposal, grant-research, impact-report, data-protection |
+| `donor-engagement` | Proposals, narrative reports, log-frames, supporter research | Read, Write, Edit, Grep, Glob, WebSearch (domain-allowlisted) | donor-proposal, grant-research, impact-report, data-protection |
 | `monitoring-evaluation` | SMART indicators, data-collection forms, period validation, dashboard summaries | Read, Write, Edit, Grep, Glob, Bash (read-only allowlist) | mne, data-protection |
 | `communications` | Newsletters, social posts, op-eds, advocacy briefs | Read, Write, Edit, Grep, Glob | ngo-comms, data-protection |
 | `field-operations` | Logistics lists, risk register, safeguarding incident records (post-triage only) | Read, Write, Edit, Grep, Glob | safeguarding, data-protection |
@@ -238,7 +238,7 @@ The user-facing agent. It knows all five specialists, when to spawn each, the fu
 - Routes requests to exactly one specialist at a time — no autonomous agent-to-agent chaining
 - Enforces the PII boundary (beneficiary data never enters agent memory)
 - Applies safeguarding-first logic (field-ops is documentation-only, after human triage)
-- All outbound actions (email, donor submission, social post) are draft-only; a human sends
+- All outbound actions (email, supporter submission, social post) are draft-only; a human sends
 - Every agent action appends to `.clawix/audit.log` (append-only)
 
 ### Workspace layout
@@ -260,8 +260,8 @@ Read-only reference packages — encoded best practice the relevant agent reads 
 | `mne/SKILL.md` | monitoring-evaluation | SMART indicator YAML template; baseline/midline/endline structure; OECD-DAC evaluation criteria; data-validation rules; anonymization recipe |
 | `safeguarding/SKILL.md` | field-operations, program-coordinator | PSEA principles, child safeguarding, incident triage decision tree, mandatory reporting triggers, record structure with pseudonym convention |
 | `data-protection/SKILL.md` | monitoring-evaluation, donor-engagement, communications, field-operations | GDPR + ICRC/IASC guidance; `pii: true` convention; consent capture; anonymization steps |
-| `impact-report/SKILL.md` | donor-engagement | Narrative report structure by donor type; financial reporting touchpoints; beneficiary story consent rules; variance reporting standard |
-| `grant-research/SKILL.md` | donor-engagement | Donor scanning checklist; eligibility filters; deadline tracking; fit-scoring rubric (1–5) |
+| `impact-report/SKILL.md` | donor-engagement | Narrative report structure by supporter type; financial reporting touchpoints; beneficiary story consent rules; variance reporting standard |
+| `grant-research/SKILL.md` | donor-engagement | Supporter scanning checklist; eligibility filters; deadline tracking; fit-scoring rubric (1–5) |
 | `ngo-comms/SKILL.md` | communications, program-coordinator | Accessible language standards; do-no-harm storytelling; dignity-preserving imagery; advocacy framing; status-note classification |
 
 ### Architecture docs

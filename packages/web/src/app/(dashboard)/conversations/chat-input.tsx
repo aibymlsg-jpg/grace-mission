@@ -56,17 +56,17 @@ const messages = {
       },
       funding: {
         title: 'Stewardship Search',
-        subtitle: 'Christian donors · grants · faith foundations',
+        subtitle: 'Christian supporters · grants · faith foundations',
         description:
           'Identify Christian foundations, faith-based grants, and church-giving programmes whose priorities align with your gospel mission and ministry goals.',
         prompt:
-          'Research funding and stewardship opportunities for our gospel mission. Identify matching Christian foundations, faith-based grant programmes, and individual donor strategies — including eligibility requirements and upcoming deadlines.',
+          'Research funding and stewardship opportunities for our gospel mission. Identify matching Christian foundations, faith-based grant programmes, and individual supporter strategies — including eligibility requirements and upcoming deadlines.',
       },
       application: {
         title: 'Ministry Proposal',
         subtitle: 'grant · theory of change · budget narrative',
         description:
-          'Draft a compelling ministry grant proposal with a biblically grounded theory of change, log-frame indicators, transparent budget narrative, and a risk matrix for submission to Christian donors.',
+          'Draft a compelling ministry grant proposal with a biblically grounded theory of change, log-frame indicators, transparent budget narrative, and a risk matrix for submission to Christian supporters.',
         prompt:
           'Help me write a ministry funding proposal. I need a biblically grounded theory of change, a logical framework with measurable discipleship and outreach indicators, a detailed budget narrative, and a risk matrix for submission to a Christian foundation.',
       },
@@ -116,17 +116,17 @@ const messages = {
       },
       funding: {
         title: '財務管理搜尋',
-        subtitle: '基督徒捐助者 · 補助金 · 信仰基金會',
+        subtitle: '基督徒支持者 · 補助金 · 信仰基金會',
         description:
           '辨識優先事項與您的福音使命及事工目標相符的基督徒基金會、信仰補助計畫與教會奉獻方案。',
         prompt:
-          '研究我們福音使命的資助與財務管理機會。辨識相符的基督徒基金會、信仰補助計畫及個人捐助策略，包含申請資格要求與即將到來的截止日期。',
+          '研究我們福音使命的資助與財務管理機會。辨識相符的基督徒基金會、信仰補助計畫及個人支持者策略，包含申請資格要求與即將到來的截止日期。',
       },
       application: {
         title: '事工提案',
         subtitle: '補助金 · 變革理論 · 預算說明',
         description:
-          '草擬以聖經為基礎、具說服力的事工補助提案，包含變革理論、含指標的邏輯架構、透明的預算說明，以及供基督徒捐助者審閱的風險矩陣。',
+          '草擬以聖經為基礎、具說服力的事工補助提案，包含變革理論、含指標的邏輯架構、透明的預算說明，以及供基督徒支持者審閱的風險矩陣。',
         prompt:
           '協助我撰寫事工資金提案。我需要以聖經為基礎的變革理論、含可衡量門徒訓練與外展指標的邏輯架構、詳細預算說明，以及供基督徒基金會提交用的風險矩陣。',
       },

@@ -8,7 +8,7 @@ applies-to: [communications, program-coordinator]
 
 ## The framing rules (non-negotiable)
 
-1. **The beneficiary is the protagonist.** Not the NGO, not the donor, not the staff. People are subjects of their own lives, not objects of someone else's intervention.
+1. **The beneficiary is the protagonist.** Not the NGO, not the supporter, not the staff. People are subjects of their own lives, not objects of someone else's intervention.
 2. **No suffering as content.** A story that exists to extract sympathy without showing agency is exploitative, regardless of how much money it raises. The NGO does not publish those stories.
 3. **No anonymous "victim" imagery.** Photos of identifiable people require named consent. Photos of unidentifiable people (silhouettes, hands, backs of heads) are fine if they accurately represent the situation; they are not fine as substitutes for missing consent.
 4. **No rescuer framing.** "We saved them" is wrong on the facts and wrong in the relationship. Communities solve their own problems; the NGO supports.
@@ -54,7 +54,7 @@ Soften these thresholds in tone if asked, never in classification.
 
 ## Things to refuse
 
-- A donor is asking us to put their logo on a beneficiary photo. The beneficiary's consent does not extend to that.
+- A supporter is asking us to put their logo on a beneficiary photo. The beneficiary's consent does not extend to that.
 - A partner wants us to delete their name from a story they share authorship of. We don't unilaterally rewrite shared work.
 - A board member wants to add a quote that softens a difficult finding. The finding stands; the quote can sit alongside, not in place of.
 - A campaign opportunity calls for emotional imagery the NGO does not have consented sources for. Pass on the campaign.

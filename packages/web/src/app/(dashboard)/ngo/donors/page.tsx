@@ -10,7 +10,7 @@ import { useT, type Messages } from '@/lib/i18n';
 import { FolderColumns, type FolderDef } from '../folder-columns';
 
 const FOLDERS: readonly FolderDef[] = [
-  { path: '/donors', label: 'donors' },
+  { path: '/donors', label: 'supporters' },
   { path: '/proposals', label: 'proposals' },
   { path: '/reports', label: 'reports' },
   { path: '/donor-research', label: 'research' },
@@ -21,7 +21,7 @@ const messages = {
     title: 'Stewardship',
     subtitle: 'giving · grants · faithful reporting',
     startConversation: 'Start conversation',
-    descBefore: 'Proposals, narrative reports, log-frames and donor research. Managed by the ',
+    descBefore: 'Proposals, narrative reports, log-frames and supporter research. Managed by the ',
     descAgent: 'Stewardship',
     descAfter: ' agent.',
   },
@@ -29,7 +29,7 @@ const messages = {
     title: '財務管理',
     subtitle: '奉獻 · 補助 · 忠心報告',
     startConversation: '開始對話',
-    descBefore: '提案、敘述性報告、邏輯框架與捐助者研究。由',
+    descBefore: '提案、敘述性報告、邏輯框架與支持者研究。由',
     descAgent: '財務管理',
     descAfter: '代理管理。',
   },

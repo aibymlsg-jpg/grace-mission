@@ -18,7 +18,7 @@ const messages = {
       },
       {
         title: 'Self-hosted data',
-        body: "Your congregation's, donors', and community's data stays on infrastructure you control.",
+        body: "Your congregation's, supporters', and community's data stays on infrastructure you control.",
       },
       {
         title: 'Container isolation',

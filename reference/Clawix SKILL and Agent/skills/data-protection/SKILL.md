@@ -42,17 +42,17 @@ For aggregate reporting:
 
 ## Retention
 
-- Survey raw data: retain only as long as the donor agreement requires, plus statutory minimum.
+- Survey raw data: retain only as long as the supporter agreement requires, plus statutory minimum.
 - Beneficiary contact details for follow-up: retain only as long as consent is current.
 - Safeguarding records: per the NGO's safeguarding policy, typically much longer; access is restricted not deleted.
-- Donor proposal drafts: retain. They become institutional memory.
+- Supporter proposal drafts: retain. They become institutional memory.
 
 ## Cross-border transfers
 
 If beneficiary data leaves the country where it was collected, check:
 
 - Local data-protection law (GDPR for the EU, the country's own act elsewhere).
-- The donor agreement's data clauses.
+- The supporter agreement's data clauses.
 - Whether a Data Processing Agreement is in place with any cloud provider involved.
 
 If any of these is unclear, refuse the transfer and surface the question to the AI Assistant Owner.

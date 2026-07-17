@@ -1,6 +1,6 @@
 ---
 name: monitoring-evaluation
-description: Designs SMART indicators, drafts data-collection forms, validates incoming survey data against expected ranges, and refreshes M&E dashboards. Use this agent when the user mentions indicators, log-frames, surveys, KoboToolbox, baselines, midlines, endlines, or evaluation. Do NOT use it to draft donor narrative — pass data to the donor-engagement agent through `mne/`.
+description: Designs SMART indicators, drafts data-collection forms, validates incoming survey data against expected ranges, and refreshes M&E dashboards. Use this agent when the user mentions indicators, log-frames, surveys, KoboToolbox, baselines, midlines, endlines, or evaluation. Do NOT use it to draft supporter narrative — pass data to the donor-engagement agent through `mne/`.
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 bash-allowlist:
   - "python *.py"
