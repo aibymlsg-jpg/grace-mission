@@ -42,6 +42,7 @@ Your job is to understand what the user needs, then either answer directly (for 
 | \`monitoring-evaluation\` | Indicator design, survey forms, data validation, M&E summaries | "Design indicators", "Validate this survey data", "Refresh the M&E dashboard" |
 | \`communications\` | Newsletters, social posts, advocacy briefs, op-eds | "Write the newsletter", "Draft a social post", "Prepare an advocacy brief" |
 | \`field-operations\` | Logistics, risk register, safeguarding records (post-triage only) | "Trip risk assessment", "Procurement options", "Document this safeguarding incident" |
+| \`pastoral-care\` | Pastoral/spiritual support conversations — listening, prayer, Scripture; escalates safety-critical disclosures | "Talk to someone about a member who's struggling", "Route this to pastoral care" |
 
 Each specialist has a system prompt that describes exactly what it can and cannot do. Trust those constraints — do not ask a specialist to do something outside its declared scope.
 
@@ -96,6 +97,11 @@ prayer-requests/
   new/          — submitted via the /prayer command, awaiting review
   praying/      — a human has picked this up
   answered/     — resolved or no longer active
+pastoral-care/
+  records/      — pastoral-care session notes (pseudonyms only)
+  flagged/      — auto-escalated crisis disclosures awaiting human follow-up
+  sampled/      — periodic sample for human quality/safety review
+  keys/         — identity-pseudonym maps (human access only)
 field-ops/
   logistics/    — procurement option lists
   risk/         — trip risk assessments and risk register
@@ -120,7 +126,7 @@ The \`aria-foundation\` skill contains stakeholder audience profiles, communicat
 
 - Draft a proposal, report, newsletter, or indicator set yourself (delegate to the specialist).
 - Read or relay the contents of \`.pii.md\` files.
-- Access \`incidents/keys/\` or \`finance/restricted/\`.
+- Access \`incidents/keys/\`, \`pastoral-care/keys/\`, or \`finance/restricted/\`.
 - Approve, submit, or publish anything externally.
 - Promise a timeline or commitment to a partner or supporter.`;
 
@@ -154,6 +160,10 @@ const WORKSPACE_FOLDERS = [
   'prayer-requests/new',
   'prayer-requests/praying',
   'prayer-requests/answered',
+  'pastoral-care/records',
+  'pastoral-care/flagged',
+  'pastoral-care/sampled',
+  'pastoral-care/keys',
   'field-ops/logistics',
   'field-ops/risk',
   'field-ops/assets',
@@ -270,6 +280,7 @@ This workspace is managed by Clawix. Five specialist agents operate within it.
 | \`monitoring-evaluation\` | Indicators, survey forms, data validation |
 | \`communications\` | Newsletters, social posts, advocacy briefs |
 | \`field-operations\` | Logistics, risk register, safeguarding records |
+| \`pastoral-care\` | Pastoral/spiritual support conversations, prayer, Scripture |
 
 ## Key rules
 
@@ -277,6 +288,7 @@ This workspace is managed by Clawix. Five specialist agents operate within it.
 - Files with \`consent: shareable\` in frontmatter may be quoted in external drafts.
 - \`.clawix/audit.log\` is append-only. Never edit it.
 - Agents draft; humans publish, submit, and pay.
+- \`incidents/keys/\` and \`pastoral-care/keys/\` are identity-pseudonym maps — admin access only.
 
 ## Folder layout
 

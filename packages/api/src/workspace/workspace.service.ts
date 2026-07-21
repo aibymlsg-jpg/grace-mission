@@ -116,11 +116,13 @@ export class WorkspaceService {
     return { fs: new ScopedFs(localPath), basePath: localPath };
   }
 
+  private static readonly ADMIN_ONLY_PATHS = ['/incidents/keys', '/pastoral-care/keys'];
+
   private assertPathAllowed(relativePath: string, role: UserRole): void {
-    if (
-      (relativePath === '/incidents/keys' || relativePath.startsWith('/incidents/keys/')) &&
-      role !== UserRole.admin
-    ) {
+    const isAdminOnly = WorkspaceService.ADMIN_ONLY_PATHS.some(
+      (restricted) => relativePath === restricted || relativePath.startsWith(`${restricted}/`),
+    );
+    if (isAdminOnly && role !== UserRole.admin) {
       throw new ForbiddenException('This folder is restricted to admin users');
     }
   }
