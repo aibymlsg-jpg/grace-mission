@@ -43,10 +43,11 @@ Namecheap/Cloudflare Registrar).
 Create one **A record** pointing at the server's public IP:
 
 ```
-church.example.org.   A   <VPS_IP>
+churchclawix.aibyml.uk.   A   <VPS_IP>
 ```
 
-(Use whatever hostname you like — this doc uses `church.example.org` as a placeholder.)
+(This doc uses `churchclawix.aibyml.uk` throughout as the running example — swap in
+whatever hostname you actually use.)
 
 ## 3. Provision the server
 
@@ -99,7 +100,7 @@ pnpm run install:clawix
 When prompted:
 - **Deploy mode:** production
 - **AI provider + key:** pick one (see the cost note below before choosing a model)
-- **Public host or IP:** `church.example.org` (your domain, no `https://`, no port)
+- **Public host or IP:** `churchclawix.aibyml.uk` (your domain, no `https://`, no port)
 - **Use HTTPS?:** `y` — the installer will remind you a reverse proxy must sit in
   front of it, which step 5 sets up
 - **Admin email/password:** yours
@@ -115,8 +116,8 @@ This step also builds the `clawix-agent:latest` Docker image and starts everythi
 ## 5. TLS with Caddy
 
 One quirk to know: the installer bakes the **port number** into the URLs it
-generates (`https://church.example.org:3002` for the dashboard,
-`https://church.example.org:3003` for the API/WebSocket) — there's no built-in
+generates (`https://churchclawix.aibyml.uk:3002` for the dashboard,
+`https://churchclawix.aibyml.uk:3003` for the API/WebSocket) — there's no built-in
 option for a clean port-less URL. The simplest fix is to let Caddy terminate TLS on
 those same two ports rather than fight it:
 
@@ -130,11 +131,11 @@ sudo apt-get update -qq && sudo apt-get install -y caddy
 Edit `/etc/caddy/Caddyfile`:
 
 ```caddyfile
-church.example.org:3002 {
+churchclawix.aibyml.uk:3002 {
 	reverse_proxy localhost:3002
 }
 
-church.example.org:3003 {
+churchclawix.aibyml.uk:3003 {
 	reverse_proxy localhost:3003
 }
 ```
@@ -147,13 +148,13 @@ Caddy issues and renews Let's Encrypt certificates for both automatically (it us
 port 80 for the ACME challenge regardless of which port the site block listens on —
 that's why port 80 is open in the firewall).
 
-*(Want the classic port-less `https://church.example.org` URL instead? That needs
+*(Want the classic port-less `https://churchclawix.aibyml.uk` URL instead? That needs
 docker-compose.prod.yml's port mappings changed and a rebuild — ask and I can make
 that small change.)*
 
 ## 6. Verify
 
-Open `https://church.example.org:3002` in a browser and log in with the admin
+Open `https://churchclawix.aibyml.uk:3002` in a browser and log in with the admin
 credentials from step 4. Confirm the WebSocket connects (the "connected" dot in
 `/conversations` should be green, not red).
 
