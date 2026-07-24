@@ -106,6 +106,7 @@ field-ops/
   logistics/    — procurement option lists
   risk/         — trip risk assessments and risk register
   assets/       — asset and vehicle logs
+  trips/        — mission trip rosters, readiness checklists, debrief reports
 skills/         — reference knowledge packages (read-only)
 .clawix/
   audit.log     — append-only action log
@@ -167,6 +168,7 @@ const WORKSPACE_FOLDERS = [
   'field-ops/logistics',
   'field-ops/risk',
   'field-ops/assets',
+  'field-ops/trips',
   '.clawix',
 ];
 
