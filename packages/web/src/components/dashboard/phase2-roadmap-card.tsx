@@ -26,13 +26,20 @@ const PHASE_2A: readonly RoadmapItem[] = [
   { title: 'Game Studio live wiring' },
 ];
 
-// Phase 2B — ChurchAIAssistant pack integration, build half: port the
-// church-* skills, seed the highest-value agents, merge their richer
-// pastoral-care content into the agent already shipped.
+// Phase 2B — ChurchAIAssistant + ChurchAIAdmin pack integration, build half.
+// Widened after a full feature audit of both source repos found no filler
+// content — every church-* skill carries real, portable material. Also picks
+// up two things the audit surfaced that aren't "church content" per se: the
+// browser-automation tool suite ChurchAIAssistant has and this repo doesn't,
+// and ChurchAIAdmin's more granular (if insecurely-implemented) RBAC role
+// taxonomy, worth adopting as a data-model change before the new agents'
+// workspace folders need department-scoped gating.
 const PHASE_2B: readonly RoadmapItem[] = [
-  { title: 'Port church-* skills' },
-  { title: 'Seed sermon/Sunday-school/admin agents' },
-  { title: 'Merge pastoral-care content' },
+  { title: 'Adopt granular RBAC role taxonomy' },
+  { title: 'Port all ~20 church-* skills' },
+  { title: 'Seed the corresponding agents' },
+  { title: 'Merge richer pastoral-care content' },
+  { title: 'Add browser-automation tool suite' },
 ];
 
 // Phase 2C — ChurchAIAssistant pack integration, settings half: make packs a
@@ -40,6 +47,17 @@ const PHASE_2B: readonly RoadmapItem[] = [
 const PHASE_2C: readonly RoadmapItem[] = [
   { title: 'Pack-installer script' },
   { title: 'Ministry Packs settings tab' },
+];
+
+// Phase 2D — ChurchAIAdmin's Attendance/Roll-Call system has no equivalent in
+// either this repo or ChurchAIAssistant. Doesn't fit 2A (unrelated backlog),
+// 2B (not church-*-skill content), or 2C (not pack infra) — a real gap on its
+// own. ChurchAIAdmin's WhatsApp-Bookkeeper receipt-classification idea folds
+// into the existing Phase 2A Financial Stewardship item instead of landing
+// here, since that item already exists.
+const PHASE_2D: readonly RoadmapItem[] = [
+  { title: 'Attendance / roll-call tracking' },
+  { title: 'AI survey + QR registration' },
 ];
 
 function RoadmapSection({ label, items }: { label: string; items: readonly RoadmapItem[] }) {
@@ -81,6 +99,7 @@ export function Phase2RoadmapCard() {
         <RoadmapSection label="Phase 2A" items={PHASE_2A} />
         <RoadmapSection label="Phase 2B" items={PHASE_2B} />
         <RoadmapSection label="Phase 2C" items={PHASE_2C} />
+        <RoadmapSection label="Phase 2D" items={PHASE_2D} />
       </CardContent>
     </Card>
   );
