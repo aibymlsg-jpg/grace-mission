@@ -116,7 +116,11 @@ export class WorkspaceService {
     return { fs: new ScopedFs(localPath), basePath: localPath };
   }
 
-  private static readonly ADMIN_ONLY_PATHS = ['/incidents/keys', '/pastoral-care/keys'];
+  private static readonly ADMIN_ONLY_PATHS = [
+    '/incidents/keys',
+    '/pastoral-care/keys',
+    '/finance/restricted',
+  ];
 
   private assertPathAllowed(relativePath: string, role: UserRole): void {
     const isAdminOnly = WorkspaceService.ADMIN_ONLY_PATHS.some(

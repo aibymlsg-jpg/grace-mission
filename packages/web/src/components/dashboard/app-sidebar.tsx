@@ -32,6 +32,7 @@ import {
   Target,
   User,
   Users,
+  Wallet,
   Wrench,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -89,6 +90,7 @@ const ngoItems: readonly NavItem[] = [
   { key: 'fieldOps', href: '/ngo/field-ops', icon: MapPin },
   { key: 'incidents', href: '/ngo/incidents', icon: ShieldAlert },
   { key: 'prayer', href: '/ngo/prayer', icon: HandHeart },
+  { key: 'finance', href: '/ngo/finance', icon: Wallet },
 ];
 
 const governanceItems: readonly NavItem[] = [
@@ -125,6 +127,7 @@ const messages = {
       fieldOps: 'Mission Field',
       incidents: 'Safeguarding',
       prayer: 'Prayer Requests',
+      finance: 'Finance',
       dashboard: 'Dashboard',
       tokenUsage: 'Token Usage',
       auditLogs: 'Audit Logs',
@@ -165,6 +168,7 @@ const messages = {
       fieldOps: '宣教工場',
       incidents: '安全防護',
       prayer: '代禱事項',
+      finance: '財務',
       dashboard: '儀表板',
       tokenUsage: 'Token 用量',
       auditLogs: '稽核日誌',
