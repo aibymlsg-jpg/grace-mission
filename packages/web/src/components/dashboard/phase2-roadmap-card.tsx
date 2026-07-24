@@ -7,19 +7,64 @@ interface RoadmapItem {
   readonly eta?: string;
 }
 
-const NEXT_UP: readonly RoadmapItem[] = [
+const SHIPPED: readonly RoadmapItem[] = [
+  { title: 'Pastoral-care agent' },
+  { title: 'Speech input & read-aloud' },
+];
+
+// Phase 2A — the original, still-unfinished Phase 2 business (gospel-mission's
+// 8 key areas). Unchanged in substance from the prior Next up / Later split —
+// just grouped under one label so it isn't confused with the new 2B/2C work.
+const PHASE_2A: readonly RoadmapItem[] = [
   { title: 'Partners Directory', eta: '~1 wk' },
   { title: 'Mission Trip Fields', eta: '~1 wk' },
   { title: 'Kingdom Impact Indicators', eta: '~2–3 wks' },
   { title: 'Evangelism & Outreach Agent', eta: '~2 wks' },
   { title: 'Financial Stewardship & Ledger Export', eta: '~3–4 wks' },
-];
-
-const LATER: readonly RoadmapItem[] = [
   { title: 'Scripture & Literacy Tracker' },
   { title: 'Consent & Story Permissions Tracker' },
   { title: 'Game Studio live wiring' },
 ];
+
+// Phase 2B — ChurchAIAssistant pack integration, build half: port the
+// church-* skills, seed the highest-value agents, merge their richer
+// pastoral-care content into the agent already shipped.
+const PHASE_2B: readonly RoadmapItem[] = [
+  { title: 'Port church-* skills' },
+  { title: 'Seed sermon/Sunday-school/admin agents' },
+  { title: 'Merge pastoral-care content' },
+];
+
+// Phase 2C — ChurchAIAssistant pack integration, settings half: make packs a
+// first-class, toggleable concept instead of a one-off script.
+const PHASE_2C: readonly RoadmapItem[] = [
+  { title: 'Pack-installer script' },
+  { title: 'Ministry Packs settings tab' },
+];
+
+function RoadmapSection({ label, items }: { label: string; items: readonly RoadmapItem[] }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
+        {label}
+      </span>
+      {items.map((item) =>
+        item.eta ? (
+          <div key={item.title} className="flex items-center justify-between gap-2">
+            <span className="truncate">{item.title}</span>
+            <Badge variant="outline" className="shrink-0 font-normal">
+              {item.eta}
+            </Badge>
+          </div>
+        ) : (
+          <span key={item.title} className="truncate text-muted-foreground">
+            {item.title}
+          </span>
+        ),
+      )}
+    </div>
+  );
+}
 
 export function Phase2RoadmapCard() {
   return (
@@ -32,29 +77,10 @@ export function Phase2RoadmapCard() {
         <CardDescription className="text-[11px]">Planning estimates, not commitments.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 px-4 text-xs">
-        <div className="flex flex-col gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
-            Next up
-          </span>
-          {NEXT_UP.map((item) => (
-            <div key={item.title} className="flex items-center justify-between gap-2">
-              <span className="truncate">{item.title}</span>
-              <Badge variant="outline" className="shrink-0 font-normal">
-                {item.eta}
-              </Badge>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
-            Later
-          </span>
-          {LATER.map((item) => (
-            <span key={item.title} className="truncate text-muted-foreground">
-              {item.title}
-            </span>
-          ))}
-        </div>
+        <RoadmapSection label="Shipped" items={SHIPPED} />
+        <RoadmapSection label="Phase 2A" items={PHASE_2A} />
+        <RoadmapSection label="Phase 2B" items={PHASE_2B} />
+        <RoadmapSection label="Phase 2C" items={PHASE_2C} />
       </CardContent>
     </Card>
   );
