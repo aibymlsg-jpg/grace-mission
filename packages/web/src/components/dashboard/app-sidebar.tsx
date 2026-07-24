@@ -17,6 +17,7 @@ import {
   HandHeart,
   Handshake,
   Heart,
+  Megaphone,
   Languages,
   MapPin,
   MonitorPlay,
@@ -91,6 +92,7 @@ const ngoItems: readonly NavItem[] = [
   { key: 'incidents', href: '/ngo/incidents', icon: ShieldAlert },
   { key: 'prayer', href: '/ngo/prayer', icon: HandHeart },
   { key: 'finance', href: '/ngo/finance', icon: Wallet },
+  { key: 'outreach', href: '/ngo/outreach', icon: Megaphone },
 ];
 
 const governanceItems: readonly NavItem[] = [
@@ -128,6 +130,7 @@ const messages = {
       incidents: 'Safeguarding',
       prayer: 'Prayer Requests',
       finance: 'Finance',
+      outreach: 'Outreach',
       dashboard: 'Dashboard',
       tokenUsage: 'Token Usage',
       auditLogs: 'Audit Logs',
@@ -169,6 +172,7 @@ const messages = {
       incidents: '安全防護',
       prayer: '代禱事項',
       finance: '財務',
+      outreach: '外展佈道',
       dashboard: '儀表板',
       tokenUsage: 'Token 用量',
       auditLogs: '稽核日誌',

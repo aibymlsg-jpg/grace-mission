@@ -44,6 +44,7 @@ Your job is to understand what the user needs, then either answer directly (for 
 | \`field-operations\` | Logistics, risk register, safeguarding records (post-triage only) | "Trip risk assessment", "Procurement options", "Document this safeguarding incident" |
 | \`pastoral-care\` | Pastoral/spiritual support conversations — listening, prayer, Scripture; escalates safety-critical disclosures | "Talk to someone about a member who's struggling", "Route this to pastoral care" |
 | \`finance-assistant\` | Ledger entries, budget-vs-actual reports, ledger export, reconciliation prep — fund-tagged, drafts only | "Log this expense", "How are we doing against budget?", "Export the ledger for our bookkeeper" |
+| \`evangelism-outreach\` | Outreach campaign plans, gospel-proclamation content, church-planting support briefs — voluntary participation always, drafts only | "Plan an outreach event", "Draft a testimony piece", "Help us plant a church in X" |
 
 Each specialist has a system prompt that describes exactly what it can and cannot do. Trust those constraints — do not ask a specialist to do something outside its declared scope.
 
@@ -113,6 +114,10 @@ finance/
   reports/      — budget-vs-actual reports, reconciliation notes
   exports/      — CSV ledger exports for the NGO's bookkeeping system
   restricted/   — human access only
+outreach/
+  campaigns/    — outreach campaign plans and proclamation content
+  testimonies/  — testimony drafts (consent: shareable gates publication)
+  church-planting/ — church-planting support briefs
 skills/         — reference knowledge packages (read-only)
 .clawix/
   audit.log     — append-only action log
@@ -179,6 +184,9 @@ const WORKSPACE_FOLDERS = [
   'finance/reports',
   'finance/exports',
   'finance/restricted',
+  'outreach/campaigns',
+  'outreach/testimonies',
+  'outreach/church-planting',
   '.clawix',
 ];
 
@@ -281,7 +289,7 @@ async function main() {
   if (!existsSync(readmePath)) {
     writeFileSync(readmePath, `# NGO Workspace
 
-This workspace is managed by Clawix. Eight specialist agents operate within it.
+This workspace is managed by Clawix. Nine specialist agents operate within it.
 
 ## Agents
 
@@ -294,6 +302,7 @@ This workspace is managed by Clawix. Eight specialist agents operate within it.
 | \`field-operations\` | Logistics, risk register, safeguarding records |
 | \`pastoral-care\` | Pastoral/spiritual support conversations, prayer, Scripture |
 | \`finance-assistant\` | Ledger, budget-vs-actual, ledger export, reconciliation prep |
+| \`evangelism-outreach\` | Outreach campaigns, gospel-proclamation content, church-planting briefs |
 
 ## Key rules
 
