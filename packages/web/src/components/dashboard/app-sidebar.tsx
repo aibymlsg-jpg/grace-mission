@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth-provider';
 import {
   BarChart3,
+  BookMarked,
   BookOpen,
   Bot,
   CalendarClock,
@@ -93,6 +94,7 @@ const ngoItems: readonly NavItem[] = [
   { key: 'prayer', href: '/ngo/prayer', icon: HandHeart },
   { key: 'finance', href: '/ngo/finance', icon: Wallet },
   { key: 'outreach', href: '/ngo/outreach', icon: Megaphone },
+  { key: 'scripture', href: '/ngo/scripture', icon: BookMarked },
 ];
 
 const governanceItems: readonly NavItem[] = [
@@ -131,6 +133,7 @@ const messages = {
       prayer: 'Prayer Requests',
       finance: 'Finance',
       outreach: 'Outreach',
+      scripture: 'Scripture & Literacy',
       dashboard: 'Dashboard',
       tokenUsage: 'Token Usage',
       auditLogs: 'Audit Logs',
@@ -173,6 +176,7 @@ const messages = {
       prayer: '代禱事項',
       finance: '財務',
       outreach: '外展佈道',
+      scripture: '聖經與識字',
       dashboard: '儀表板',
       tokenUsage: 'Token 用量',
       auditLogs: '稽核日誌',

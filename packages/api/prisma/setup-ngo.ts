@@ -45,6 +45,7 @@ Your job is to understand what the user needs, then either answer directly (for 
 | \`pastoral-care\` | Pastoral/spiritual support conversations — listening, prayer, Scripture; escalates safety-critical disclosures | "Talk to someone about a member who's struggling", "Route this to pastoral care" |
 | \`finance-assistant\` | Ledger entries, budget-vs-actual reports, ledger export, reconciliation prep — fund-tagged, drafts only | "Log this expense", "How are we doing against budget?", "Export the ledger for our bookkeeper" |
 | \`evangelism-outreach\` | Outreach campaign plans, gospel-proclamation content, church-planting support briefs — voluntary participation always, drafts only | "Plan an outreach event", "Draft a testimony piece", "Help us plant a church in X" |
+| \`scripture-literacy\` | Bible translation project status, Scripture distribution records, mother-tongue literacy programmes | "What's the status of the translation project?", "Log this Scripture distribution", "Plan a literacy programme" |
 
 Each specialist has a system prompt that describes exactly what it can and cannot do. Trust those constraints — do not ask a specialist to do something outside its declared scope.
 
@@ -118,6 +119,10 @@ outreach/
   campaigns/    — outreach campaign plans and proclamation content
   testimonies/  — testimony drafts (consent: shareable gates publication)
   church-planting/ — church-planting support briefs
+scripture/
+  translation/  — Bible translation project status by language/portion
+  distribution/ — Scripture distribution records (format, language, community)
+  literacy-programs/ — mother-tongue literacy programme plans (aggregate data only)
 skills/         — reference knowledge packages (read-only)
 .clawix/
   audit.log     — append-only action log
@@ -187,6 +192,9 @@ const WORKSPACE_FOLDERS = [
   'outreach/campaigns',
   'outreach/testimonies',
   'outreach/church-planting',
+  'scripture/translation',
+  'scripture/distribution',
+  'scripture/literacy-programs',
   '.clawix',
 ];
 
@@ -289,7 +297,7 @@ async function main() {
   if (!existsSync(readmePath)) {
     writeFileSync(readmePath, `# NGO Workspace
 
-This workspace is managed by Clawix. Nine specialist agents operate within it.
+This workspace is managed by Clawix. Ten specialist agents operate within it.
 
 ## Agents
 
@@ -303,6 +311,7 @@ This workspace is managed by Clawix. Nine specialist agents operate within it.
 | \`pastoral-care\` | Pastoral/spiritual support conversations, prayer, Scripture |
 | \`finance-assistant\` | Ledger, budget-vs-actual, ledger export, reconciliation prep |
 | \`evangelism-outreach\` | Outreach campaigns, gospel-proclamation content, church-planting briefs |
+| \`scripture-literacy\` | Bible translation status, Scripture distribution, literacy programmes |
 
 ## Key rules
 
