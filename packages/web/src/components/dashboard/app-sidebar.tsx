@@ -15,6 +15,7 @@ import {
   CreditCard,
   FolderOpen,
   HandHeart,
+  Handshake,
   Heart,
   Languages,
   MapPin,
@@ -81,6 +82,7 @@ const platformItems: readonly NavItem[] = [
 
 const ngoItems: readonly NavItem[] = [
   { key: 'programs', href: '/ngo/programs', icon: Target },
+  { key: 'partners', href: '/ngo/partners', icon: Handshake },
   { key: 'donors', href: '/ngo/donors', icon: Heart },
   { key: 'mne', href: '/ngo/mne', icon: BarChart3 },
   { key: 'comms', href: '/ngo/comms', icon: Newspaper },
@@ -116,6 +118,7 @@ const messages = {
       agents: 'Agents',
       tasks: 'Scheduled Tasks',
       programs: 'Ministries',
+      partners: 'Partners',
       donors: 'Stewardship',
       mne: 'Kingdom Impact',
       comms: 'Proclamation',
@@ -155,6 +158,7 @@ const messages = {
       agents: '代理',
       tasks: '排程任務',
       programs: '事工計畫',
+      partners: '夥伴機構',
       donors: '財務管理',
       mne: '國度成效',
       comms: '宣揚福音',
